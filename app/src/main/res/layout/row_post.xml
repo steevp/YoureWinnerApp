@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:padding="10dp">
+
+
+    <ImageView
+        android:id="@+id/avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/no_avatar"/>
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/avatar"
+        android:layout_alignTop="@id/avatar"
+        android:textColor="#D28333"
+        android:textSize="14sp"
+        android:text="steev"/>
+
+    <TextView
+        android:id="@+id/board_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/avatar"
+        android:layout_below="@id/username"
+        android:textSize="14sp"
+        android:textColor="#8E8E8E"
+        android:text="Social/Off-Topic"/>
+
+    <TextView
+        android:id="@+id/topic_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/avatar"
+        android:textSize="18sp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="10dp"
+        android:text="text"/>
+
+    <TextView
+        android:id="@+id/post_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_below="@id/topic_title"
+        android:layout_alignParentLeft="true"
+        android:text="test"/>
+
+    <TextView
+        android:id="@+id/post_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/post_content"
+        android:layout_marginTop="10dp"
+        android:textSize="14sp"
+        android:textColor="#8E8E8E"
+        android:text="timestamp"/>
+
+</RelativeLayout>

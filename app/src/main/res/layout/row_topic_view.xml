@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:padding="10dp" android:descendantFocusability="blocksDescendants">
+
+    <LinearLayout
+        android:id="@+id/top_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/no_avatar"/>
+
+        <ImageView
+            android:id="@+id/image_username"
+            android:layout_width="133dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"/>
+
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"
+            android:textColor="#D28333"
+            android:textSize="14sp"
+            android:text="steev"/>
+
+        <TextView
+            android:id="@+id/post_time"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:gravity="end|center_vertical"
+            android:textSize="14sp"
+            android:textColor="#8E8E8E"
+            android:text="timestamp"/>
+
+    </LinearLayout>
+
+    <com.yourewinner.yourewinner.LinkifyTextView
+        android:id="@+id/post_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top_row"
+        android:layout_marginTop="10dp"
+        android:textSize="18sp"
+        android:layout_alignParentLeft="true"
+        android:text="test"/>
+
+</RelativeLayout>
