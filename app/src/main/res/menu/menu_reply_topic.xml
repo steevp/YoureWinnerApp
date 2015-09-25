@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.yourewinner.yourewinner.ReplyTopicActivity">
+
+    <item
+        android:id="@+id/action_reply"
+        android:title="@string/action_reply"
+        android:icon="@drawable/action_reply"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_settings" android:title="@string/action_settings"
+        android:orderInCategory="100" app:showAsAction="never" />
+</menu>

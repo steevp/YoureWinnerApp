@@ -1,14 +1,36 @@
 <resources>
-    <string name="app_name">yourewinner.com</string>
+    <string name="app_name">yourewinner</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_topic_view"></string>
     <string name="loading">Loading…</string>
+    <string name="login_message">Logging in…</string>
 
-    <string name="header_login">Login</string>
-    <string name="header_login_summary">Login Settings</string>
+    <string name="header_account">Account</string>
+    <string name="header_account_summary">Account Settings</string>
     <string name="pref_username">Username</string>
     <string name="pref_username_summary">Enter your username</string>
     <string name="pref_password">Password</string>
     <string name="pref_password_summary">Enter your password</string>
+    <string name="signin">Sign in</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="action_reply">Reply</string>
+    <string name="action_quote">Quote</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_rate">Rate Post</string>
+    <string name="action_preview">Preview</string>
+    <string name="title_activity_reply_topic">ReplyTopicActivity</string>
+
+    <string name="rate_post">Rate Post</string>
+
+    <string name="hello_world">Hello world!</string>
+
+    <string-array name="tab_titles">
+        <item>Recent</item>
+        <item>Unread</item>
+        <item>Participated</item>
+        <item>Subscribed</item>
+    </string-array>
 
 </resources>

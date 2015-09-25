@@ -3,7 +3,7 @@
 
     <header
         android:fragment="com.yourewinner.yourewinner.MyPreferenceFragment"
-        android:title="@string/header_login"
-        android:summary="@string/header_login_summary"/>
+        android:title="@string/header_account"
+        android:summary="@string/header_account_summary"/>
 
 </preference-headers>

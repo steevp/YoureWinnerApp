@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -74,12 +75,116 @@ public class TopicViewAdapter extends BaseAdapter {
             holder.postContentTextView = (LinkifyTextView) convertView.findViewById(R.id.post_content);
             //holder.postContentTextView.setMovementMethod(LinkMovementMethod.getInstance());
             holder.postTimeTextView = (TextView) convertView.findViewById(R.id.post_time);
+            holder.ratingBar = (LinearLayout) convertView.findViewById(R.id.rating_bar);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
         Map<String,Object> post = (Map<String,Object>) getItem(position);
+
+        holder.ratingBar.removeAllViews();
+
+        Object[] ratings = (Object[]) post.get("ratings");
+        if (ratings != null && ratings.length > 0) {
+
+            Map<String,Object> rating;
+            int count;
+            int ratingId;
+
+            TextView ratingCount;
+            ImageView ratingImage;
+
+            final float scale = mContext.getResources().getDisplayMetrics().density;
+            int pixels = (int) (16 * scale + 0.5f);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(pixels, pixels);
+
+            for (int i=0;i<ratings.length;i++) {
+                rating = (Map<String,Object>) ratings[i];
+                count = (int) rating.get("count");
+                ratingId = (int) rating.get("rate_id");
+
+                ratingCount = new TextView(mContext);
+                ratingImage = new ImageView(mContext);
+                ratingImage.setLayoutParams(layoutParams);
+
+                switch(ratingId) {
+                    case 23:
+                        ratingImage.setImageResource(R.mipmap.rating_trophy);
+                        break;
+                    case 22:
+                        ratingImage.setImageResource(R.mipmap.rating_thumbup);
+                        break;
+                    case 21:
+                        ratingImage.setImageResource(R.mipmap.rating_thumbdown);
+                        break;
+                    case 25:
+                        ratingImage.setImageResource(R.mipmap.rating_turd);
+                        break;
+                    case 26:
+                        ratingImage.setImageResource(R.mipmap.rating_gay);
+                        break;
+                    case 20:
+                        ratingImage.setImageResource(R.mipmap.rating_heart);
+                        break;
+                    case 19:
+                        ratingImage.setImageResource(R.mipmap.rating_smug);
+                        break;
+                    case 24:
+                        ratingImage.setImageResource(R.mipmap.rating_cheese);
+                        break;
+                    case 101:
+                        ratingImage.setImageResource(R.mipmap.rating_aggro);
+                        break;
+                    case 18:
+                        ratingImage.setImageResource(R.mipmap.rating_twisted);
+                        break;
+                    case 17:
+                        ratingImage.setImageResource(R.mipmap.rating_zigsd);
+                        break;
+                    case 16:
+                        ratingImage.setImageResource(R.mipmap.rating_old);
+                        break;
+                    case 102:
+                        ratingImage.setImageResource(R.mipmap.rating_baby);
+                        break;
+                    case 104:
+                        ratingImage.setImageResource(R.mipmap.rating_weed);
+                        break;
+                    case 103:
+                        ratingImage.setImageResource(R.mipmap.rating_meta);
+                        break;
+                    case 111:
+                        ratingImage.setImageResource(R.mipmap.rating_ballin);
+                        break;
+                    case 116:
+                        ratingImage.setImageResource(R.mipmap.rating_coorslight);
+                        break;
+                    case 117:
+                        ratingImage.setImageResource(R.mipmap.rating_america);
+                        break;
+                    case 118:
+                        ratingImage.setImageResource(R.mipmap.rating_hipster);
+                        break;
+                    case 119:
+                        ratingImage.setImageResource(R.mipmap.rating_scroogled);
+                        break;
+                    case 120:
+                        ratingImage.setImageResource(R.mipmap.rating_mistletoe);
+                        break;
+                    default:
+                        ratingImage.setImageResource(R.mipmap.ic_launcher);
+                        break;
+                }
+
+                ratingCount.setText(count + "x");
+
+                holder.ratingBar.addView(ratingCount);
+                holder.ratingBar.addView(ratingImage);
+
+            }
+
+        }
 
         try {
             String username = new String((byte[]) post.get("post_author_name"), "UTF-8");
@@ -129,5 +234,6 @@ public class TopicViewAdapter extends BaseAdapter {
         public ImageView avatarImageView;
         public LinkifyTextView postContentTextView;
         public TextView postTimeTextView;
+        public LinearLayout ratingBar;
     }
 }

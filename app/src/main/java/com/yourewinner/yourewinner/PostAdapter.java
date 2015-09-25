@@ -36,6 +36,11 @@ public class PostAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void clear() {
+        mPosts.clear();
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         return mPosts.size();

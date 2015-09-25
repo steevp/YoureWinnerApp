@@ -1,34 +1,40 @@
 package com.yourewinner.yourewinner;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import java.util.Map;
 
 import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity {
 
     Forum mForum;
     ListView mRecentPostsList;
     PostAdapter mPostAdapter;
     ProgressDialog mDialog;
     ProgressBar mProgress;
+    SharedPreferences mSharedPreferences;
+    SwipeRefreshLayout mSwipeContainer;
+
+    ViewPager mViewPager;
+    TabLayout mTabLayout;
 
     Boolean isLoading;
     Integer lastCount;
@@ -43,48 +49,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         mForum = Forum.getInstance();
 
-        //mProgress = new ProgressBar(this);
-        //mProgress.setIndeterminate(true);
-        //mProgress.setVisibility(View.VISIBLE);
-
-        mRecentPostsList = (ListView) findViewById(R.id.posts_list);
-
-        mFooter = getLayoutInflater().inflate(R.layout.loading, null);
-
-        //mRecentPostsList.addFooterView(loading);
-
-        mPostAdapter = new PostAdapter(this, getLayoutInflater());
-        mRecentPostsList.setAdapter(mPostAdapter);
-        mRecentPostsList.setOnItemClickListener(this);
-
         mDialog = new ProgressDialog(this);
-        mDialog.setMessage("Loading...");
+        mDialog.setMessage(getString(R.string.login_message));
         mDialog.setCancelable(false);
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         isLoading = false;
         lastCount = 0;
         currentPage = 1;
 
-        mRecentPostsList.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
+        doWelcome();
+    }
 
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-                final int lastItem = firstVisibleItem + visibleItemCount - mRecentPostsList.getFooterViewsCount();
-                if (lastItem == totalItemCount && totalItemCount != lastCount && !isLoading) {
-                    isLoading = true;
-                    lastCount = totalItemCount;
-                    addMoreItems();
-                }
-            }
-        });
-
-        doLogin();
-        //getRecent();
+    public void setupTabLayout() {
+        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        mViewPager.setAdapter(new PostsViewPagerAdapter(getSupportFragmentManager(), MainActivity.this));
+        mTabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
+        mTabLayout.setupWithViewPager(mViewPager);
     }
 
     @Override
@@ -94,123 +76,88 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         return true;
     }
 
-    public void doLogin() {
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        final String username = prefs.getString("username", "");
-        String password = prefs.getString("password", "");
+    public void doWelcome() {
+        final String username = mSharedPreferences.getString("username", "");
+        final String password = mSharedPreferences.getString("password", "");
 
         if (username.length() == 0 || password.length() == 0) {
-            //TODO
-        } else {
-            mForum.login(username, password, new XMLRPCCallback() {
+            // Show sign in dialog
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            final View input = getLayoutInflater().inflate(R.layout.dialog_signin, null);
+            alert.setView(input);
+            alert.setPositiveButton(R.string.signin, new DialogInterface.OnClickListener() {
                 @Override
-                public void onResponse(long id, Object result) {
-                    mForum.setLogin(true);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(), "YOU'RE WINNER, " + username + " !", Toast.LENGTH_LONG).show();
-                            getRecent();
-                        }
-                    });
-                }
-
-                @Override
-                public void onError(long id, XMLRPCException error) {
-                    mForum.setLogin(false);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
-                            getRecent();
-                        }
-                    });
-                }
-
-                @Override
-                public void onServerError(long id, XMLRPCServerException error) {
-                    mForum.setLogin(false);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
-                            getRecent();
-                        }
-                    });
+                public void onClick(DialogInterface dialog, int which) {
+                    EditText inputUsername = (EditText) input.findViewById(R.id.username);
+                    EditText inputPassword = (EditText) input.findViewById(R.id.password);
+                    String user = inputUsername.getText().toString();
+                    String pass = inputPassword.getText().toString();
+                    if (user.length() > 0 && pass.length() > 0) {
+                        SharedPreferences.Editor editor = mSharedPreferences.edit();
+                        editor.putString("username", user);
+                        editor.putString("password", pass);
+                        editor.commit();
+                        doLogin(user, password);
+                    }
                 }
             });
+
+            alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //getRecent();
+                }
+            });
+
+            alert.show();
+
+        } else {
+            doLogin(username, password);
         }
     }
 
-    public void getRecent() {
-        mRecentPostsList.addFooterView(mFooter);
-
-        mForum.getRecent(currentPage, new XMLRPCCallback() {
+    public void doLogin(final String username, final String password) {
+        mDialog.show();
+        mForum.login(username, password, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
-                Map<String, Object> r = (Map<String, Object>) result;
-                final Object[] topics = (Object[]) r.get("topics");
-
+                mForum.setLogin(true);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        //mDialog.dismiss();
-                        //loading.setVisibility(View.GONE);
-                        mRecentPostsList.removeFooterView(mFooter);
-                        mPostAdapter.updateData(topics);
-                        isLoading = false;
+                        mDialog.dismiss();
+                        Toast.makeText(getApplicationContext(), "YOU'RE WINNER, " + username + " !", Toast.LENGTH_LONG).show();
+                        setupTabLayout();
                     }
                 });
             }
 
             @Override
             public void onError(long id, XMLRPCException error) {
-                error.printStackTrace();
+                mForum.setLogin(false);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        //mDialog.dismiss();
-                        //loading.setVisibility(View.GONE);
-                        mRecentPostsList.removeFooterView(mFooter);
-                        isLoading = false;
-                        Toast.makeText(getApplicationContext(), "FUCK: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
+                        mDialog.dismiss();
+                        Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
+                        setupTabLayout();
                     }
                 });
             }
 
             @Override
             public void onServerError(long id, XMLRPCServerException error) {
-                error.printStackTrace();
+                mForum.setLogin(false);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        //mDialog.dismiss();
-                        //loading.setVisibility(View.GONE);
-                        mRecentPostsList.removeFooterView(mFooter);
-                        isLoading = false;
-                        Toast.makeText(getApplicationContext(), "FUCK: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
+                        mDialog.dismiss();
+                        Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
+                        setupTabLayout();
                     }
                 });
             }
         });
-    }
-
-    public void addMoreItems() {
-        currentPage++;
-        Log.d("yourewinner", "Loading more " + currentPage.toString());
-        getRecent();
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Map<String,Object> topic = (Map<String,Object>) mPostAdapter.getItem(position);
-        if (topic != null) {
-            String topicID = (String) topic.get("topic_id");
-            Intent intent = new Intent(this, TopicViewActivity.class);
-            intent.putExtra("topicID", topicID);
-            startActivity(intent);
-        }
     }
 
     @Override
