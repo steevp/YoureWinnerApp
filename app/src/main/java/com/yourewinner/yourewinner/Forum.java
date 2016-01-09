@@ -90,4 +90,30 @@ public class Forum {
         Object[] params = {postID, ratingID};
         client.callAsync(listener, "rate_post", params);
     }
+
+    public void getRawPost(String postID, XMLRPCCallback listener) {
+        client.callAsync(listener, "get_raw_post", postID);
+    }
+
+    public void saveRawPost(String postID, String postTitle, String postContent, XMLRPCCallback listener) {
+        Object[] params = {postID, postTitle.getBytes(), postContent.getBytes()};
+        client.callAsync(listener, "save_raw_post", params);
+    }
+
+    public void getQuotePost(String postID, XMLRPCCallback listener) {
+        client.callAsync(listener, "get_quote_post", postID);
+    }
+
+    public void subscribeTopic(String topicID, XMLRPCCallback listener) {
+        client.callAsync(listener, "subscribe_topic", topicID);
+    }
+
+    public void unsubscribeTopic(String topicID, XMLRPCCallback listener) {
+        client.callAsync(listener, "unsubscribe_topic", topicID);
+    }
+
+    public void getUserInfo(String username, XMLRPCCallback listener) {
+        Object[] params = {username.getBytes()};
+        client.callAsync(listener, "get_user_info", params);
+    }
 }

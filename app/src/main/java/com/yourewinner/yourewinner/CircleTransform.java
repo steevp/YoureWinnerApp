@@ -1,5 +1,6 @@
 package com.yourewinner.yourewinner;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -8,7 +9,13 @@ import android.graphics.Paint;
 import com.squareup.picasso.Transformation;
 
 public class CircleTransform implements Transformation {
+    private Context mContext;
+    private boolean mLoggedIn;
 
+    public CircleTransform(Context context, boolean loggedIn) {
+        mContext = context;
+        mLoggedIn = loggedIn;
+    }
     @Override
     public Bitmap transform(Bitmap source) {
         int size = Math.min(source.getWidth(), source.getHeight());
@@ -32,6 +39,12 @@ public class CircleTransform implements Transformation {
 
         float r = size / 2f;
         canvas.drawCircle(r, r, r, paint);
+
+        /*if (mLoggedIn) {
+            Paint green = new Paint();
+            green.setColor(Color.GREEN);
+            canvas.drawCircle(size - 18, size - 18, 10, green);
+        }*/
 
         squaredBitmap.recycle();
         return bitmap;

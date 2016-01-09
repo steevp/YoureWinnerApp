@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:padding="10dp" android:descendantFocusability="blocksDescendants"
-    android:background="?android:attr/activatedBackgroundIndicator">
+    android:padding="10dp" android:background="?android:attr/activatedBackgroundIndicator">
 
     <LinearLayout
         android:id="@+id/top_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginBottom="10dp">
 
         <ImageView
             android:id="@+id/avatar"
@@ -30,9 +30,8 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_gravity="center_vertical"
-            android:textColor="#D28333"
-            android:textSize="14sp"
-            android:text="steev"/>
+            android:textColor="?attr/color_username"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/post_time"
@@ -40,23 +39,29 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:gravity="end|center_vertical"
-            android:textSize="14sp"
-            android:textColor="#8E8E8E"
-            android:text="timestamp"/>
+            android:textSize="14sp" />
 
     </LinearLayout>
 
-    <com.yourewinner.yourewinner.LinkifyTextView
+    <!--<com.yourewinner.yourewinner.LinkifyTextView
         android:id="@+id/post_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/top_row"
         android:layout_marginTop="10dp"
         android:textSize="18sp"
-        android:layout_alignParentLeft="true"
-        android:text="test"/>
+        android:layout_alignParentLeft="true" />-->
 
     <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top_row"
+        android:id="@+id/post_content">
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
         android:id="@+id/rating_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

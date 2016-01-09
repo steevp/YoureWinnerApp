@@ -44,6 +44,31 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        final String theme = mSharedPreferences.getString("theme", "0");
+
+        switch (theme) {
+            case "0":
+                setTheme(R.style.AppTheme);
+                break;
+            case "1":
+                setTheme(R.style.GayPrideTheme);
+                break;
+            case "2":
+                setTheme(R.style.StonerTheme);
+                break;
+            case "3":
+                setTheme(R.style.DarkTheme);
+                break;
+            case "4":
+                setTheme(R.style.LightTheme);
+                break;
+            default:
+                setTheme(R.style.AppTheme);
+                break;
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -52,8 +77,6 @@ public class MainActivity extends AppCompatActivity {
         mDialog = new ProgressDialog(this);
         mDialog.setMessage(getString(R.string.login_message));
         mDialog.setCancelable(false);
-
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         isLoading = false;
         lastCount = 0;
@@ -97,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                         editor.putString("username", user);
                         editor.putString("password", pass);
                         editor.commit();
-                        doLogin(user, password);
+                        doLogin(user, pass);
                     }
                 }
             });
@@ -111,9 +134,11 @@ public class MainActivity extends AppCompatActivity {
 
             alert.show();
 
-        } else {
+        } else if (!mForum.getLogin()) {
             doLogin(username, password);
         }
+
+        setupTabLayout();
     }
 
     public void doLogin(final String username, final String password) {
@@ -127,33 +152,34 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "YOU'RE WINNER, " + username + " !", Toast.LENGTH_LONG).show();
-                        setupTabLayout();
+                        //setupTabLayout();
                     }
                 });
             }
 
             @Override
-            public void onError(long id, XMLRPCException error) {
-                mForum.setLogin(false);
+            public void onError(long id, final XMLRPCException error) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        error.printStackTrace();
+                        mForum.setLogin(false);
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
-                        setupTabLayout();
+                        //setupTabLayout();
                     }
                 });
             }
 
             @Override
             public void onServerError(long id, XMLRPCServerException error) {
-                mForum.setLogin(false);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        mForum.setLogin(false);
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
-                        setupTabLayout();
+                        //setupTabLayout();
                     }
                 });
             }

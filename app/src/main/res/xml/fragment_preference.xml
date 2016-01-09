@@ -18,4 +18,15 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/header_appearance">
+        <ListPreference
+            android:key="theme"
+            android:title="@string/pref_theme"
+            android:summary="@string/pref_theme_summary"
+            android:entries="@array/themes"
+            android:entryValues="@array/theme_values"
+            android:defaultValue="0"/>
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

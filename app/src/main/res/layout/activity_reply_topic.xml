@@ -8,6 +8,7 @@
     tools:context="com.yourewinner.yourewinner.ReplyTopicActivity">
 
     <EditText
+        android:inputType="textMultiLine"
         android:id="@+id/post_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"

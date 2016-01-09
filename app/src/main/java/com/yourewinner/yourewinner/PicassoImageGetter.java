@@ -34,7 +34,7 @@ public class PicassoImageGetter implements Html.ImageGetter {
             @Override
             protected Bitmap doInBackground(final Void... meh) {
                 try {
-                    return pablo.load(source).resize(600, 600).centerInside().get();
+                    return pablo.load(source).get();
                 } catch (Exception e) {
                     return null;
                 }

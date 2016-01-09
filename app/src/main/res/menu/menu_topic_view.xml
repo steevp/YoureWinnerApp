@@ -14,6 +14,21 @@
         android:icon="@drawable/action_rate"
         app:showAsAction="ifRoom"
         android:visible="false"/>
+
+    <item
+        android:id="@+id/action_subscribe"
+        android:title="@string/action_subscribe"
+        android:icon="@drawable/action_subscribe"
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/action_unsubscribe"
+        android:title="@string/action_unsubscribe"
+        android:icon="@drawable/action_unsubscribe"
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
+
     <item
         android:id="@+id/action_quote"
         android:title="@string/action_quote"
@@ -25,8 +40,14 @@
         app:showAsAction="ifRoom"
         android:visible="false"/>
     <item
-        android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
-        app:showAsAction="never" />
+        android:id="@+id/action_select_all"
+        android:title="@string/action_select"
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
+    <item
+        android:id="@+id/action_deselect_all"
+        android:title="@string/action_deselect"
+        android:icon="@drawable/action_deselect_all"
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
 </menu>

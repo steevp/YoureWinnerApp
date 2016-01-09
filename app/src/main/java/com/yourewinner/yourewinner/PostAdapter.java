@@ -111,7 +111,7 @@ public class PostAdapter extends BaseAdapter {
 
         String avatar = (String) post.get("icon_url");
         if (avatar.length() > 0) {
-            Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).transform(new CircleTransform()).into(holder.avatarImageView);
+            Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).resize(100, 100).transform(new CircleTransform(mContext, false)).into(holder.avatarImageView);
         } else {
             holder.avatarImageView.setImageResource(R.mipmap.no_avatar);
         }

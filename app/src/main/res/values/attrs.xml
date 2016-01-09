@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="color_username" format="color|reference"/>
+    <attr name="ic_action_first" format="reference"/>
+    <attr name="ic_action_previous" format="reference"/>
+    <attr name="ic_action_next" format="reference"/>
+    <attr name="ic_action_last" format="reference"/>
+</resources>

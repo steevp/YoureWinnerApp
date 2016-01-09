@@ -1,8 +1,93 @@
 <resources>
-
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat">
         <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/winnerOrange</item>
+        <item name="colorPrimaryDark">@color/winnerOrangeDark</item>
+        <item name="colorAccent">@color/winnerOrangeDark</item>
+        <item name="android:windowBackground">@color/winnerBlue</item>
+        <item name="android:textColorPrimary">@color/fontColor</item>
+        <item name="android:textColorSecondary">@color/fontColor</item>
+        <item name="android:textColor">@color/fontColor</item>
+        <item name="android:textColorLink">@color/colorLink</item>
+        <item name="color_username">@color/colorLink</item>
+        <item name="ic_action_first">@drawable/ic_action_first</item>
+        <item name="ic_action_previous">@drawable/ic_action_previous</item>
+        <item name="ic_action_next">@drawable/ic_action_next</item>
+        <item name="ic_action_last">@drawable/ic_action_last</item>
     </style>
+
+    <style name="GayPrideTheme" parent="Theme.AppCompat">
+        <item name="colorPrimary">@color/winnerPink</item>
+        <item name="colorPrimaryDark">@color/winnerPinkDark</item>
+        <item name="colorAccent">@color/winnerPinkDark</item>
+        <item name="android:windowBackground">@color/winnerPurple</item>
+        <item name="android:textColorPrimary">@color/fontColor</item>
+        <item name="android:textColorSecondary">@color/fontColor</item>
+        <item name="android:textColor">@color/fontColor</item>
+        <item name="android:textColorLink">@color/winnerPinkLink</item>
+        <item name="color_username">@color/winnerPinkLink</item>
+        <item name="ic_action_first">@drawable/ic_action_first</item>
+        <item name="ic_action_previous">@drawable/ic_action_previous</item>
+        <item name="ic_action_next">@drawable/ic_action_next</item>
+        <item name="ic_action_last">@drawable/ic_action_last</item>
+    </style>
+
+    <style name="StonerTheme" parent="Theme.AppCompat">
+        <item name="colorPrimary">@color/winnerSilver</item>
+        <item name="colorPrimaryDark">@color/winnerSilverDark</item>
+        <item name="colorAccent">@color/winnerSilverDark</item>
+        <item name="android:windowBackground">@color/winnerGreen</item>
+        <item name="android:textColorPrimary">@color/fontColor</item>
+        <item name="android:textColorSecondary">@color/fontColor</item>
+        <item name="android:textColor">@color/fontColor</item>
+        <item name="android:textColorLink">@color/winnerYellow</item>
+        <item name="color_username">@color/winnerYellow</item>
+        <item name="ic_action_first">@drawable/ic_action_first</item>
+        <item name="ic_action_previous">@drawable/ic_action_previous</item>
+        <item name="ic_action_next">@drawable/ic_action_next</item>
+        <item name="ic_action_last">@drawable/ic_action_last</item>
+    </style>
+
+    <style name="DarkTheme" parent="Theme.AppCompat">
+        <item name="color_username">@color/colorLink</item>
+        <item name="ic_action_first">@drawable/ic_action_first</item>
+        <item name="ic_action_previous">@drawable/ic_action_previous</item>
+        <item name="ic_action_next">@drawable/ic_action_next</item>
+        <item name="ic_action_last">@drawable/ic_action_last</item>
+    </style>
+
+    <style name="LightTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="color_username">@color/colorLink</item>
+        <item name="ic_action_first">@drawable/ic_action_first_dark</item>
+        <item name="ic_action_previous">@drawable/ic_action_previous_dark</item>
+        <item name="ic_action_next">@drawable/ic_action_next_dark</item>
+        <item name="ic_action_last">@drawable/ic_action_last_dark</item>
+    </style>
+
+    <color name="winnerOrange">#BE752A</color>
+    <color name="winnerOrangeDark">#9F5D18</color>
+    <color name="winnerBlue">#211C45</color>
+    <color name="fontColor">#FFF</color>
+    <color name="colorLink">#D28333</color>
+
+    <color name="winnerPinkDark">#96017C</color>
+    <color name="winnerPink">#BE2AA4</color>
+    <color name="winnerPurple">#3C1C45</color>
+    <color name="winnerPinkLink">#D233B7</color>
+
+    <color name="winnerSilver">#EBEBEB</color>
+    <color name="winnerSilverDark">#C7C7C7</color>
+    <color name="winnerGreen">#1E3F1E</color>
+    <color name="winnerYellow">#FF6</color>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

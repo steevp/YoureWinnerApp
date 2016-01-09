@@ -20,7 +20,7 @@
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/avatar"
         android:layout_alignTop="@id/avatar"
-        android:textColor="#D28333"
+        android:textColor="?attr/color_username"
         android:textSize="14sp"
         android:text="steev"/>
 
@@ -32,7 +32,6 @@
         android:layout_toRightOf="@id/avatar"
         android:layout_below="@id/username"
         android:textSize="14sp"
-        android:textColor="#8E8E8E"
         android:text="Social/Off-Topic"/>
 
     <TextView
@@ -61,8 +60,6 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@id/post_content"
         android:layout_marginTop="10dp"
-        android:textSize="14sp"
-        android:textColor="#8E8E8E"
-        android:text="timestamp"/>
+        android:textSize="14sp" />
 
 </RelativeLayout>

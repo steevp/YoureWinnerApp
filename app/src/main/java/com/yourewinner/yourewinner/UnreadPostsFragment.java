@@ -69,7 +69,9 @@ public class UnreadPostsFragment extends Fragment implements SwipeRefreshLayout.
             lastCount = 0;
             userScrolled = false;
             isLoading = true;
-            getRecent();
+            if (mForum.getLogin()) {
+                getRecent();
+            }
         }
         return view;
     }

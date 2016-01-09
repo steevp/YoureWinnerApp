@@ -12,7 +12,7 @@ public class RatingListAdapter extends BaseAdapter {
 
     private Context mContext;
     private LayoutInflater mInflater;
-    private int[] ratingIDs = {23, 22, 21, 25, 26, 20, 19, 24, 101, 18, 17, 16, 102, 104, 103, 111, 116, 117, 118, 119, 120};
+    private final int[] ratingIDs = {23, 22, 21, 25, 26, 20, 19, 24, 101, 18, 17, 16, 102, 104, 103, 111, 116, 117, 118, 119, 120};
 
     public RatingListAdapter(Context context, LayoutInflater inflater) {
         mContext = context;

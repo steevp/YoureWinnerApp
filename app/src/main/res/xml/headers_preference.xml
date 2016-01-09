@@ -6,4 +6,9 @@
         android:title="@string/header_account"
         android:summary="@string/header_account_summary"/>
 
+    <header
+        android:fragment="com.yourewinner.yourewinner.MyPreferenceFragment"
+        android:title="@string/header_appearance"
+        android:summary="@string/header_appearance_summary"/>
+
 </preference-headers>
