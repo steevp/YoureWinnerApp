@@ -13,6 +13,7 @@ public class Forum {
     private final static int PAGE_SIZE = 15;
     private XMLRPCClient client;
     private Boolean isLoggedIn;
+    private String mUsername;
 
     public static Forum getInstance() {
         return ourInstance;
@@ -28,6 +29,7 @@ public class Forum {
     }
 
     public void login(String username, String password, XMLRPCCallback listener) {
+        mUsername = username;
         Object[] params = {username.getBytes(), password.getBytes()};
         client.callAsync(listener, "login", params);
     }
@@ -38,6 +40,10 @@ public class Forum {
 
     public Boolean getLogin() {
         return isLoggedIn;
+    }
+
+    public String getUsername() {
+        return mUsername;
     }
 
     public void getRecent(int page, XMLRPCCallback listener) {
@@ -115,5 +121,47 @@ public class Forum {
     public void getUserInfo(String username, XMLRPCCallback listener) {
         Object[] params = {username.getBytes()};
         client.callAsync(listener, "get_user_info", params);
+    }
+
+    public void getForum(XMLRPCCallback listener) {
+        client.callAsync(listener, "get_forum");
+    }
+
+    public void getBoard(String boardID, int page, XMLRPCCallback listener) {
+        int start = page * PAGE_SIZE - PAGE_SIZE;
+        int end = page * PAGE_SIZE - 1;
+
+        Object[] params = {boardID, start, end};
+        client.callAsync(listener, "get_topic", params);
+    }
+
+    public void searchTopic(String search, int page, XMLRPCCallback listener) {
+        int start = page * PAGE_SIZE - PAGE_SIZE;
+        int end = page * PAGE_SIZE - 1;
+
+        Object[] params = {search.getBytes(), start, end};
+        client.callAsync(listener, "search_topic", params);
+    }
+
+    public void getBox(String boxID, int page, XMLRPCCallback listener) {
+        // boxID can be "inbox", "sent", or "unread"
+        int start = page * PAGE_SIZE - PAGE_SIZE;
+        int end = page * PAGE_SIZE - 1;
+
+        Object[] params = {boxID, start, end};
+        client.callAsync(listener, "get_box", params);
+    }
+
+    public void getParticipatedTopic(String username, int page, XMLRPCCallback listener) {
+        int start = page * PAGE_SIZE - PAGE_SIZE;
+        int end = page * PAGE_SIZE - 1;
+
+        Object[] params = {username.getBytes(), start, end};
+        client.callAsync(listener, "get_participated_topic", params);
+    }
+
+    public void newTopic(String boardID, String subject, String body, XMLRPCCallback listener) {
+        Object[] params = {boardID, subject.getBytes(), body.getBytes()};
+        client.callAsync(listener, "new_topic", params);
     }
 }

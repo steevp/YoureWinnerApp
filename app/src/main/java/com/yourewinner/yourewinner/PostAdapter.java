@@ -7,16 +7,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PostAdapter extends BaseAdapter {
 
@@ -49,7 +50,7 @@ public class PostAdapter extends BaseAdapter {
     @Override
     public Object getItem(int position) {
         int totalCount = getCount();
-        if (totalCount == 0 || position > totalCount) {
+        if (totalCount == 0 || position > totalCount || position < 0) {
             return null;
         }
 
@@ -63,7 +64,7 @@ public class PostAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
+        final ViewHolder holder;
 
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.row_post, null);
@@ -71,7 +72,7 @@ public class PostAdapter extends BaseAdapter {
             holder.boardNameTextView = (TextView) convertView.findViewById(R.id.board_name);
             holder.topicTitleTextView = (TextView) convertView.findViewById(R.id.topic_title);
             holder.usernameTextView = (TextView) convertView.findViewById(R.id.username);
-            holder.avatarImageView = (ImageView) convertView.findViewById(R.id.avatar);
+            holder.avatarImageView = (CircleImageView) convertView.findViewById(R.id.avatar);
             holder.postContentTextView = (TextView) convertView.findViewById(R.id.post_content);
             holder.postTimeTextView = (TextView) convertView.findViewById(R.id.post_time);
             convertView.setTag(holder);
@@ -81,45 +82,32 @@ public class PostAdapter extends BaseAdapter {
 
         Map<String,Object> post = (Map<String,Object>) getItem(position);
 
-        try {
-            String username = new String((byte[]) post.get("post_author_name"), "UTF-8");
-            holder.usernameTextView.setText(username);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
 
-        try {
-            String boardName = new String((byte[]) post.get("forum_name"), "UTF-8");
-            holder.boardNameTextView.setText(boardName);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        byte[] userBytes = post.get("post_author_name") != null ? (byte[]) post.get("post_author_name") : (byte[]) post.get("topic_author_name");
+        String username = new String(userBytes, StandardCharsets.UTF_8);
+        holder.usernameTextView.setText(username);
 
-        try {
-            String topicTitle = new String((byte[]) post.get("topic_title"), "UTF-8");
-            holder.topicTitleTextView.setText(Html.fromHtml("<strong>" + topicTitle + "</strong>"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        String boardName = new String((byte[]) post.get("forum_name"), StandardCharsets.UTF_8);
+        holder.boardNameTextView.setText(boardName);
 
-        try {
-            String postContent = new String((byte[]) post.get("short_content"), "UTF-8");
-            holder.postContentTextView.setText(postContent);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        String topicTitle = new String((byte[]) post.get("topic_title"), StandardCharsets.UTF_8);
+        holder.topicTitleTextView.setText(Html.fromHtml("<strong>" + topicTitle + "</strong>"));
+
+        String postContent = new String((byte[]) post.get("short_content"), StandardCharsets.UTF_8);
+        holder.postContentTextView.setText(postContent);
 
         String avatar = (String) post.get("icon_url");
         if (avatar.length() > 0) {
-            Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).resize(100, 100).transform(new CircleTransform(mContext, false)).into(holder.avatarImageView);
+            //Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).fit().transform(new CircleTransform(mContext, false)).into(holder.avatarImageView);
+            Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).fit().into(holder.avatarImageView);
+            //Glide.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).centerCrop().into(holder.avatarImageView);
         } else {
             holder.avatarImageView.setImageResource(R.mipmap.no_avatar);
         }
 
-        Date then = (Date) post.get("post_time");
+        Date then = post.get("post_time") != null ? (Date) post.get("post_time") : (Date) post.get("last_reply_time");
         long now = System.currentTimeMillis();
 
-        //long now = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
         String postTime = DateUtils.getRelativeTimeSpanString(then.getTime(), now, DateUtils.MINUTE_IN_MILLIS).toString();
         holder.postTimeTextView.setText(postTime);
 
@@ -130,7 +118,7 @@ public class PostAdapter extends BaseAdapter {
         public TextView boardNameTextView;
         public TextView topicTitleTextView;
         public TextView usernameTextView;
-        public ImageView avatarImageView;
+        public CircleImageView avatarImageView;
         public TextView postContentTextView;
         public TextView postTimeTextView;
     }

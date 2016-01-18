@@ -1,17 +1,19 @@
 package com.yourewinner.yourewinner;
 
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
-public class MyPreferenceActivity extends Activity {
-    SharedPreferences mSharedPreferences;
+public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mSharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
         final String theme = mSharedPreferences.getString("theme", "0");
 
@@ -37,18 +39,13 @@ public class MyPreferenceActivity extends Activity {
         }
 
         super.onCreate(savedInstanceState);
-
-        getFragmentManager().beginTransaction().replace(android.R.id.content, new MyPreferenceFragment()).commit();
-    }
-
-    /*@Override
-    public void onBuildHeaders(List<Header> target) {
-        loadHeadersFromResource(R.xml.headers_preference, target);
+        getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsFragment()).commit();
     }
 
     @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return MyPreferenceFragment.class.getName().equals(fragmentName);
-    }*/
-
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("theme")) {
+            recreate();
+        }
+    }
 }

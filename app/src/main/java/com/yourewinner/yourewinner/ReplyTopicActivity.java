@@ -106,9 +106,7 @@ public class ReplyTopicActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(long id, XMLRPCException error) {
-                mDialog.dismiss();
-            }
+            public void onError(long id, XMLRPCException error) { mDialog.dismiss(); }
 
             @Override
             public void onServerError(long id, XMLRPCServerException error) {
@@ -118,6 +116,7 @@ public class ReplyTopicActivity extends AppCompatActivity {
     }
 
     public void sendReply() {
+        mDialog.show();
         String message = mPostContent.getText().toString();
 
         mForum.replyPost(boardID, topicID, topicTitle, message, new XMLRPCCallback() {
@@ -126,6 +125,7 @@ public class ReplyTopicActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_LONG).show();
                         setResult(RESULT_OK);
                         finish();
@@ -135,12 +135,26 @@ public class ReplyTopicActivity extends AppCompatActivity {
 
             @Override
             public void onError(long id, XMLRPCException error) {
-
+                error.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDialog.dismiss();
+                        Toast.makeText(getApplicationContext(), "Unable to send reply!", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             @Override
             public void onServerError(long id, XMLRPCServerException error) {
-
+                error.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDialog.dismiss();
+                        Toast.makeText(getApplicationContext(), "FUCK: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
     }
@@ -160,7 +174,6 @@ public class ReplyTopicActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        Intent intent;
         if (id == R.id.action_reply) {
             sendReply();
             return true;

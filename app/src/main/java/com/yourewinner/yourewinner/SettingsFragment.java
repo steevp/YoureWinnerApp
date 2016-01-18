@@ -3,7 +3,7 @@ package com.yourewinner.yourewinner;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
-public class MyPreferenceFragment extends PreferenceFragment {
+public class SettingsFragment extends PreferenceFragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

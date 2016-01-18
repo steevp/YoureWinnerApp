@@ -1,14 +1,13 @@
 package com.yourewinner.yourewinner;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,16 +18,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class ProfileViewActivity extends AppCompatActivity {
+public class ProfileViewActivity extends AppCompatActivity implements View.OnClickListener {
 
     private SharedPreferences mSharedPreferences;
     private Forum mForum;
     private String mUsername;
-    private ImageView mProfileAvatar;
+    private CircleImageView mProfileAvatar;
     private TextView mProfileUsername;
     private TextView mProfilePosts;
     private TextView mProfileRegistered;
@@ -37,10 +37,12 @@ public class ProfileViewActivity extends AppCompatActivity {
     private TextView mProfileEmail;
     private TextView mProfileIP;
     private TextView mProfileHostname;
+    private LinearLayout mProfilePostsContainer;
     private LinearLayout mProfileEmailContainer;
     private LinearLayout mProfileIPContainer;
     private LinearLayout mProfileHostnameContainer;
-    private ProgressDialog mDialog;
+    private LinearLayout mLoadingBar;
+    private ScrollView mProfileScrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +80,7 @@ public class ProfileViewActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle(mUsername);
 
-        mProfileAvatar = (ImageView) findViewById(R.id.profile_avatar);
+        mProfileAvatar = (CircleImageView) findViewById(R.id.profile_avatar);
         mProfileUsername = (TextView) findViewById(R.id.profile_username);
         mProfileUsername.setText(mUsername);
 
@@ -90,19 +92,19 @@ public class ProfileViewActivity extends AppCompatActivity {
         mProfileIP = (TextView) findViewById(R.id.profile_ip);
         mProfileHostname = (TextView) findViewById(R.id.profile_hostname);
 
+        mLoadingBar = (LinearLayout) findViewById(R.id.loading_bar);
+        mProfileScrollView = (ScrollView) findViewById(R.id.profile_scrollview);
+
+        mProfilePostsContainer = (LinearLayout) findViewById(R.id.profile_posts_container);
+        mProfilePostsContainer.setOnClickListener(this);
         mProfileEmailContainer = (LinearLayout) findViewById(R.id.profile_email_container);
         mProfileIPContainer = (LinearLayout) findViewById(R.id.profile_ip_container);
         mProfileHostnameContainer = (LinearLayout) findViewById(R.id.profile_hostname_container);
-
-        mDialog = new ProgressDialog(this);
-        mDialog.setTitle(getString(R.string.loading));
-        mDialog.setCancelable(false);
 
         getProfileInfo();
     }
 
     public void getProfileInfo() {
-        mDialog.show();
         mForum.getUserInfo(mUsername, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
@@ -116,7 +118,15 @@ public class ProfileViewActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Picasso.with(getApplicationContext()).load(iconUrl).fit().transform(new CircleTransform(getApplicationContext(), false)).into(mProfileAvatar);
+                        if (iconUrl.length() > 0) {
+                            Picasso.with(getApplicationContext())
+                                    .load(iconUrl)
+                                    .placeholder(R.mipmap.no_avatar)
+                                    .fit()
+                                    .into(mProfileAvatar);
+                        } else {
+                            mProfileAvatar.setImageResource(R.mipmap.no_avatar);
+                        }
                         mProfilePosts.setText(postCount.toString());
                         mProfileRegistered.setText(fmt.format(regTime));
 
@@ -139,8 +149,8 @@ public class ProfileViewActivity extends AppCompatActivity {
                                 mProfileHostnameContainer.setVisibility(View.VISIBLE);
                             }
                         }
-
-                        mDialog.dismiss();
+                        mLoadingBar.setVisibility(View.GONE);
+                        mProfileScrollView.setVisibility(View.VISIBLE);
                     }
                 });
             }
@@ -151,7 +161,6 @@ public class ProfileViewActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Error loading profile!", Toast.LENGTH_LONG).show();
                     }
                 });
@@ -163,11 +172,21 @@ public class ProfileViewActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "FUCK: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
                     }
                 });
             }
         });
+    }
+
+    @Override
+    public void onClick(View v) {
+        getUserPosts();
+    }
+
+    private void getUserPosts() {
+        Intent intent = new Intent(this, ParticipatedPostsActivity.class);
+        intent.putExtra(ParticipatedPostsActivity.ARG_USERNAME, mUsername);
+        startActivity(intent);
     }
 }

@@ -2,45 +2,42 @@ package com.yourewinner.yourewinner;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
-    Forum mForum;
-    ListView mRecentPostsList;
-    PostAdapter mPostAdapter;
-    ProgressDialog mDialog;
-    ProgressBar mProgress;
-    SharedPreferences mSharedPreferences;
-    SwipeRefreshLayout mSwipeContainer;
-
-    ViewPager mViewPager;
-    TabLayout mTabLayout;
-
-    Boolean isLoading;
-    Integer lastCount;
-    Integer currentPage;
-
-    View mFooter;
+    private Forum mForum;
+    private ProgressDialog mDialog;
+    private SharedPreferences mSharedPreferences;
+    private String[] mNavigationItems;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private String mTitle;
+    private ListView mDrawerList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,30 +69,66 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        mTitle = getTitle().toString();
+
+        mNavigationItems = getResources().getStringArray(R.array.navigation_items);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mNavigationItems));
+        mDrawerList.setOnItemClickListener(this);
+        setupDrawer();
+
         mForum = Forum.getInstance();
 
         mDialog = new ProgressDialog(this);
         mDialog.setMessage(getString(R.string.login_message));
         mDialog.setCancelable(false);
 
-        isLoading = false;
-        lastCount = 0;
-        currentPage = 1;
-
         doWelcome();
     }
 
-    public void setupTabLayout() {
-        mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        mViewPager.setAdapter(new PostsViewPagerAdapter(getSupportFragmentManager(), MainActivity.this));
-        mTabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
-        mTabLayout.setupWithViewPager(mViewPager);
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    private void setupDrawer() {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getSupportActionBar().setTitle("Navigation");
+                invalidateOptionsMenu();
+            }
+
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                getSupportActionBar().setTitle(mTitle);
+                invalidateOptionsMenu();
+            }
+        };
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
         return true;
     }
 
@@ -128,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
             alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    //getRecent();
+                    selectItem(0);
                 }
             });
 
@@ -136,9 +169,9 @@ public class MainActivity extends AppCompatActivity {
 
         } else if (!mForum.getLogin()) {
             doLogin(username, password);
+        } else {
+            selectItem(0);
         }
-
-        setupTabLayout();
     }
 
     public void doLogin(final String username, final String password) {
@@ -152,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "YOU'RE WINNER, " + username + " !", Toast.LENGTH_LONG).show();
-                        //setupTabLayout();
+                        selectItem(0);
                     }
                 });
             }
@@ -166,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
                         mForum.setLogin(false);
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
-                        //setupTabLayout();
+                        selectItem(0);
                     }
                 });
             }
@@ -179,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                         mForum.setLogin(false);
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
-                        //setupTabLayout();
+                        selectItem(0);
                     }
                 });
             }
@@ -193,14 +226,62 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent();
-            intent.setClassName(this, "com.yourewinner.yourewinner.MyPreferenceActivity");
-            startActivity(intent);
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
 
+        //noinspection SimplifiableIfStatement
+        /*if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }*/
+
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        selectItem(position);
+    }
+
+    private void selectItem(int position) {
+
+        Fragment fragment;
+        Bundle args = new Bundle();
+        switch (position) {
+            case 0:
+                mTitle = "yourewinner.com";
+                fragment = new HomeFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                break;
+            case 1:
+                mTitle = mNavigationItems[position];
+                fragment = new InboxFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                break;
+            case 2:
+                mTitle = mNavigationItems[position];
+                fragment = new SubForumsFragment();
+                args.putInt(SubForumsFragment.ARG_PAGE, position);
+                fragment.setArguments(args);
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                break;
+            case 3:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivityForResult(intent, 69);
+                break;
+            default:
+                mTitle = mNavigationItems[position];
+                break;
+        }
+
+        mDrawerList.setItemChecked(position, true);
+        mDrawerLayout.closeDrawer(mDrawerList);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        recreate();
     }
 }

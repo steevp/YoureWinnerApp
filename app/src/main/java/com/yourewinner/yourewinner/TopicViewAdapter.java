@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class TopicViewAdapter extends BaseAdapter {
 
     Context mContext;
@@ -144,7 +146,7 @@ public class TopicViewAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.usernameTextView = (TextView) convertView.findViewById(R.id.username);
             holder.usernameImageView = (ImageView) convertView.findViewById(R.id.image_username);
-            holder.avatarImageView = (ImageView) convertView.findViewById(R.id.avatar);
+            holder.avatarImageView = (CircleImageView) convertView.findViewById(R.id.avatar);
             holder.postContentTextView = (LinearLayout) convertView.findViewById(R.id.post_content);
             holder.postTimeTextView = (TextView) convertView.findViewById(R.id.post_time);
             holder.ratingBar = (LinearLayout) convertView.findViewById(R.id.rating_bar);
@@ -152,7 +154,8 @@ public class TopicViewAdapter extends BaseAdapter {
             holder.avatarImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String username = (String) holder.avatarImageView.getTag();
+                    //String username = (String) holder.avatarImageView.getTag();
+                    String username = holder.usernameTextView.getText().toString();
                     //Toast.makeText(mContext, username + " clicked!", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(mContext, ProfileViewActivity.class);
                     intent.putExtra("username", username);
@@ -271,12 +274,13 @@ public class TopicViewAdapter extends BaseAdapter {
 
         try {
             String username = new String((byte[]) post.get("post_author_name"), "UTF-8");
-            holder.avatarImageView.setTag(username);
+            //holder.avatarImageView.setTag(username);
             String imageUsername = post.get("image_username").toString();
             if (imageUsername.length() > 0) {
                 holder.usernameTextView.setVisibility(View.GONE);
                 holder.usernameImageView.setVisibility(View.VISIBLE);
                 Glide.with(mContext).load(imageUsername).into(holder.usernameImageView);
+                holder.usernameTextView.setText(username);
             } else {
                 holder.usernameTextView.setVisibility(View.VISIBLE);
                 holder.usernameImageView.setVisibility(View.GONE);
@@ -328,7 +332,8 @@ public class TopicViewAdapter extends BaseAdapter {
 
         String avatar = (String) post.get("icon_url");
         if (avatar.length() > 0) {
-            Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).transform(new CircleTransform(mContext, loggedIn)).into(holder.avatarImageView);
+            //Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).transform(new CircleTransform(mContext, loggedIn)).into(holder.avatarImageView);
+            Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).fit().into(holder.avatarImageView);
         } else {
             holder.avatarImageView.setImageResource(R.mipmap.no_avatar);
         }
@@ -345,7 +350,7 @@ public class TopicViewAdapter extends BaseAdapter {
     private static class ViewHolder {
         public TextView usernameTextView;
         public ImageView usernameImageView;
-        public ImageView avatarImageView;
+        public CircleImageView avatarImageView;
         public LinearLayout postContentTextView;
         public TextView postTimeTextView;
         public LinearLayout ratingBar;

@@ -54,23 +54,21 @@ public class SubscribedPostsFragment extends Fragment implements SwipeRefreshLay
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_posts_view, container, false);
-        if (mPosition == 4) {
-            mPostsList = (ListView) view.findViewById(R.id.posts_list);
-            mSwipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
-            mSwipeContainer.setOnRefreshListener(this);
-            mPostAdapter = new PostAdapter(mContext, inflater);
-            mPostsList.setAdapter(mPostAdapter);
-            mPostsList.setOnScrollListener(this);
-            mPostsList.setOnItemClickListener(this);
-            mFooter = inflater.inflate(R.layout.loading, null);
-            mPostsList.removeFooterView(mFooter);
-            mSwipeContainer.setRefreshing(true);
-            currentPage = 1;
-            lastCount = 0;
-            userScrolled = false;
-            isLoading = true;
-            getRecent();
-        }
+        mPostsList = (ListView) view.findViewById(R.id.posts_list);
+        mSwipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        mSwipeContainer.setOnRefreshListener(this);
+        mPostAdapter = new PostAdapter(mContext, inflater);
+        mPostsList.setAdapter(mPostAdapter);
+        mPostsList.setOnScrollListener(this);
+        mPostsList.setOnItemClickListener(this);
+        mFooter = inflater.inflate(R.layout.loading, null);
+        mPostsList.removeFooterView(mFooter);
+        mSwipeContainer.setRefreshing(true);
+        currentPage = 1;
+        lastCount = 0;
+        userScrolled = false;
+        isLoading = true;
+        getRecent();
         return view;
     }
 
