@@ -3,10 +3,12 @@ package com.yourewinner.yourewinner;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
-public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private SharedPreferences mSharedPreferences;
 
@@ -15,31 +17,18 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mSharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-        final String theme = mSharedPreferences.getString("theme", "0");
-
-        switch (theme) {
-            case "0":
-                setTheme(R.style.AppTheme);
-                break;
-            case "1":
-                setTheme(R.style.GayPrideTheme);
-                break;
-            case "2":
-                setTheme(R.style.StonerTheme);
-                break;
-            case "3":
-                setTheme(R.style.DarkTheme);
-                break;
-            case "4":
-                setTheme(R.style.LightTheme);
-                break;
-            default:
-                setTheme(R.style.AppTheme);
-                break;
-        }
+        Config.loadTheme(this);
 
         super.onCreate(savedInstanceState);
-        getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsFragment()).commit();
+        setContentView(R.layout.activity_settings);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        getFragmentManager().beginTransaction().replace(R.id.content_frame, new SettingsFragment()).commit();
     }
 
     @Override
@@ -47,5 +36,17 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         if (key.equals("theme")) {
             recreate();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

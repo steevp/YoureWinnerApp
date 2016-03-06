@@ -3,18 +3,17 @@ package com.yourewinner.yourewinner;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -29,10 +28,9 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
     ListView mTopicViewList;
     TopicViewAdapter mTopicViewAdapter;
     ProgressDialog mDialog;
-    Button mHeaderPage;
-    Button mFooterPage;
+    TextView mHeaderPage;
+    TextView mFooterPage;
     Menu mOptionsMenu;
-    SharedPreferences mSharedPreferences;
 
     private String topicTitle;
     private String topicID;
@@ -47,33 +45,15 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        final String theme = mSharedPreferences.getString("theme", "0");
-
-        switch (theme) {
-            case "0":
-                setTheme(R.style.AppTheme);
-                break;
-            case "1":
-                setTheme(R.style.GayPrideTheme);
-                break;
-            case "2":
-                setTheme(R.style.StonerTheme);
-                break;
-            case "3":
-                setTheme(R.style.DarkTheme);
-                break;
-            case "4":
-                setTheme(R.style.LightTheme);
-                break;
-            default:
-                setTheme(R.style.AppTheme);
-                break;
-        }
+        Config.loadTheme(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_topic_view);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         mTopicViewList = (ListView) findViewById(R.id.topic_view_list);
         mTopicViewAdapter = new TopicViewAdapter(this, getLayoutInflater());
@@ -88,8 +68,8 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
 
         mHeader = getLayoutInflater().inflate(R.layout.pagelinks, null);
         mFooter = getLayoutInflater().inflate(R.layout.pagelinks, null);
-        mHeaderPage = (Button) mHeader.findViewById(R.id.curpage);
-        mFooterPage = (Button) mFooter.findViewById(R.id.curpage);
+        mHeaderPage = (TextView) mHeader.findViewById(R.id.curpage);
+        mFooterPage = (TextView) mFooter.findViewById(R.id.curpage);
 
         mTopicViewList.addHeaderView(mHeader);
         mTopicViewList.addFooterView(mFooter);

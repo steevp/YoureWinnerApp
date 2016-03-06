@@ -33,8 +33,10 @@ public class PostAdapter extends BaseAdapter {
 
     public void updateData(Object[] data) {
         //mPosts = new ArrayList<Object>(Arrays.asList(data));
-        mPosts.addAll(Arrays.asList(data));
-        notifyDataSetChanged();
+        if (data != null) {
+            mPosts.addAll(Arrays.asList(data));
+            notifyDataSetChanged();
+        }
     }
 
     public void clear() {
@@ -50,7 +52,7 @@ public class PostAdapter extends BaseAdapter {
     @Override
     public Object getItem(int position) {
         int totalCount = getCount();
-        if (totalCount == 0 || position > totalCount || position < 0) {
+        if (totalCount == 0 || position >= totalCount || position < 0) {
             return null;
         }
 

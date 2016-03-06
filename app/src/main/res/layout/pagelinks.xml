@@ -6,43 +6,39 @@
     android:layout_height="wrap_content"
     android:visibility="invisible">
 
-    <ImageButton
+    <ImageView
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_weight="1"
-        android:background="@android:color/transparent"
         android:src="?attr/ic_action_first"
         android:onClick="goFirstPage"/>
 
-    <ImageButton
+    <ImageView
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_weight="1"
-        android:background="@android:color/transparent"
         android:src="?attr/ic_action_previous"
         android:onClick="previousPage"/>
 
-    <Button
+    <TextView
         android:id="@+id/curpage"
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_weight="2"
-        android:background="@android:color/transparent"
+        android:gravity="center"
         android:onClick="selectPage"/>
 
-    <ImageButton
+    <ImageView
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_weight="1"
-        android:background="@android:color/transparent"
         android:src="?attr/ic_action_next"
         android:onClick="nextPage"/>
 
-    <ImageButton
+    <ImageView
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_weight="1"
-        android:background="@android:color/transparent"
         android:src="?attr/ic_action_last"
         android:onClick="goLastPage"/>
 

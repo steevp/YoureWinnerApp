@@ -1,6 +1,7 @@
 package com.yourewinner.yourewinner;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,13 +23,21 @@ public class PrivateMessageAdapter extends BaseAdapter {
 
     private Context mContext;
     private LayoutInflater mInflater;
+    private String mBoxID;
     private ArrayList<Object> mMessages;
 
-    public PrivateMessageAdapter(Context context, LayoutInflater inflater, Object[] messages) {
+    public PrivateMessageAdapter(Context context, LayoutInflater inflater, String boxID) {
         mContext = context;
         mInflater = inflater;
+        mBoxID = boxID;
         mMessages = new ArrayList<Object>();
-        mMessages.addAll(Arrays.asList(messages));
+    }
+
+    public void updateData(Object[] data) {
+        if (data != null) {
+            mMessages.addAll(Arrays.asList(data));
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -38,6 +47,10 @@ public class PrivateMessageAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
+        int totalCount = getCount();
+        if (totalCount == 0 || position >= totalCount || position < 0) {
+            return null;
+        }
         return mMessages.get(position);
     }
 
@@ -71,7 +84,19 @@ public class PrivateMessageAdapter extends BaseAdapter {
             holder.avatarImageView.setImageResource(R.mipmap.no_avatar);
         }
 
-        String sender = new String((byte[]) message.get("msg_from"), StandardCharsets.UTF_8);
+        String sender;
+        if (mBoxID.equals("sent")) {
+            Object[] msgTo = (Object[]) message.get("msg_to");
+            ArrayList<String> senders = new ArrayList<String>();
+            for (int i=0;i<msgTo.length;i++) {
+                Map<String,Object> map = (Map<String,Object>) msgTo[i];
+                senders.add(new String((byte[]) map.get("username"), StandardCharsets.UTF_8));
+            }
+            sender = TextUtils.join(", ", senders);
+        } else {
+            sender = new String((byte[]) message.get("msg_from"), StandardCharsets.UTF_8);
+        }
+
         holder.usernameTextView.setText(sender);
 
         String subject = new String((byte[]) message.get("msg_subject"), StandardCharsets.UTF_8);

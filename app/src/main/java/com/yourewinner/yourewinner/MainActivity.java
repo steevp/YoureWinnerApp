@@ -10,25 +10,35 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    private final static String DRAWER_ITEM_ID = "DRAWER_ITEM_ID";
+    private final static String AVATAR = "AVATAR";
+    private final static String USERNAME = "USERNAME";
 
     private Forum mForum;
     private ProgressDialog mDialog;
@@ -37,37 +47,37 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private String mTitle;
-    private ListView mDrawerList;
+    //private ListView mDrawerList;
+    private NavigationView mDrawerView;
+    private View mDrawerHeader;
+    private int mDrawerItemId;
+
+    private TextView mUsernameView;
+    private CircleImageView mAvatarView;
+    private String mUsername;
+    private String mAvatar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        final String theme = mSharedPreferences.getString("theme", "0");
-
-        switch (theme) {
-            case "0":
-                setTheme(R.style.AppTheme);
-                break;
-            case "1":
-                setTheme(R.style.GayPrideTheme);
-                break;
-            case "2":
-                setTheme(R.style.StonerTheme);
-                break;
-            case "3":
-                setTheme(R.style.DarkTheme);
-                break;
-            case "4":
-                setTheme(R.style.LightTheme);
-                break;
-            default:
-                setTheme(R.style.AppTheme);
-                break;
-        }
+        Config.loadTheme(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (savedInstanceState != null) {
+            mDrawerItemId = savedInstanceState.getInt(DRAWER_ITEM_ID);
+            mUsername = savedInstanceState.getString(USERNAME);
+            mAvatar = savedInstanceState.getString(AVATAR);
+        } else {
+            mDrawerItemId = R.id.drawer_home;
+            mUsername = "";
+            mAvatar = "";
+        }
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -76,9 +86,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         mNavigationItems = getResources().getStringArray(R.array.navigation_items);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mNavigationItems));
-        mDrawerList.setOnItemClickListener(this);
+        mDrawerView = (NavigationView) findViewById(R.id.left_drawer);
+        mDrawerView.setNavigationItemSelectedListener(this);
+
+        View drawerHeader = getLayoutInflater().inflate(R.layout.navigation_header, null);
+        mAvatarView = (CircleImageView) drawerHeader.findViewById(R.id.avatar);
+        mUsernameView = (TextView) drawerHeader.findViewById(R.id.username);
+
+        mDrawerView.addHeaderView(drawerHeader);
+        mDrawerView.getMenu().findItem(mDrawerItemId).setChecked(true);
         setupDrawer();
 
         mForum = Forum.getInstance();
@@ -106,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                getSupportActionBar().setTitle("Navigation");
                 invalidateOptionsMenu();
             }
 
@@ -118,6 +133,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         };
         mDrawerToggle.setDrawerIndicatorEnabled(true);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+    }
+
+    private void setupDrawerHeader() {
+        if (mAvatar.length() > 0) {
+            Picasso.with(getApplicationContext()).load(mAvatar).placeholder(R.mipmap.no_avatar).fit().into(mAvatarView);
+        } else {
+            mAvatarView.setImageResource(R.mipmap.no_avatar);
+        }
+        mUsernameView.setText(mUsername);
     }
 
     @Override
@@ -161,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    selectItem(0);
+                    selectItem(mDrawerItemId);
                 }
             });
 
@@ -170,7 +194,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (!mForum.getLogin()) {
             doLogin(username, password);
         } else {
-            selectItem(0);
+            setupDrawerHeader();
+            selectItem(mDrawerItemId);
         }
     }
 
@@ -180,12 +205,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onResponse(long id, Object result) {
                 mForum.setLogin(true);
+
+                Map<String, Object> r = (Map<String, Object>) result;
+                mAvatar = (String) r.get("icon_url");
+                mUsername = new String((byte[]) r.get("username"), StandardCharsets.UTF_8);
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        setupDrawerHeader();
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "YOU'RE WINNER, " + username + " !", Toast.LENGTH_LONG).show();
-                        selectItem(0);
+                        selectItem(mDrawerItemId);
                     }
                 });
             }
@@ -199,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         mForum.setLogin(false);
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
-                        selectItem(0);
+                        selectItem(mDrawerItemId);
                     }
                 });
             }
@@ -212,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         mForum.setLogin(false);
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
-                        selectItem(0);
+                        selectItem(mDrawerItemId);
                     }
                 });
             }
@@ -240,48 +271,68 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        selectItem(position);
-    }
-
-    private void selectItem(int position) {
+    private void selectItem(int id) {
 
         Fragment fragment;
         Bundle args = new Bundle();
-        switch (position) {
-            case 0:
+        Intent intent;
+        switch (id) {
+            case R.id.drawer_home:
                 mTitle = "yourewinner.com";
                 fragment = new HomeFragment();
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;
-            case 1:
-                mTitle = mNavigationItems[position];
+            case R.id.drawer_profile:
+                intent = new Intent(this, ProfileViewActivity.class);
+                intent.putExtra("username", mUsername);
+                startActivity(intent);
+                break;
+            case R.id.drawer_messages:
+                mTitle = getString(R.string.action_messages);
                 fragment = new InboxFragment();
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;
-            case 2:
-                mTitle = mNavigationItems[position];
+            case R.id.drawer_browse:
+                //mTitle = mNavigationItems[position];
+                mTitle = getString(R.string.action_browse);
                 fragment = new SubForumsFragment();
-                args.putInt(SubForumsFragment.ARG_PAGE, position);
+                args.putInt(SubForumsFragment.ARG_PAGE, 1);
                 fragment.setArguments(args);
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;
-            case 3:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivityForResult(intent, 69);
+            case R.id.drawer_settings:
+                intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
                 break;
             default:
-                mTitle = mNavigationItems[position];
+                mTitle = "yourewinner.com";
                 break;
         }
 
-        mDrawerList.setItemChecked(position, true);
-        mDrawerLayout.closeDrawer(mDrawerList);
+        //mDrawerList.setItemChecked(position, true);
+        mDrawerLayout.closeDrawer(mDrawerView);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        recreate();
+    public boolean onNavigationItemSelected(MenuItem item) {
+        item.setChecked(true);
+        selectItem(item.getItemId());
+        return true;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(DRAWER_ITEM_ID, mDrawerItemId);
+        outState.putString(USERNAME, mUsername);
+        outState.putString(AVATAR, mAvatar);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent a = new Intent(Intent.ACTION_MAIN);
+        a.addCategory(Intent.CATEGORY_HOME);
+        a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(a);
     }
 }

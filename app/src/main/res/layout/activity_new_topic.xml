@@ -4,24 +4,43 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context="com.yourewinner.yourewinner.NewTopicActivity">
 
-    <EditText
-        android:id="@+id/subject"
-        android:hint="@string/hint_subject"
-        android:textSize="18sp"
-        android:inputType="textAutoComplete"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:fitsSystemWindows="true"/>
 
-    <EditText
-        android:textSize="18sp"
-        android:hint="@string/hint_body"
-        android:id="@+id/body"
-        android:inputType="textMultiLine"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="top"/>
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
+
+        <EditText
+            android:id="@+id/subject"
+            android:hint="@string/hint_subject"
+            android:textSize="18sp"
+            android:inputType="textAutoComplete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:textSize="18sp"
+            android:hint="@string/hint_body"
+            android:id="@+id/body"
+            android:inputType="textMultiLine"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="top"/>
+
+    </LinearLayout>
+
 
 </LinearLayout>

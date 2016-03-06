@@ -8,7 +8,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 public class InboxViewPagerAdapter extends FragmentStatePagerAdapter {
 
-    private final static String[] tabTitles = {"unread", "inbox", "sent"};
+    private final static String[] tabTitles = {"inbox", "sent"};
     private Context mContext;
 
     public InboxViewPagerAdapter(FragmentManager fm, Context context) {

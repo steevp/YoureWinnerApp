@@ -2,14 +2,15 @@ package com.yourewinner.yourewinner;
 
 import android.app.SearchManager;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -19,55 +20,50 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class SearchActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class SearchActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener, AbsListView.OnScrollListener {
 
     private Forum mForum;
-    private SharedPreferences mSharedPreferences;
     private SearchView mSearchView;
-    private ListView mPostList;
+    private ListView mPostsList;
     private PostAdapter mPostAdapter;
+    private SwipeRefreshLayout mSwipeContainer;
     private String mQuery;
     private View mFooter;
 
+    private int lastCount = 0;
+    private int currentPage = 1;
+    private boolean isLoading = false;
+    private boolean userScrolled = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        final String theme = mSharedPreferences.getString("theme", "0");
-
-        switch (theme) {
-            case "0":
-                setTheme(R.style.AppTheme);
-                break;
-            case "1":
-                setTheme(R.style.GayPrideTheme);
-                break;
-            case "2":
-                setTheme(R.style.StonerTheme);
-                break;
-            case "3":
-                setTheme(R.style.DarkTheme);
-                break;
-            case "4":
-                setTheme(R.style.LightTheme);
-                break;
-            default:
-                setTheme(R.style.AppTheme);
-                break;
-        }
+        Config.loadTheme(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
         mForum = Forum.getInstance();
 
-        mPostList = (ListView) findViewById(R.id.post_list);
-        mPostList.setOnItemClickListener(this);
+        mPostsList = (ListView) findViewById(R.id.posts_list);
+        mPostsList.setOnItemClickListener(this);
+        mPostsList.setOnScrollListener(this);
         mPostAdapter = new PostAdapter(this, getLayoutInflater());
-        mPostList.setAdapter(mPostAdapter);
+        mPostsList.setAdapter(mPostAdapter);
+        mSwipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        mSwipeContainer.setOnRefreshListener(this);
 
         mFooter = (View) getLayoutInflater().inflate(R.layout.loading, null);
-        mPostList.addFooterView(mFooter);
+        mPostsList.addFooterView(mFooter);
+
+        lastCount = 0;
+        currentPage = 1;
+        userScrolled = false;
+        isLoading = true;
 
         handleIntent(getIntent());
 
@@ -75,7 +71,7 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
     }
 
     public void searchTopic() {
-        mForum.searchTopic(mQuery, 1, new XMLRPCCallback() {
+        mForum.searchTopic(mQuery, currentPage, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
                 Map<String,Object> r = (Map<String,Object>) result;
@@ -83,8 +79,10 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mPostList.removeFooterView(mFooter);
+                        mPostsList.removeFooterView(mFooter);
                         mPostAdapter.updateData(topics);
+                        isLoading = false;
+                        mSwipeContainer.setRefreshing(false);
                     }
                 });
             }
@@ -95,7 +93,9 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mPostList.removeFooterView(mFooter);
+                        mPostsList.removeFooterView(mFooter);
+                        isLoading = false;
+                        mSwipeContainer.setRefreshing(false);
                     }
                 });
             }
@@ -106,7 +106,9 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mPostList.removeFooterView(mFooter);
+                        mPostsList.removeFooterView(mFooter);
+                        isLoading = false;
+                        mSwipeContainer.setRefreshing(false);
                     }
                 });
             }
@@ -121,6 +123,7 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        //getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -150,5 +153,37 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
             intent.putExtra("topicID", topicID);
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        mPostAdapter.clear();
+        mPostsList.removeFooterView(mFooter);
+        lastCount = 0;
+        currentPage = 1;
+        searchTopic();
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
+            userScrolled = true;
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        final int lastItem = firstVisibleItem + visibleItemCount - mPostsList.getFooterViewsCount();
+        if (userScrolled && lastItem == totalItemCount && totalItemCount > lastCount && !isLoading) {
+            isLoading = true;
+            lastCount = totalItemCount;
+            addMoreItems();
+        }
+    }
+
+    private void addMoreItems() {
+        currentPage++;
+        mPostsList.addFooterView(mFooter);
+        searchTopic();
     }
 }

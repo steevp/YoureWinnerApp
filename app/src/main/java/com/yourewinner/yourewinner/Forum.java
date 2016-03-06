@@ -2,6 +2,8 @@ package com.yourewinner.yourewinner;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCClient;
@@ -136,11 +138,17 @@ public class Forum {
     }
 
     public void searchTopic(String search, int page, XMLRPCCallback listener) {
-        int start = page * PAGE_SIZE - PAGE_SIZE;
+        /*int start = page * PAGE_SIZE - PAGE_SIZE;
         int end = page * PAGE_SIZE - 1;
 
         Object[] params = {search.getBytes(), start, end};
-        client.callAsync(listener, "search_topic", params);
+        client.callAsync(listener, "search_topic", params);*/
+
+        Map<String,Object> args = new HashMap<String,Object>();
+        args.put("page", page);
+        args.put("perpage", PAGE_SIZE);
+        args.put("keywords", search.getBytes());
+        client.callAsync(listener, "search", args);
     }
 
     public void getBox(String boxID, int page, XMLRPCCallback listener) {
@@ -150,6 +158,21 @@ public class Forum {
 
         Object[] params = {boxID, start, end};
         client.callAsync(listener, "get_box", params);
+    }
+
+    public void getMessage(String msgID, String boxID, XMLRPCCallback listener) {
+        Object[] params = {msgID, boxID};
+        client.callAsync(listener, "get_message", params);
+    }
+
+    public void createMessage(String[] recipients, String subject, String body, XMLRPCCallback listener) {
+        Object[] to = new Object[recipients.length];
+        for (int i=0;i<recipients.length;i++) {
+            to[i] = recipients[i].getBytes();
+        }
+
+        Object[] params = {to, subject.getBytes(), body.getBytes()};
+        client.callAsync(listener, "create_message", params);
     }
 
     public void getParticipatedTopic(String username, int page, XMLRPCCallback listener) {

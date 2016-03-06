@@ -1,10 +1,9 @@
 package com.yourewinner.yourewinner;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -25,7 +24,6 @@ import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class ProfileViewActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private SharedPreferences mSharedPreferences;
     private Forum mForum;
     private String mUsername;
     private CircleImageView mProfileAvatar;
@@ -46,37 +44,19 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Config.loadTheme(this);
         mForum = Forum.getInstance();
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        final String theme = mSharedPreferences.getString("theme", "0");
-
-        switch (theme) {
-            case "0":
-                setTheme(R.style.AppTheme);
-                break;
-            case "1":
-                setTheme(R.style.GayPrideTheme);
-                break;
-            case "2":
-                setTheme(R.style.StonerTheme);
-                break;
-            case "3":
-                setTheme(R.style.DarkTheme);
-                break;
-            case "4":
-                setTheme(R.style.LightTheme);
-                break;
-            default:
-                setTheme(R.style.AppTheme);
-                break;
-        }
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_view);
 
         Intent intent = getIntent();
         mUsername = intent.getStringExtra("username");
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         getSupportActionBar().setTitle(mUsername);
 

@@ -1,6 +1,12 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat">
+    <style name="AppTheme" parent="AppTheme.Base" />
+    <style name="GayPrideTheme" parent="GayPrideTheme.Base" />
+    <style name="StonerTheme" parent="StonerTheme.Base" />
+    <style name="DarkTheme" parent="DarkTheme.Base" />
+    <style name="LightTheme" parent="LightTheme.Base" />
+
+    <style name="AppTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/winnerOrange</item>
         <item name="colorPrimaryDark">@color/winnerOrangeDark</item>
@@ -17,7 +23,7 @@
         <item name="ic_action_last">@drawable/ic_action_last</item>
     </style>
 
-    <style name="GayPrideTheme" parent="Theme.AppCompat">
+    <style name="GayPrideTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/winnerPink</item>
         <item name="colorPrimaryDark">@color/winnerPinkDark</item>
         <item name="colorAccent">@color/winnerPinkDark</item>
@@ -33,7 +39,7 @@
         <item name="ic_action_last">@drawable/ic_action_last</item>
     </style>
 
-    <style name="StonerTheme" parent="Theme.AppCompat">
+    <style name="StonerTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/winnerSilver</item>
         <item name="colorPrimaryDark">@color/winnerSilverDark</item>
         <item name="colorAccent">@color/winnerSilverDark</item>
@@ -49,7 +55,7 @@
         <item name="ic_action_last">@drawable/ic_action_last</item>
     </style>
 
-    <style name="DarkTheme" parent="Theme.AppCompat">
+    <style name="DarkTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="color_username">@color/colorLink</item>
         <item name="ic_action_first">@drawable/ic_action_first</item>
         <item name="ic_action_previous">@drawable/ic_action_previous</item>
@@ -57,7 +63,7 @@
         <item name="ic_action_last">@drawable/ic_action_last</item>
     </style>
 
-    <style name="LightTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="LightTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="color_username">@color/colorLink</item>
         <item name="ic_action_first">@drawable/ic_action_first_dark</item>
         <item name="ic_action_previous">@drawable/ic_action_previous_dark</item>

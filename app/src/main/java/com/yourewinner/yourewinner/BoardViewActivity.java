@@ -4,9 +4,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
@@ -72,6 +73,12 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_board_view);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
         final Intent intent = getIntent();
         mBoardID = intent.getStringExtra("boardID");
         mBoardName = intent.getStringExtra("boardName");
@@ -100,6 +107,17 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
         isLoading = true;
 
         getBoard();
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), NewTopicActivity.class);
+                intent.putExtra(NewTopicActivity.ARG_BOARDID, mBoardID);
+                intent.putExtra(NewTopicActivity.ARG_BOARDNAME, mBoardName);
+                startActivity(intent);
+            }
+        });
     }
 
     public void populateHeader() {
@@ -227,19 +245,12 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_reply_topic, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         int id = item.getItemId();
 
-        if (id == R.id.action_reply) {
-            Intent intent = new Intent(this, NewTopicActivity.class);
-            intent.putExtra(NewTopicActivity.ARG_BOARDID, mBoardID);
-            startActivity(intent);
+        if (id == android.R.id.home) {
+            finish();
             return true;
         }
 
