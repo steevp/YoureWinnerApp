@@ -1,6 +1,8 @@
 package com.yourewinner.yourewinner;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -32,6 +34,25 @@ public class PrivateMessageFragment extends Fragment implements AbsListView.OnSc
     private int currentPage;
     private boolean isLoading;
     private boolean userScrolled;
+
+    InboxRefreshListener mCallback;
+
+    public interface InboxRefreshListener {
+        public void onInboxRefresh();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (InboxRefreshListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement InboxRefreshListener");
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -144,7 +165,16 @@ public class PrivateMessageFragment extends Fragment implements AbsListView.OnSc
             Intent intent = new Intent(getActivity(), PrivateMessageActivity.class);
             intent.putExtra(PrivateMessageActivity.ARG_MSGID, msgID);
             intent.putExtra(PrivateMessageActivity.ARG_BOXID, mBoxID);
-            startActivity(intent);
+            startActivityForResult(intent, 0);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 0 && resultCode == Activity.RESULT_OK) {
+            // Refresh
+            mCallback.onInboxRefresh();
         }
     }
 }

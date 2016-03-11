@@ -40,6 +40,11 @@ public class PrivateMessageAdapter extends BaseAdapter {
         }
     }
 
+    public void clearData() {
+        mMessages.clear();
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         return mMessages.size();

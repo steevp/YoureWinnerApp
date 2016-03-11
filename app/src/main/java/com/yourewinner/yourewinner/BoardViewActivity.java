@@ -1,13 +1,10 @@
 package com.yourewinner.yourewinner;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
@@ -29,7 +26,6 @@ import de.timroes.axmlrpc.XMLRPCServerException;
 public class BoardViewActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
 
     private Forum mForum;
-    private SharedPreferences mSharedPreferences;
     private ListView mPostList;
     private PostAdapter mPostAdapter;
     private String mBoardID;
@@ -45,30 +41,7 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        final String theme = mSharedPreferences.getString("theme", "0");
-
-        switch (theme) {
-            case "0":
-                setTheme(R.style.AppTheme);
-                break;
-            case "1":
-                setTheme(R.style.GayPrideTheme);
-                break;
-            case "2":
-                setTheme(R.style.StonerTheme);
-                break;
-            case "3":
-                setTheme(R.style.DarkTheme);
-                break;
-            case "4":
-                setTheme(R.style.LightTheme);
-                break;
-            default:
-                setTheme(R.style.AppTheme);
-                break;
-        }
+        Config.loadTheme(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_board_view);
@@ -162,7 +135,6 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d("ywdebug", "page " + currentPage);
                         mPostList.removeFooterView(mFooter);
                         mPostAdapter.updateData(topics);
                         isLoading = false;

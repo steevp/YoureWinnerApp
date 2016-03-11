@@ -175,6 +175,10 @@ public class Forum {
         client.callAsync(listener, "create_message", params);
     }
 
+    public void getInboxStat(XMLRPCCallback listener) {
+        client.callAsync(listener, "get_inbox_stat");
+    }
+
     public void getParticipatedTopic(String username, int page, XMLRPCCallback listener) {
         int start = page * PAGE_SIZE - PAGE_SIZE;
         int end = page * PAGE_SIZE - 1;

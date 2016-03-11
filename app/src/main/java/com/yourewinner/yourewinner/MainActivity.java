@@ -1,6 +1,8 @@
 package com.yourewinner.yourewinner;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -34,11 +37,12 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener, PrivateMessageFragment.InboxRefreshListener {
 
-    private final static String DRAWER_ITEM_ID = "DRAWER_ITEM_ID";
-    private final static String AVATAR = "AVATAR";
-    private final static String USERNAME = "USERNAME";
+    public final static String DRAWER_ITEM_ID = "DRAWER_ITEM_ID";
+    public final static String AVATAR = "AVATAR";
+    public final static String USERNAME = "USERNAME";
 
     private Forum mForum;
     private ProgressDialog mDialog;
@@ -71,9 +75,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mUsername = savedInstanceState.getString(USERNAME);
             mAvatar = savedInstanceState.getString(AVATAR);
         } else {
-            mDrawerItemId = R.id.drawer_home;
-            mUsername = "";
-            mAvatar = "";
+            //mDrawerItemId = R.id.drawer_home;
+            Intent intent = getIntent();
+            mDrawerItemId = intent.getIntExtra(DRAWER_ITEM_ID, R.id.drawer_home);
+            mUsername = intent.getStringExtra(USERNAME);
+            mAvatar = intent.getStringExtra(AVATAR);
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -104,6 +110,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDialog.setCancelable(false);
 
         doWelcome();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        mDrawerItemId = intent.getIntExtra(DRAWER_ITEM_ID, R.id.drawer_home);
+        //mUsername = intent.getStringExtra(USERNAME);
+        //mAvatar = intent.getStringExtra(AVATAR);
+        mDrawerView.getMenu().findItem(mDrawerItemId).setChecked(true);
+        selectItem(mDrawerItemId);
     }
 
     @Override
@@ -217,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "YOU'RE WINNER, " + username + " !", Toast.LENGTH_LONG).show();
                         selectItem(mDrawerItemId);
+                        checkNewMessages();
                     }
                 });
             }
@@ -246,6 +263,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         selectItem(mDrawerItemId);
                     }
                 });
+            }
+        });
+    }
+
+    private void checkNewMessages() {
+        mForum.getInboxStat(new XMLRPCCallback() {
+            @Override
+            public void onResponse(long id, Object result) {
+                Map<String, Object> r = (Map<String, Object>) result;
+                final int unreadCount = (int) r.get("inbox_unread_count");
+                if (unreadCount > 0) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(getApplicationContext(), "You've got mail!", Toast.LENGTH_LONG).show();
+                            NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
+                                    .setSmallIcon(R.drawable.ic_message)
+                                    .setContentTitle("You've got mail!")
+                                    .setContentText(unreadCount + " unread message(s)")
+                                    .setAutoCancel(true);
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            intent.putExtra(DRAWER_ITEM_ID, R.id.drawer_messages);
+                            //intent.putExtra(USERNAME, mUsername);
+                            //intent.putExtra(AVATAR, mAvatar);
+                            PendingIntent pi = PendingIntent.getActivity(
+                                    getApplicationContext(),
+                                    0,
+                                    intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT);
+                            builder.setContentIntent(pi);
+                            NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                            notifyMgr.notify(001, builder.build());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(long id, XMLRPCException error) {
+                error.printStackTrace();
+            }
+
+            @Override
+            public void onServerError(long id, XMLRPCServerException error) {
+                error.printStackTrace();
             }
         });
     }
@@ -330,9 +392,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        Intent a = new Intent(Intent.ACTION_MAIN);
-        a.addCategory(Intent.CATEGORY_HOME);
-        a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(a);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onInboxRefresh() {
+        // Reload the inbox fragment
+        Fragment fragment = new InboxFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 }

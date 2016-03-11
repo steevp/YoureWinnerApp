@@ -23,72 +23,98 @@
     <LinearLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="match_parent"
         android:visibility="gone"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/avatar"
-            android:src="@mipmap/no_avatar"
-            app:civ_border_width="2dp"
-            app:civ_border_color="?attr/colorAccent"
-            android:layout_width="40dp"
-            android:layout_height="40dp" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
-        <TextView
-            android:id="@+id/username"
-            android:textColor="?attr/color_username"
-            android:textSize="14sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="10dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/timestamp"
-            android:textSize="14sp"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_gravity="center_vertical"
-            android:gravity="right"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
 
-    </LinearLayout>
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/avatar"
+                        android:src="@mipmap/no_avatar"
+                        app:civ_border_width="2dp"
+                        app:civ_border_color="?attr/colorAccent"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp" />
 
-    <TextView
-        android:id="@+id/message_body"
-        android:layout_width="match_parent"
-        android:textSize="18sp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+                    <TextView
+                        android:id="@+id/username"
+                        android:textColor="?attr/color_username"
+                        android:textSize="14sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="16dp"/>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+                    <TextView
+                        android:id="@+id/timestamp"
+                        android:textSize="14sp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="right"/>
 
-        <EditText
-            android:id="@+id/quick_reply"
-            android:hint="@string/quick_reply"
-            android:layout_gravity="center_vertical"
-            android:inputType="textAutoComplete"
-            android:textSize="18sp"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content" />
+                </LinearLayout>
 
-        <ImageView
-            android:onClick="sendReply"
-            android:src="@drawable/action_reply"
-            android:layout_gravity="center_vertical"
-            android:layout_width="40dp"
-            android:layout_height="40dp" />
+                <TextView
+                    android:id="@+id/message_body"
+                    android:layout_width="match_parent"
+                    android:textSize="18sp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:layout_height="wrap_content"/>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/quick_reply"
+                        android:hint="@string/quick_reply"
+                        android:layout_gravity="center_vertical"
+                        android:inputType="textAutoComplete"
+                        android:textSize="18sp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"/>
+
+                    <ImageView
+                        android:onClick="sendReply"
+                        android:src="@drawable/action_reply"
+                        android:layout_gravity="center_vertical"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
 
     </LinearLayout>
 

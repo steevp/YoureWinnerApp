@@ -124,6 +124,7 @@ public class PrivateMessageActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        Toast.makeText(getApplicationContext(), "Unable to load message!", Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -134,6 +135,7 @@ public class PrivateMessageActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        Toast.makeText(getApplicationContext(), "FUCK: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -141,7 +143,7 @@ public class PrivateMessageActivity extends AppCompatActivity {
     }
 
     public void sendReply(View v) {
-        String to[] = {mUsername.getText().toString()};
+        String[] to = {mUsername.getText().toString()};
         String subject = getSupportActionBar().getTitle().toString();
         String body = mQuickReply.getText().toString();
         if (subject.length() > 0 && body.length() > 0) {
@@ -154,6 +156,7 @@ public class PrivateMessageActivity extends AppCompatActivity {
                         public void run() {
                             mDialog.dismiss();
                             Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_LONG).show();
+                            setResult(RESULT_OK);
                             finish();
                         }
                     });
@@ -161,14 +164,35 @@ public class PrivateMessageActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(long id, XMLRPCException error) {
-
+                    error.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mDialog.dismiss();
+                            Toast.makeText(getApplicationContext(), "Unable to send reply!", Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
 
                 @Override
                 public void onServerError(long id, XMLRPCServerException error) {
-
+                    error.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mDialog.dismiss();
+                            Toast.makeText(getApplicationContext(), "FUCK: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
             });
         }
+    }
+
+    @Override
+    public Intent getSupportParentActivityIntent() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(MainActivity.DRAWER_ITEM_ID, R.id.drawer_messages);
+        return intent;
     }
 }

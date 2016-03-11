@@ -2,9 +2,7 @@ package com.yourewinner.yourewinner;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -26,34 +24,10 @@ public class EditPostActivity extends AppCompatActivity {
     private String postTitle;
     private String postContent;
     private EditText mPostContent;
-    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        final String theme = mSharedPreferences.getString("theme", "0");
-
-        switch (theme) {
-            case "0":
-                setTheme(R.style.AppTheme);
-                break;
-            case "1":
-                setTheme(R.style.GayPrideTheme);
-                break;
-            case "2":
-                setTheme(R.style.StonerTheme);
-                break;
-            case "3":
-                setTheme(R.style.DarkTheme);
-                break;
-            case "4":
-                setTheme(R.style.LightTheme);
-                break;
-            default:
-                setTheme(R.style.AppTheme);
-                break;
-        }
+        Config.loadTheme(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reply_topic);
