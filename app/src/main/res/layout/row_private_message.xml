@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp">
+    android:padding="10dp" android:background="?android:attr/activatedBackgroundIndicator">
 
     <RelativeLayout
         android:layout_width="match_parent"

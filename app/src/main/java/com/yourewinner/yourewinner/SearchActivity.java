@@ -1,6 +1,7 @@
 package com.yourewinner.yourewinner;
 
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -20,7 +21,8 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class SearchActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener, AbsListView.OnScrollListener {
+public class SearchActivity extends AppCompatActivity
+        implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener, AbsListView.OnScrollListener {
 
     private Forum mForum;
     private SearchView mSearchView;
@@ -58,23 +60,25 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
         mSwipeContainer.setOnRefreshListener(this);
 
         mFooter = (View) getLayoutInflater().inflate(R.layout.loading, null);
-        mPostsList.addFooterView(mFooter);
 
         lastCount = 0;
         currentPage = 1;
         userScrolled = false;
-        isLoading = true;
+        isLoading = false;
 
-        handleIntent(getIntent());
-
-        searchTopic();
+        //searchTopic();
     }
 
     public void searchTopic() {
+        mPostsList.removeFooterView(mFooter);
+
+        isLoading = true;
+        mPostsList.addFooterView(mFooter);
+
         mForum.searchTopic(mQuery, currentPage, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
-                Map<String,Object> r = (Map<String,Object>) result;
+                Map<String, Object> r = (Map<String, Object>) result;
                 final Object[] topics = (Object[]) r.get("topics");
                 runOnUiThread(new Runnable() {
                     @Override
@@ -123,7 +127,12 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_search, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
         return true;
     }
 
@@ -139,8 +148,12 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
 
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            mQuery = intent.getStringExtra(SearchManager.QUERY);
-            getSupportActionBar().setTitle("\"" + mQuery + "\"");
+            mQuery = intent.getStringExtra(SearchManager.QUERY).trim();
+            if (mQuery.length() > 0) {
+                getSupportActionBar().setTitle("\"" + mQuery + "\"");
+                clearSearch();
+                searchTopic();
+            }
         }
     }
 
@@ -157,10 +170,7 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
 
     @Override
     public void onRefresh() {
-        mPostAdapter.clear();
-        mPostsList.removeFooterView(mFooter);
-        lastCount = 0;
-        currentPage = 1;
+        clearSearch();
         searchTopic();
     }
 
@@ -183,7 +193,15 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
 
     private void addMoreItems() {
         currentPage++;
-        mPostsList.addFooterView(mFooter);
+        //mPostsList.addFooterView(mFooter);
         searchTopic();
+    }
+
+    private void clearSearch() {
+        mPostAdapter.clear();
+        lastCount = 0;
+        currentPage = 1;
+        userScrolled = false;
+        isLoading = false;
     }
 }

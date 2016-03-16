@@ -45,6 +45,11 @@ public class PrivateMessageAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void removeItem(Object object) {
+        mMessages.remove(object);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         return mMessages.size();

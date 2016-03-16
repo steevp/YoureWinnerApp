@@ -8,6 +8,7 @@
 
     <style name="AppTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
+        <item name="windowActionModeOverlay">true</item>
         <item name="colorPrimary">@color/winnerOrange</item>
         <item name="colorPrimaryDark">@color/winnerOrangeDark</item>
         <item name="colorAccent">@color/winnerOrangeDark</item>
@@ -24,6 +25,7 @@
     </style>
 
     <style name="GayPrideTheme.Base" parent="Theme.AppCompat.NoActionBar">
+        <item name="windowActionModeOverlay">true</item>
         <item name="colorPrimary">@color/winnerPink</item>
         <item name="colorPrimaryDark">@color/winnerPinkDark</item>
         <item name="colorAccent">@color/winnerPinkDark</item>
@@ -40,6 +42,7 @@
     </style>
 
     <style name="StonerTheme.Base" parent="Theme.AppCompat.NoActionBar">
+        <item name="windowActionModeOverlay">true</item>
         <item name="colorPrimary">@color/winnerSilver</item>
         <item name="colorPrimaryDark">@color/winnerSilverDark</item>
         <item name="colorAccent">@color/winnerSilverDark</item>
@@ -56,6 +59,7 @@
     </style>
 
     <style name="DarkTheme.Base" parent="Theme.AppCompat.NoActionBar">
+        <item name="windowActionModeOverlay">true</item>
         <item name="color_username">@color/colorLink</item>
         <item name="ic_action_first">@drawable/ic_action_first</item>
         <item name="ic_action_previous">@drawable/ic_action_previous</item>
@@ -64,6 +68,7 @@
     </style>
 
     <style name="LightTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionModeOverlay">true</item>
         <item name="color_username">@color/colorLink</item>
         <item name="ic_action_first">@drawable/ic_action_first_dark</item>
         <item name="ic_action_previous">@drawable/ic_action_previous_dark</item>

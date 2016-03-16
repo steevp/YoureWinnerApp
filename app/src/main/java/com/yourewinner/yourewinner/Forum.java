@@ -7,6 +7,7 @@ import java.util.Map;
 
 import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCClient;
+import de.timroes.axmlrpc.XMLRPCException;
 
 public class Forum {
     private static Forum ourInstance = new Forum();
@@ -173,6 +174,18 @@ public class Forum {
 
         Object[] params = {to, subject.getBytes(), body.getBytes()};
         client.callAsync(listener, "create_message", params);
+    }
+
+    public boolean deleteMessage(String msgID, String boxID) {
+        Object[] params = {msgID, boxID};
+        try {
+            Map<String,Object> r = (Map<String,Object>) client.call("delete_message", params);
+            boolean result = (boolean) r.get("result");
+            return result;
+        } catch (XMLRPCException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void getInboxStat(XMLRPCCallback listener) {

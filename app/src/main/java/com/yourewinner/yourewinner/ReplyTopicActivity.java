@@ -2,7 +2,9 @@ package com.yourewinner.yourewinner;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -22,18 +24,20 @@ public class ReplyTopicActivity extends AppCompatActivity {
     private Forum mForum;
     private EditText mPostContent;
     private ProgressDialog mDialog;
+    private SharedPreferences mSharedPreferences;
 
     private String topicTitle;
     private String topicID;
     private String boardID;
     private String postID;
     private boolean quote;
-
-
+    private boolean mSaveDraft;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Config.loadTheme(this);
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reply_topic);
@@ -51,10 +55,6 @@ public class ReplyTopicActivity extends AppCompatActivity {
         postID = intent.getStringExtra("postID");
         quote = intent.getBooleanExtra("quote", false);
 
-        if (quote && postID.length() > 0) {
-            getQuote();
-        }
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -63,6 +63,14 @@ public class ReplyTopicActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(topicTitle);
 
         mPostContent = (EditText) findViewById(R.id.post_content);
+
+        if (quote && postID.length() > 0) {
+            getQuote();
+        } else {
+            restoreSavedDraft();
+        }
+
+        mSaveDraft = true;
     }
 
     public void getQuote() {
@@ -70,7 +78,7 @@ public class ReplyTopicActivity extends AppCompatActivity {
         mForum.getQuotePost(postID, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
-                Map<String,Object> r = (Map<String,Object>) result;
+                Map<String, Object> r = (Map<String, Object>) result;
                 try {
                     final String postContent = new String((byte[]) r.get("post_content"), "UTF-8");
                     runOnUiThread(new Runnable() {
@@ -86,7 +94,9 @@ public class ReplyTopicActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(long id, XMLRPCException error) { mDialog.dismiss(); }
+            public void onError(long id, XMLRPCException error) {
+                mDialog.dismiss();
+            }
 
             @Override
             public void onServerError(long id, XMLRPCServerException error) {
@@ -108,6 +118,8 @@ public class ReplyTopicActivity extends AppCompatActivity {
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_LONG).show();
                         setResult(RESULT_OK);
+                        // No need to save draft if successful
+                        mSaveDraft = false;
                         finish();
                     }
                 });
@@ -160,5 +172,33 @@ public class ReplyTopicActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPause() {
+        if (mSaveDraft) {
+            saveDraft();
+        }
+        super.onPause();
+    }
+
+    private void saveDraft() {
+        String reply = mPostContent.getText().toString();
+        if (reply.length() > 0) {
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putString("reply_draft", reply);
+            editor.commit();
+            Toast.makeText(this, "Draft saved!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void restoreSavedDraft() {
+        String draft = mSharedPreferences.getString("reply_draft", "");
+        if (draft.length() > 0) {
+            mPostContent.append(draft);
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.remove("reply_draft");
+            editor.commit();
+        }
     }
 }

@@ -7,6 +7,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.util.DisplayMetrics;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -45,12 +47,27 @@ public class PicassoImageGetter implements Html.ImageGetter {
                 try {
                     final BitmapDrawable drawable = new BitmapDrawable(resources, bitmap);
 
-                    drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                    final DisplayMetrics metrics = resources.getDisplayMetrics();
+                    final int originalWidthScaled = (int) (drawable.getIntrinsicWidth() * metrics.density + 0.5f);
+                    final int originalHeightScaled = (int) (drawable.getIntrinsicHeight() * metrics.density + 0.5f);
+
+                    int width, height;
+
+                    if (originalWidthScaled > metrics.widthPixels) {
+                        height = originalHeightScaled * metrics.widthPixels / originalWidthScaled;
+                        width = metrics.widthPixels;
+                    } else {
+                        height = originalHeightScaled;
+                        width = originalWidthScaled;
+                    }
+
+                    drawable.setBounds(0, 0, width, height);
 
                     result.setDrawable(drawable);
-                    result.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                    result.setBounds(0, 0, width, height);
 
                     textView.setText(textView.getText()); // invalidate() doesn't work correctly...
+                    textView.setMovementMethod(LinkMovementMethod.getInstance());
                 } catch (Exception e) {
                 /* nom nom nom*/
                 }
