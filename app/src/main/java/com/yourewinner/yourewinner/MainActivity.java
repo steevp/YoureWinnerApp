@@ -350,6 +350,11 @@ public class MainActivity extends AppCompatActivity
                 fragment = new HomeFragment();
                 getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;
+            case R.id.drawer_news:
+                mTitle = getString(R.string.action_news);
+                fragment = new NewsFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                break;
             case R.id.drawer_profile:
                 intent = new Intent(this, ProfileViewActivity.class);
                 intent.putExtra("username", mUsername);

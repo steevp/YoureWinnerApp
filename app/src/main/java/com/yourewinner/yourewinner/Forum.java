@@ -212,4 +212,8 @@ public class Forum {
     public void viewRatings(String msgID, XMLRPCCallback listener) {
         client.callAsync(listener, "view_ratings", msgID);
     }
+
+    public void getNews(XMLRPCCallback listener) {
+        client.callAsync(listener, "get_news");
+    }
 }
