@@ -8,6 +8,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -144,7 +146,7 @@ public class PrivateMessageActivity extends AppCompatActivity {
 
     public void sendReply(View v) {
         String[] to = {mUsername.getText().toString()};
-        String subject = getSupportActionBar().getTitle().toString();
+        String subject = "Re: " + getSupportActionBar().getTitle().toString();
         String body = mQuickReply.getText().toString();
         if (subject.length() > 0 && body.length() > 0) {
             mDialog.show();
@@ -190,9 +192,35 @@ public class PrivateMessageActivity extends AppCompatActivity {
     }
 
     @Override
-    public Intent getSupportParentActivityIntent() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(MainActivity.DRAWER_ITEM_ID, R.id.drawer_messages);
-        return intent;
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_view_pm, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.action_reply:
+                Intent intent = new Intent(this, ComposePrivateMessageActivity.class);
+                intent.putExtra(ComposePrivateMessageActivity.ARG_MSGTO, mUsername.getText().toString());
+                intent.putExtra(ComposePrivateMessageActivity.ARG_SUBJECT, "Re: " + getSupportActionBar().getTitle());
+                startActivityForResult(intent, 0);
+                return true;
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 0 && resultCode == RESULT_OK) {
+            setResult(RESULT_OK);
+            finish();
+        }
     }
 }

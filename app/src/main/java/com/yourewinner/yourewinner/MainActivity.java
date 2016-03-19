@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
@@ -72,11 +73,7 @@ public class MainActivity extends AppCompatActivity
             mUsername = savedInstanceState.getString(USERNAME);
             mAvatar = savedInstanceState.getString(AVATAR);
         } else {
-            //mDrawerItemId = R.id.drawer_home;
-            Intent intent = getIntent();
-            mDrawerItemId = intent.getIntExtra(DRAWER_ITEM_ID, R.id.drawer_home);
-            mUsername = intent.getStringExtra(USERNAME);
-            mAvatar = intent.getStringExtra(AVATAR);
+            mDrawerItemId = R.id.drawer_home;
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -106,7 +103,24 @@ public class MainActivity extends AppCompatActivity
         mDialog.setMessage(getString(R.string.login_message));
         mDialog.setCancelable(false);
 
-        doWelcome();
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
+        if (action.equals(Intent.ACTION_VIEW)) {
+            handleUri(intent.getData());
+        } else {
+            doWelcome();
+        }
+    }
+
+    private void handleUri(Uri uri) {
+        final String topic = uri.getQueryParameter("topic");
+        if (topic != null) {
+            final String topicID = topic.split("\\.")[0];
+            final Intent intent = new Intent(this, TopicViewActivity.class);
+            intent.putExtra("topicID", topicID);
+            startActivity(intent);
+        }
+        finish();
     }
 
     @Override

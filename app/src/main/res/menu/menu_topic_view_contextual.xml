@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_rate"
+        android:title="@string/action_rate"
+        android:icon="@drawable/action_rate"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_view_rating"
+        android:title="@string/action_view_rating"
+        android:icon="@drawable/action_view_rating"/>
+
+    <item
+        android:id="@+id/action_quote"
+        android:title="@string/action_quote"
+        android:icon="@drawable/action_quote"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_edit"
+        android:title="@string/action_edit"
+        app:showAsAction="ifRoom" />
+
+</menu>

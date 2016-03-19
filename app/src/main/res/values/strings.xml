@@ -33,6 +33,7 @@
     <string name="action_select">Select All</string>
     <string name="action_deselect">Deselect All</string>
     <string name="action_search">Search</string>
+    <string name="action_view_rating">View Ratings</string>
 
     <string name="title_activity_reply_topic">ReplyTopicActivity</string>
 
@@ -100,5 +101,6 @@
     <string name="hint_body">Body</string>
 
     <string name="quick_reply">Quick Reply</string>
+    <string name="message_to">To:</string>
 
 </resources>

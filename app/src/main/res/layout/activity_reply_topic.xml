@@ -14,11 +14,14 @@
         android:fitsSystemWindows="true"/>
 
     <EditText
-        android:inputType="textMultiLine"
+        android:inputType="textCapSentences|textMultiLine"
         android:id="@+id/post_content"
+        android:textSize="18sp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="top"
-        android:padding="16dp"/>
+        android:padding="16dp"
+        android:hint="@string/hint_body"
+        android:background="@android:color/transparent"/>
 
 </LinearLayout>

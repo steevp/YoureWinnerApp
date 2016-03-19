@@ -24,19 +24,22 @@
             android:id="@+id/subject"
             android:hint="@string/hint_subject"
             android:textSize="18sp"
-            android:inputType="textAutoComplete"
+            android:inputType="textCapSentences"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:paddingLeft="16dp"
-            android:paddingRight="16dp"/>
+            android:paddingRight="16dp"
+            android:background="@android:color/transparent"/>
+
+        <View style="@style/Divider" />
 
         <EditText
             android:textSize="18sp"
             android:hint="@string/hint_body"
             android:id="@+id/body"
-            android:inputType="textMultiLine"
+            android:inputType="textCapSentences|textMultiLine"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -44,7 +47,8 @@
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:paddingLeft="16dp"
-            android:paddingRight="16dp"/>
+            android:paddingRight="16dp"
+            android:background="@android:color/transparent"/>
 
     </LinearLayout>
 

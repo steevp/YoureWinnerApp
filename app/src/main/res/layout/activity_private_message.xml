@@ -87,6 +87,8 @@
 
                 </FrameLayout>
 
+                <View style="@style/Divider"/>
+
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
@@ -96,12 +98,13 @@
                         android:id="@+id/quick_reply"
                         android:hint="@string/quick_reply"
                         android:layout_gravity="center_vertical"
-                        android:inputType="textAutoComplete"
+                        android:inputType="textCapSentences"
                         android:textSize="18sp"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"/>
+                        android:padding="16dp"
+                        android:background="@android:color/transparent"/>
 
                     <ImageView
                         android:onClick="sendReply"

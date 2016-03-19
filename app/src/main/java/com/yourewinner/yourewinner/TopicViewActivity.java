@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -59,6 +61,72 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         mTopicViewAdapter = new TopicViewAdapter(this, getLayoutInflater());
         mTopicViewList.setAdapter(mTopicViewAdapter);
 
+        mTopicViewList.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+            private int mSelected = 0;
+            private MenuItem mItemViewRating;
+            private MenuItem mItemEdit;
+
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                if (checked) {
+                    mSelected++;
+                } else {
+                    mSelected--;
+                }
+
+                if (mSelected > 1) {
+                    mItemViewRating.setVisible(false);
+                    mItemEdit.setVisible(false);
+                } else {
+                    mItemViewRating.setVisible(true);
+                    mItemEdit.setVisible(true);
+                }
+
+                if (mSelected > 0) {
+                    mode.setTitle(mSelected + " selected");
+                }
+            }
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                getMenuInflater().inflate(R.menu.menu_topic_view_contextual, menu);
+                mItemViewRating = menu.findItem(R.id.action_view_rating);
+                mItemEdit = menu.findItem(R.id.action_edit);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_rate:
+                        ratePost();
+                        return true;
+                    case R.id.action_quote:
+                        quotePost();
+                        return true;
+                    case R.id.action_edit:
+                        editPost();
+                        return true;
+                    case R.id.action_view_rating:
+                        viewRatings();
+                        return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                mSelected = 0;
+            }
+        });
+
+        mTopicViewList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+
         mForum = Forum.getInstance();
 
         mDialog = new ProgressDialog(this);
@@ -84,10 +152,6 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
     }
 
     public void getTopic() {
-        //mTopicViewList.removeHeaderView(mFooter);
-        //mTopicViewList.removeFooterView(mFooter);
-        //mHeader.setVisibility(View.GONE);
-        //mFooter.setVisibility(View.GONE);
         mDialog.show();
         mForum.getTopic(topicID, page, new XMLRPCCallback() {
             @Override
@@ -109,9 +173,6 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
                     @Override
                     public void run() {
                         getSupportActionBar().setTitle(topicTitle);
-
-                        //mTopicViewList.addHeaderView(mFooter);
-                        //mTopicViewList.addFooterView(mFooter);
 
                         MenuItem actionReply = mOptionsMenu.findItem((R.id.action_reply));
                         MenuItem actionSubscribe = mOptionsMenu.findItem(R.id.action_subscribe);
@@ -154,10 +215,6 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
     }
 
     public void getTopicByUnread() {
-        //mTopicViewList.removeHeaderView(mFooter);
-        //mTopicViewList.removeFooterView(mFooter);
-        //mHeader.setVisibility(View.GONE);
-        //mFooter.setVisibility(View.GONE);
         mDialog.show();
         mForum.getTopicByUnread(topicID, new XMLRPCCallback() {
             @Override
@@ -261,7 +318,7 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         }
     }
 
-    public void ratePost() {
+    private void ratePost() {
         final AlertDialog alert = new AlertDialog.Builder(this).create();
         ListView listView = new ListView(this);
         final RatingListAdapter adapter = new RatingListAdapter(this, getLayoutInflater());
@@ -321,6 +378,97 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         alert.show();
     }
 
+    private void viewRatings() {
+        final SparseBooleanArray checked = mTopicViewList.getCheckedItemPositions();
+        for (int i=0, size=checked.size(); i<size; i++) {
+            final int key = checked.keyAt(i);
+            if (checked.get(key)) {
+                final Map<String,Object> post = (Map<String,Object>) mTopicViewAdapter.getItem(key - 1);
+                final String postID = (String) post.get("post_id");
+                mForum.viewRatings(postID, new XMLRPCCallback() {
+                    @Override
+                    public void onResponse(long id, Object result) {
+                        final Map<String,Object> r = (Map<String,Object>) result;
+                        if ((boolean) r.get("result")) {
+                            final Object[] ratings = (Object[]) r.get("ratings");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    final AlertDialog alert = new AlertDialog.Builder(TopicViewActivity.this).create();
+                                    alert.setTitle("Ratings for this post");
+                                    final ListView listView = new ListView(TopicViewActivity.this);
+                                    final RatingViewAdapter adapter = new RatingViewAdapter(TopicViewActivity.this, getLayoutInflater(), ratings);
+                                    listView.setAdapter(adapter);
+                                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                        @Override
+                                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                            alert.dismiss();
+                                        }
+                                    });
+                                    alert.setView(listView);
+                                    alert.show();
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onError(long id, XMLRPCException error) {
+
+                    }
+
+                    @Override
+                    public void onServerError(long id, XMLRPCServerException error) {
+
+                    }
+                });
+                break;
+            }
+        }
+    }
+
+    private void replyPost() {
+        final Intent intent = new Intent(this, ReplyTopicActivity.class);
+        intent.putExtra("topicTitle", topicTitle);
+        intent.putExtra("topicID", topicID);
+        intent.putExtra("boardID", boardID);
+        startActivityForResult(intent, 69);
+    }
+
+    private void quotePost() {
+        final Intent intent = new Intent(this, ReplyTopicActivity.class);
+        intent.putExtra("topicTitle", topicTitle);
+        intent.putExtra("topicID", topicID);
+        intent.putExtra("boardID", boardID);
+        final SparseBooleanArray checked = mTopicViewList.getCheckedItemPositions();
+        for (int i=0, size=checked.size();i<size;i++) {
+            final int key = checked.keyAt(i);
+            if (checked.get(key)) {
+                final Map<String,Object> post = (Map<String,Object>) mTopicViewAdapter.getItem(key - 1);
+                final String postID = post.get("post_id").toString();
+                intent.putExtra("postID", postID);
+                break;
+            }
+        }
+        intent.putExtra("quote", true);
+        startActivityForResult(intent, 69);
+    }
+
+    private void editPost() {
+        final SparseBooleanArray checked = mTopicViewList.getCheckedItemPositions();
+        for (int i = 0, size = checked.size(); i < size; i++) {
+            final int key = checked.keyAt(i);
+            if (checked.get(key)) {
+                final Map<String, Object> post = (Map<String, Object>) mTopicViewAdapter.getItem(key - 1);
+                final String postID = post.get("post_id").toString();
+                final Intent intent = new Intent(this, EditPostActivity.class);
+                intent.putExtra("postID", postID);
+                startActivityForResult(intent, 69);
+                break;
+            }
+        }
+    }
+
     public void selectPage(View v) {
         final AlertDialog alert = new AlertDialog.Builder(this).create();
         alert.setTitle("Jump to");
@@ -342,7 +490,7 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         alert.show();
     }
 
-    public void subscribeTopic() {
+    private void subscribeTopic() {
         mForum.subscribeTopic(topicID, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
@@ -371,7 +519,7 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         });
     }
 
-    public void unsubscribeTopic() {
+    private void unsubscribeTopic() {
         mForum.unsubscribeTopic(topicID, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
@@ -405,26 +553,13 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_topic_view, menu);
         mOptionsMenu = menu;
-        /*MenuItem actionReply = mOptionsMenu.findItem((R.id.action_reply));
-        MenuItem actionSubscribe = mOptionsMenu.findItem(R.id.action_subscribe);
-        MenuItem actionUnsubscribe = mOptionsMenu.findItem(R.id.action_unsubscribe);
-
-        if (mForum.getLogin()) {
-            actionReply.setVisible(true);
-            if (isSubscribed) {
-                actionUnsubscribe.setVisible(true);
-                actionSubscribe.setVisible(false);
-            } else {
-                actionSubscribe.setVisible(true);
-                actionUnsubscribe.setVisible(false);
-            }
-        }*/
         return true;
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        MenuItem actionQuote = mOptionsMenu.findItem(R.id.action_quote);
+        mTopicViewList.setItemChecked(position, true);
+        /*MenuItem actionQuote = mOptionsMenu.findItem(R.id.action_quote);
         MenuItem actionEdit = mOptionsMenu.findItem(R.id.action_edit);
         MenuItem actionRate = mOptionsMenu.findItem(R.id.action_rate);
         MenuItem actionSelect = mOptionsMenu.findItem(R.id.action_select_all);
@@ -453,83 +588,21 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
             actionEdit.setVisible(false);
             actionRate.setVisible(false);
             actionDeselect.setVisible(false);
-        }
+        }*/
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        MenuItem actionQuote = mOptionsMenu.findItem(R.id.action_quote);
-        MenuItem actionEdit = mOptionsMenu.findItem(R.id.action_edit);
-        MenuItem actionRate = mOptionsMenu.findItem(R.id.action_rate);
-        MenuItem actionSelect = mOptionsMenu.findItem(R.id.action_select_all);
-        MenuItem actionDeselect = mOptionsMenu.findItem(R.id.action_deselect_all);
-
-        //noinspection SimplifiableIfStatement
-        Intent intent;
-        if (id == R.id.action_reply || id == R.id.action_quote) {
-            intent = new Intent(this, ReplyTopicActivity.class);
-            intent.putExtra("topicTitle", topicTitle);
-            intent.putExtra("topicID", topicID);
-            intent.putExtra("boardID", boardID);
-            if (id == R.id.action_quote) {
-                SparseBooleanArray checked = mTopicViewList.getCheckedItemPositions();
-                String postID = null;
-                for (int i=0, size=checked.size();i<size;i++) {
-                    int key = checked.keyAt(i);
-                    if (checked.get(key)) {
-                        Map<String,Object> post = (Map<String,Object>) mTopicViewAdapter.getItem(key - 1);
-                        postID = post.get("post_id").toString();
-                        intent.putExtra("postID", postID);
-                        break;
-                    }
-                }
-                intent.putExtra("quote", true);
-            }
-            startActivityForResult(intent, 69);
-            return true;
-        } else if (id == R.id.action_edit) {
-            SparseBooleanArray checked = mTopicViewList.getCheckedItemPositions();
-            String postID = null;
-            for (int i = 0, size = checked.size(); i < size; i++) {
-                int key = checked.keyAt(i);
-                if (checked.get(key)) {
-                    Map<String, Object> post = (Map<String, Object>) mTopicViewAdapter.getItem(key - 1);
-                    postID = post.get("post_id").toString();
-                    intent = new Intent(this, EditPostActivity.class);
-                    intent.putExtra("postID", postID);
-                    startActivityForResult(intent, 69);
-                    break;
-                }
-            }
-            return true;
-        } else if (id == R.id.action_subscribe) {
-            subscribeTopic();
-            return true;
-        } else if (id == R.id.action_unsubscribe) {
-            unsubscribeTopic();
-            return true;
-        } else if (id == R.id.action_rate) {
-            ratePost();
-            return true;
-        } else if (id == R.id.action_deselect_all) {
-            mTopicViewList.clearChoices();
-            mTopicViewList.requestLayout();
-            actionQuote.setVisible(false);
-            actionEdit.setVisible(false);
-            actionRate.setVisible(false);
-            actionDeselect.setVisible(false);
-            return true;
-        } else if (id == R.id.action_select_all) {
-            for (int i=1;i<mTopicViewAdapter.getCount()+1;i++) {
-                mTopicViewList.setItemChecked(i, true);
-            }
-            mTopicViewList.requestLayout();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_reply:
+                replyPost();
+                return true;
+            case R.id.action_subscribe:
+                subscribeTopic();
+                return true;
+            case R.id.action_unsubscribe:
+                unsubscribeTopic();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

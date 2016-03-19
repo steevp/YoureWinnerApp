@@ -166,6 +166,10 @@ public class Forum {
         client.callAsync(listener, "get_message", params);
     }
 
+    public void getQuotePM(String msgID, XMLRPCCallback listener) {
+        client.callAsync(listener, "get_quote_pm", msgID);
+    }
+
     public void createMessage(String[] recipients, String subject, String body, XMLRPCCallback listener) {
         Object[] to = new Object[recipients.length];
         for (int i=0;i<recipients.length;i++) {
@@ -203,5 +207,9 @@ public class Forum {
     public void newTopic(String boardID, String subject, String body, XMLRPCCallback listener) {
         Object[] params = {boardID, subject.getBytes(), body.getBytes()};
         client.callAsync(listener, "new_topic", params);
+    }
+
+    public void viewRatings(String msgID, XMLRPCCallback listener) {
+        client.callAsync(listener, "view_ratings", msgID);
     }
 }
