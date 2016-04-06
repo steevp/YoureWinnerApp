@@ -13,7 +13,7 @@
         android:background="?attr/colorPrimary"
         android:fitsSystemWindows="true"/>
 
-    <ListView
+    <com.yourewinner.yourewinner.CustomListView
         android:id="@+id/topic_view_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

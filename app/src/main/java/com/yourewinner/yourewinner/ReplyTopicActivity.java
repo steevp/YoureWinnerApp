@@ -1,6 +1,8 @@
 package com.yourewinner.yourewinner;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -193,12 +195,29 @@ public class ReplyTopicActivity extends AppCompatActivity {
     }
 
     private void restoreSavedDraft() {
-        String draft = mSharedPreferences.getString("reply_draft", "");
+        final String draft = mSharedPreferences.getString("reply_draft", "");
         if (draft.length() > 0) {
-            mPostContent.append(draft);
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.remove("reply_draft");
-            editor.commit();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Restore saved draft");
+            builder.setMessage("Do you want to restore your saved draft?");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mPostContent.append(draft);
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                    editor.remove("reply_draft");
+                    editor.commit();
+                }});
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                    editor.remove("reply_draft");
+                    editor.commit();
+                }
+            });
+            builder.show();
         }
     }
 }

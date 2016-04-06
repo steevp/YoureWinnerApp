@@ -11,13 +11,13 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -26,13 +26,14 @@ import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class TopicViewActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
-    Forum mForum;
-    ListView mTopicViewList;
-    TopicViewAdapter mTopicViewAdapter;
-    ProgressDialog mDialog;
-    TextView mHeaderPage;
-    TextView mFooterPage;
-    Menu mOptionsMenu;
+    private Forum mForum;
+    private CustomListView mTopicViewList;
+    private TopicViewAdapter mTopicViewAdapter;
+    private ProgressDialog mDialog;
+    private TextView mHeaderPage;
+    private TextView mFooterPage;
+    private Menu mOptionsMenu;
+    private ActionMode mActionMode;
 
     private String topicTitle;
     private String topicID;
@@ -42,8 +43,8 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
     private int lastPage;
     private int scrollTo = 0;
 
-    View mHeader;
-    View mFooter;
+    private View mHeader;
+    private View mFooter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,75 +58,9 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        mTopicViewList = (ListView) findViewById(R.id.topic_view_list);
+        mTopicViewList = (CustomListView) findViewById(R.id.topic_view_list);
         mTopicViewAdapter = new TopicViewAdapter(this, getLayoutInflater());
         mTopicViewList.setAdapter(mTopicViewAdapter);
-
-        mTopicViewList.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-            private int mSelected = 0;
-            private MenuItem mItemViewRating;
-            private MenuItem mItemEdit;
-
-            @Override
-            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-                if (checked) {
-                    mSelected++;
-                } else {
-                    mSelected--;
-                }
-
-                if (mSelected > 1) {
-                    mItemViewRating.setVisible(false);
-                    mItemEdit.setVisible(false);
-                } else {
-                    mItemViewRating.setVisible(true);
-                    mItemEdit.setVisible(true);
-                }
-
-                if (mSelected > 0) {
-                    mode.setTitle(mSelected + " selected");
-                }
-            }
-
-            @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                getMenuInflater().inflate(R.menu.menu_topic_view_contextual, menu);
-                mItemViewRating = menu.findItem(R.id.action_view_rating);
-                mItemEdit = menu.findItem(R.id.action_edit);
-                return true;
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                return false;
-            }
-
-            @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_rate:
-                        ratePost();
-                        return true;
-                    case R.id.action_quote:
-                        quotePost();
-                        return true;
-                    case R.id.action_edit:
-                        editPost();
-                        return true;
-                    case R.id.action_view_rating:
-                        viewRatings();
-                        return true;
-                }
-                return false;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode mode) {
-                mSelected = 0;
-            }
-        });
-
-        mTopicViewList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
 
         mForum = Forum.getInstance();
 
@@ -149,7 +84,7 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         mTopicViewList.setOnItemClickListener(this);
 
         getTopicByUnread();
-    }
+    };
 
     public void getTopic() {
         mDialog.show();
@@ -163,7 +98,7 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
                 topicTitle = new String((byte[]) r.get("topic_title"));
                 boardID = r.get("forum_id").toString();
 
-                Integer totalPosts = (Integer) r.get("total_post_num");
+                int totalPosts = (int) r.get("total_post_num");
                 lastPage = (int) Math.ceil((double) totalPosts / 15);
 
                 isSubscribed = (boolean) r.get("is_subscribed");
@@ -226,7 +161,7 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
                 topicTitle = new String((byte[]) r.get("topic_title"));
                 boardID = r.get("forum_id").toString();
 
-                Integer totalPosts = (Integer) r.get("total_post_num");
+                int totalPosts = (int) r.get("total_post_num");
                 lastPage = (int) Math.ceil((double) totalPosts / 15);
 
                 isSubscribed = (boolean) r.get("is_subscribed");
@@ -558,37 +493,11 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mTopicViewList.setItemChecked(position, true);
-        /*MenuItem actionQuote = mOptionsMenu.findItem(R.id.action_quote);
-        MenuItem actionEdit = mOptionsMenu.findItem(R.id.action_edit);
-        MenuItem actionRate = mOptionsMenu.findItem(R.id.action_rate);
-        MenuItem actionSelect = mOptionsMenu.findItem(R.id.action_select_all);
-        MenuItem actionDeselect = mOptionsMenu.findItem(R.id.action_deselect_all);
-
-        int count = mTopicViewList.getCheckedItemCount();
-        Map<String,Object> r = (Map<String,Object>) mTopicViewAdapter.getItem(position-1);
-        boolean canEdit = (boolean) r.get("can_edit");
-
-        if (count == 1 && mForum.getLogin()) {
-            actionQuote.setVisible(true);
-            if (canEdit) {
-                actionEdit.setVisible(true);
-            } else {
-                actionEdit.setVisible(false);
-            }
-            actionRate.setVisible(true);
-            actionDeselect.setVisible(true);
-        } else if (count > 1 && mForum.getLogin()) {
-            actionQuote.setVisible(false);
-            actionEdit.setVisible(false);
-            actionRate.setVisible(true);
-            actionDeselect.setVisible(true);
-        } else {
-            actionQuote.setVisible(false);
-            actionEdit.setVisible(false);
-            actionRate.setVisible(false);
-            actionDeselect.setVisible(false);
-        }*/
+        if (mActionMode == null) {
+            TopicViewActionCallback callback = new TopicViewActionCallback();
+            mTopicViewList.setOnItemCheckedListener(callback);
+            mActionMode = startActionMode(callback);
+        }
     }
 
     @Override
@@ -613,6 +522,99 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         if (resultCode == RESULT_OK) {
             //mTopicViewList.clearChoices();
             getTopic();
+        }
+    }
+
+    private class TopicViewActionCallback implements ActionMode.Callback, CustomListView.OnItemCheckedListener {
+        private MenuItem mViewRatings;
+        private MenuItem mQuote;
+        private MenuItem mEdit;
+        private int mSelected;
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            getMenuInflater().inflate(R.menu.menu_topic_view_contextual, menu);
+            mViewRatings = menu.findItem(R.id.action_view_rating);
+            mQuote = menu.findItem(R.id.action_quote);
+            mEdit = menu.findItem(R.id.action_edit);
+            mSelected = 0;
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_rate:
+                    ratePost();
+                    return true;
+                case R.id.action_quote:
+                    quotePost();
+                    return true;
+                case R.id.action_edit:
+                    editPost();
+                    return true;
+                case R.id.action_view_rating:
+                    viewRatings();
+                    return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mTopicViewList.clearChoices();
+            mTopicViewList.requestLayout();
+            mActionMode = null;
+        }
+
+        @Override
+        public void onItemChecked(int position, boolean checked) {
+            if (checked) {
+                mSelected++;
+            } else {
+                mSelected--;
+            }
+
+            if (mForum.getLogin() && mSelected == 1) {
+                mViewRatings.setVisible(true);
+                mQuote.setVisible(true);
+            } else {
+                mViewRatings.setVisible(false);
+                mQuote.setVisible(false);
+            }
+
+            if (mSelected == 1) {
+                SparseBooleanArray checkStates = mTopicViewList.getCheckedItemPositions();
+                for (int i=0, size=checkStates.size(); i<size; i++) {
+                    int key = checkStates.keyAt(i);
+                    if (checkStates.get(key)) {
+                        Map<String,Object> post = (Map<String,Object>) mTopicViewAdapter.getItem(key - 1);
+                        // Check if user can edit the post
+                        boolean canEdit = (boolean) post.get("can_edit");
+                        if (canEdit) {
+                            mEdit.setVisible(true);
+                        } else {
+                            mEdit.setVisible(false);
+                        }
+                        String username = new String((byte[]) post.get("post_author_name"), StandardCharsets.UTF_8);
+                        mActionMode.setTitle(username);
+                        break;
+                    }
+                }
+            } else {
+                mEdit.setVisible(false);
+            }
+
+            if (mSelected > 1) {
+                mActionMode.setTitle(mSelected + " selected");
+            } else if (mSelected == 0) {
+                mActionMode.finish();
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.text.Html;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -138,7 +139,7 @@ public class TopicViewAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         final ViewHolder holder;
 
         if (convertView == null) {
@@ -182,9 +183,9 @@ public class TopicViewAdapter extends BaseAdapter {
             TextView ratingCount;
             ImageView ratingImage;
 
-            final float scale = mContext.getResources().getDisplayMetrics().density;
-            int pixels = (int) (16 * scale + 0.5f);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(pixels, pixels);
+            final DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+            final int pixels = (int) (16 * metrics.density + 0.5f);
+            final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(pixels, pixels);
 
             for (int i=0;i<ratings.length;i++) {
                 rating = (Map<String,Object>) ratings[i];
@@ -295,14 +296,12 @@ public class TopicViewAdapter extends BaseAdapter {
             String[] postContentSplit = postContent.split("(?=\\[img\\])|(?<=\\[/img\\])");
             holder.postContentTextView.removeAllViews();
             Pattern r = Pattern.compile("\\[img\\](.+)\\[/img\\]");
-            Matcher m = null;
-            ImageView imageView = null;
-            LinkifyTextView textView = null;
+            Matcher m;
             for (int i=0;i<postContentSplit.length;i++) {
                 m = r.matcher(postContentSplit[i]);
                 if (m.find()) {
                     final String imageURL = m.group(1);
-                    imageView = new ImageView(mContext);
+                    final ImageView imageView = new ImageView(mContext);
                     imageView.setScaleType(ImageView.ScaleType.FIT_START);
                     imageView.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -313,9 +312,10 @@ public class TopicViewAdapter extends BaseAdapter {
                         }
                     });
                     Glide.with(mContext).load(imageURL).into(imageView);
+
                     holder.postContentTextView.addView(imageView);
                 } else {
-                    textView = new LinkifyTextView(mContext);
+                    LinkifyTextView textView = new LinkifyTextView(mContext);
                     textView.setTextSize(18);
                     textView.setText(Html.fromHtml(EmoteProcessor.process(BBProcessor.process(postContentSplit[i])), new PicassoImageGetter(textView, mContext.getResources(), Picasso.with(mContext)), null));
                     textView.setMovementMethod(LinkMovementMethod.getInstance());
