@@ -17,10 +17,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.squareup.picasso.Picasso;
 
-import org.kefirsf.bb.BBProcessorFactory;
-import org.kefirsf.bb.EscapeProcessor;
-import org.kefirsf.bb.TextProcessor;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,81 +32,11 @@ public class TopicViewAdapter extends BaseAdapter {
     Context mContext;
     LayoutInflater mInflater;
     ArrayList<Object> mPosts;
-    TextProcessor BBProcessor;
-    TextProcessor EmoteProcessor;
 
     public TopicViewAdapter(Context context, LayoutInflater inflater) {
         mContext = context;
         mInflater = inflater;
         mPosts = new ArrayList<Object>();
-        BBProcessor = BBProcessorFactory.getInstance().create();
-
-        EmoteProcessor = new EscapeProcessor(
-                new String[][]{
-                        {":stamp:", "<img src=\"http://yourewinner.com/Smileys/default/winnervt4.png\">"},
-                        {":loser:", "<img src=\"http://yourewinner.com/Smileys/default/loserox7.png\">"},
-                        {":roddy:", "<img src=\"http://yourewinner.com/Smileys/default/rroddy.jpg\">"},
-                        {":belair:", "<img src=\"http://yourewinner.com/Smileys/default/belair.jpg\">"},
-                        {":bidoof:", "<img src=\"http://yourewinner.com/Smileys/default/Bidoof.gif\">"},
-                        {":leek:", "<img src=\"http://yourewinner.com/Smileys/default/leekspin.gif\">"},
-                        {":bluerig:", "<img src=\"http://yourewinner.com/Smileys/default/bluerigdtforumavatar5rx.jpg\">"},
-                        {":stalin:", "<img src=\"http://yourewinner.com/Smileys/default/stalin.gif\">"},
-                        {":thumbsup:", "<img src=\"http://yourewinner.com/Smileys/default/thumbs-up.jpg\">"},
-                        {"'>", "<img src=\"http://yourewinner.com/Smileys/default/pacman.png\">"},
-                        {":ateam:", "<img src=\"http://yourewinner.com/Smileys/default/A-Team.gif\">"},
-                        {":brbox:", "<img src=\"http://yourewinner.com/Smileys/default/BR.jpg\">"},
-                        {":shaq:", "<img src=\"http://yourewinner.com/Smileys/default/shaq_kw_copy.gif\">"},
-                        {":trophy:", "<img src=\"http://yourewinner.com/Smileys/default/BR_emoticon.JPG\">"},
-                        {":bump:", "<img src=\"http://yourewinner.com/Smileys/default/bumpun2.png\">"},
-                        {":dare:", "<img src=\"http://yourewinner.com/Smileys/default/DARE2.jpg\">"},
-                        {":texan:", "<img src=\"http://yourewinner.com/Smileys/default/jrwinner7mz.JPG\">"},
-                        {":lolwut:", "<img src=\"http://yourewinner.com/Smileys/default/lolwut.PNG\">"},
-                        {":mj:", "<img src=\"http://yourewinner.com/Smileys/default/MJWINNER.gif\">"},
-                        {":ngage:", "<img src=\"http://yourewinner.com/Smileys/default/N-GageD.gif\">"},
-                        {":mc:", "<img src=\"http://yourewinner.com/Smileys/default/p1354198.gif\">"},
-                        {":rocky:", "<img src=\"http://yourewinner.com/Smileys/default/Rocky.gif\">"},
-                        {":sslogo:", "<img src=\"http://yourewinner.com/Smileys/default/SS_Emoticon.gif.jpg\">"},
-                        {":winner:", "<img src=\"http://yourewinner.com/Smileys/default/winnerscrooll3vb.gif\">"},
-                        {":ballin:", "<img src=\"http://yourewinner.com/Smileys/default/ballin.gif\">"},
-                        {":pika:", "<img src=\"http://yourewinner.com/Smileys/default/pika.png\">"},
-                        {":barneyclap:", "<img src=\"http://yourewinner.com/Smileys/default/barneyclap.gif\">"},
-                        {":barneykiss:", "<img src=\"http://yourewinner.com/Smileys/default/barneykiss.gif\">"},
-                        {":facepalm:", "<img src=\"http://yourewinner.com/Smileys/default/facepalm.jpg\">"},
-                        {":unhappy:", "<img src=\"http://yourewinner.com/Smileys/default/unhappy.jpg\">"},
-                        {":volcanicity:", "<img src=\"http://yourewinner.com/Smileys/default/george.gif\">"},
-                        {":kawaii:", "<img src=\"http://yourewinner.com/Smileys/default/konata.gif\">"},
-                        {":russian:", "<img src=\"http://yourewinner.com/Smileys/default/RUSSIA.png\">"},
-                        {":headbang:", "<img src=\"http://yourewinner.com/Smileys/default/longhairni3.gif\">"},
-                        {":running:", "<img src=\"http://yourewinner.com/Smileys/default/kith.gif\">"},
-                        {":mrtwinner:", "<img src=\"http://yourewinner.com/Smileys/default/mrtwinner.png\">"},
-                        {":timesup:", "<img src=\"http://yourewinner.com/Smileys/default/timesup_stamp.png\">"},
-                        {"(@)", "<img src=\"http://yourewinner.com/Smileys/default/.png\">"},
-                        {"(H)", "<img src=\"http://yourewinner.com/Smileys/default/H.png\">"},
-                        {"(Y)", "<img src=\"http://yourewinner.com/Smileys/default/Y.png\">"},
-                        {":bike:", "<img src=\"http://yourewinner.com/Smileys/default/bike.gif\">"},
-                        {":youreman:", "<img src=\"http://yourewinner.com/Smileys/default/Youaretheman.gif\">"},
-                        {":shoes:", "<img src=\"http://yourewinner.com/Smileys/default/shoes.gif\">"},
-                        {":iceburn:", "<img src=\"http://yourewinner.com/Smileys/default/emot-iceburn.gif\">"},
-                        {":laugh:", "<img src=\"http://yourewinner.com/Smileys/default/laugh_small.jpg\">"},
-                        {":usa:", "<img src=\"http://yourewinner.com/Smileys/default/flageagusa.gif\">"},
-                        {":salute:", "<img src=\"http://yourewinner.com/Smileys/default/salute_small.jpg\">"},
-                        {":canada:", "<img src=\"http://yourewinner.com/Smileys/default/canada.gif\">"},
-                        {":uk:", "<img src=\"http://yourewinner.com/Smileys/default/corgi.gif\">"},
-                        {":twisted:", "<img src=\"http://yourewinner.com/Smileys/default/icon_twisted.gif\">"},
-                        {":dog:", "<img src=\"http://yourewinner.com/Smileys/default/dancingdog79.gif\">"},
-                        {":portugal:", "<img src=\"http://yourewinner.com/Smileys/default/portugal.gif\">"},
-                        {":estonia:", "<img src=\"http://yourewinner.com/Smileys/default/estonia.gif\">"},
-                        {":finland:", "<img src=\"http://yourewinner.com/Smileys/default/finland.gif\">"},
-                        {":csa:", "<img src=\"http://yourewinner.com/Smileys/default/csa.gif\">"},
-                        {":quebec:", "<img src=\"http://yourewinner.com/Smileys/default/quebec.gif\">"},
-                        {":rigcon:", "<img src=\"http://yourewinner.com/Smileys/default/fistbump_emote.gif\">"},
-                        {":sonic:", "<img src=\"http://yourewinner.com/Smileys/default/ChristianSonicCry.gif\">"},
-                        {":toot:", "<img src=\"http://yourewinner.com/Smileys/default/toot.gif\">"},
-                        {":trophy2:", "<img src=\"http://yourewinner.com/Smileys/default/yourewiener.gif\">"},
-                        {":cool:", "<img src=\"http://yourewinner.com/Smileys/default/cool.jpg\">"},
-                        {":dope:", "<img src=\"http://yourewinner.com/Smileys/default/dope.gif\">"},
-                }
-        );
     }
 
     public void updateData(Object[] data) {
@@ -317,7 +243,8 @@ public class TopicViewAdapter extends BaseAdapter {
                 } else {
                     LinkifyTextView textView = new LinkifyTextView(mContext);
                     textView.setTextSize(18);
-                    textView.setText(Html.fromHtml(EmoteProcessor.process(BBProcessor.process(postContentSplit[i])), new PicassoImageGetter(textView, mContext.getResources(), Picasso.with(mContext)), null));
+                    //textView.setText(Html.fromHtml(EmoteProcessor.process(BBProcessor.process(postContentSplit[i])), new PicassoImageGetter(textView, mContext.getResources(), Picasso.with(mContext)), null));
+                    textView.setText(Html.fromHtml(BBCodeConverter.process(postContentSplit[i]), new EmoteImageGetter(mContext), null));
                     textView.setMovementMethod(LinkMovementMethod.getInstance());
                     holder.postContentTextView.addView(textView);
                 }
