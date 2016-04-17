@@ -137,11 +137,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.yourewinner.yourewinner.MainActivity" />
         </activity>
-        <activity android:name=".ComposePrivateMessageActivity"
+        <activity
+            android:name=".ComposePrivateMessageActivity"
             android:parentActivityName=".PrivateMessageActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.yourewinner.yourewinner.PrivateMessageActivity" />
+        </activity>
+        <activity android:name=".YouTubePlayerActivity"
+            android:label="@string/title_activity_youtube_player"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar.Translucent">
+
         </activity>
     </application>
 

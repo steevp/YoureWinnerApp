@@ -106,4 +106,16 @@
         <item name="android:layout_height">1dp</item>
         <item name="android:background">?android:attr/listDivider</item>
     </style>
+
+    <style name="Theme.AppCompat.Light.DarkActionBar.Translucent">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/semiTransparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+    </style>
+
+    <color name="semiTransparent">#c0000000</color>
+    <color name="grey">#BEBEBE</color>
+
 </resources>

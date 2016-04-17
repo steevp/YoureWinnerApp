@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.SparseBooleanArray;
@@ -26,22 +27,32 @@ import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class TopicViewActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+
+    public final static String TOPIC_TITLE = "TOPIC_TITLE";
+    public final static String TOPIC_ID = "TOPIC_ID";
+    public final static String BOARD_ID = "BOARD_ID";
+    public final static String IS_SUBSCRIBED = "IS_SUBSCRIBED";
+    public final static String PAGE = "PAGE";
+    public final static String LAST_PAGE = "LAST_PAGE";
+    public final static String SCROLL_POS = "SCROLL_POS";
+
     private Forum mForum;
     private CustomListView mTopicViewList;
     private TopicViewAdapter mTopicViewAdapter;
     private ProgressDialog mDialog;
     private TextView mHeaderPage;
     private TextView mFooterPage;
-    private Menu mOptionsMenu;
     private ActionMode mActionMode;
+
+    private TopicViewDataFragment mDataFragment;
 
     private String topicTitle;
     private String topicID;
     private String boardID;
-    private boolean isSubscribed = false;
+    private boolean isSubscribed;
     private int page;
     private int lastPage;
-    private int scrollTo = 0;
+    private int scrollTo;
 
     private View mHeader;
     private View mFooter;
@@ -52,6 +63,25 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_topic_view);
+
+        if (savedInstanceState != null) {
+            topicTitle = savedInstanceState.getString(TOPIC_TITLE);
+            topicID = savedInstanceState.getString(TOPIC_ID);
+            boardID = savedInstanceState.getString(BOARD_ID);
+            isSubscribed = savedInstanceState.getBoolean(IS_SUBSCRIBED);
+            page = savedInstanceState.getInt(PAGE);
+            lastPage = savedInstanceState.getInt(LAST_PAGE);
+            scrollTo = savedInstanceState.getInt(SCROLL_POS);
+        } else {
+            topicID = getIntent().getStringExtra("topicID");
+            page = 1;
+            lastPage = 1;
+            isSubscribed = false;
+            scrollTo = 0;
+        }
+
+        FragmentManager fm = getSupportFragmentManager();
+        mDataFragment = (TopicViewDataFragment) fm.findFragmentByTag("data");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -77,14 +107,28 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         mTopicViewList.addHeaderView(mHeader);
         mTopicViewList.addFooterView(mFooter);
 
-        topicID = getIntent().getStringExtra("topicID");
-        page = 1;
-        lastPage = 1;
-
         mTopicViewList.setOnItemClickListener(this);
 
-        getTopicByUnread();
-    };
+        loadData();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mDataFragment.setData(mTopicViewAdapter.getData());
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(TOPIC_TITLE, topicTitle);
+        outState.putString(TOPIC_ID, topicID);
+        outState.putString(BOARD_ID, boardID);
+        outState.putBoolean(IS_SUBSCRIBED, isSubscribed);
+        outState.putInt(PAGE, page);
+        outState.putInt(LAST_PAGE, lastPage);
+        outState.putInt(SCROLL_POS, scrollTo);
+    }
 
     public void getTopic() {
         mDialog.show();
@@ -94,7 +138,6 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
                 mDialog.dismiss();
                 Map<String, Object> r = (Map<String, Object>) result;
 
-                final String forumName = new String((byte[]) r.get("forum_name"));
                 topicTitle = new String((byte[]) r.get("topic_title"));
                 boardID = r.get("forum_id").toString();
 
@@ -107,30 +150,9 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        getSupportActionBar().setTitle(topicTitle);
-
-                        MenuItem actionReply = mOptionsMenu.findItem((R.id.action_reply));
-                        MenuItem actionSubscribe = mOptionsMenu.findItem(R.id.action_subscribe);
-                        MenuItem actionUnsubscribe = mOptionsMenu.findItem(R.id.action_unsubscribe);
-
-                        if (mForum.getLogin()) {
-                            actionReply.setVisible(true);
-                            if (isSubscribed) {
-                                actionUnsubscribe.setVisible(true);
-                                actionSubscribe.setVisible(false);
-                            } else {
-                                actionSubscribe.setVisible(true);
-                                actionUnsubscribe.setVisible(false);
-                            }
-                        }
-
-                        mHeader.setVisibility(View.VISIBLE);
-                        mFooter.setVisibility(View.VISIBLE);
-
-                        mHeaderPage.setText(page + "/" + lastPage);
-                        mFooterPage.setText(page + "/" + lastPage);
                         mTopicViewAdapter.updateData(posts);
                         mTopicViewList.setSelection(scrollTo);
+                        updateUI();
                     }
                 });
             }
@@ -149,6 +171,31 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         });
     }
 
+    public void loadData() {
+        if (mDataFragment == null) {
+            mDataFragment = new TopicViewDataFragment();
+            getSupportFragmentManager().beginTransaction().add(mDataFragment, "data").commit();
+            getTopicByUnread();
+        } else {
+            Object[] data = mDataFragment.getData();
+            mTopicViewAdapter.updateData(data);
+            updateUI();
+        }
+    }
+
+    public void updateUI() {
+        getSupportActionBar().setTitle(topicTitle);
+        supportInvalidateOptionsMenu();
+
+        mHeader.setVisibility(View.VISIBLE);
+        mFooter.setVisibility(View.VISIBLE);
+
+        mHeaderPage.setText(page + "/" + lastPage);
+        mFooterPage.setText(page + "/" + lastPage);
+
+        //mTopicViewList.setSelection(scrollTo);
+    }
+
     public void getTopicByUnread() {
         mDialog.show();
         mForum.getTopicByUnread(topicID, new XMLRPCCallback() {
@@ -157,7 +204,6 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
                 mDialog.dismiss();
                 Map<String, Object> r = (Map<String, Object>) result;
 
-                final String forumName = new String((byte[]) r.get("forum_name"));
                 topicTitle = new String((byte[]) r.get("topic_title"));
                 boardID = r.get("forum_id").toString();
 
@@ -174,32 +220,9 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        getSupportActionBar().setTitle(topicTitle);
-                        //mTopicViewList.addHeaderView(mFooter);
-                        //mTopicViewList.addFooterView(mFooter);
-
-                        MenuItem actionReply = mOptionsMenu.findItem((R.id.action_reply));
-                        MenuItem actionSubscribe = mOptionsMenu.findItem(R.id.action_subscribe);
-                        MenuItem actionUnsubscribe = mOptionsMenu.findItem(R.id.action_unsubscribe);
-
-                        if (mForum.getLogin()) {
-                            actionReply.setVisible(true);
-                            if (isSubscribed) {
-                                actionUnsubscribe.setVisible(true);
-                                actionSubscribe.setVisible(false);
-                            } else {
-                                actionSubscribe.setVisible(true);
-                                actionUnsubscribe.setVisible(false);
-                            }
-                        }
-
-                        mHeader.setVisibility(View.VISIBLE);
-                        mFooter.setVisibility(View.VISIBLE);
-
-                        mHeaderPage.setText(page + "/" + lastPage);
-                        mFooterPage.setText(page + "/" + lastPage);
                         mTopicViewAdapter.updateData(posts);
                         mTopicViewList.setSelection(scrollTo);
+                        updateUI();
                     }
                 });
             }
@@ -220,19 +243,13 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
 
     public void nextPage(View v) {
         if (page < lastPage) {
-            scrollTo = 0;
-            mTopicViewList.clearChoices();
-            page++;
-            getTopic();
+            setPage(page + 1);
         }
     }
 
     public void previousPage(View v) {
         if (page > 1) {
-            scrollTo = 0;
-            mTopicViewList.clearChoices();
-            page--;
-            getTopic();
+            setPage(page - 1);
         }
     }
 
@@ -248,6 +265,9 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
         if (page != this.page) {
             scrollTo = 0;
             mTopicViewList.clearChoices();
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
             this.page = page;
             getTopic();
         }
@@ -433,10 +453,7 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
                     @Override
                     public void run() {
                         isSubscribed = true;
-                        MenuItem actionSubscribe = mOptionsMenu.findItem(R.id.action_subscribe);
-                        MenuItem actionUnsubscribe = mOptionsMenu.findItem(R.id.action_unsubscribe);
-                        actionSubscribe.setVisible(false);
-                        actionUnsubscribe.setVisible(true);
+                        supportInvalidateOptionsMenu();
                         Toast.makeText(getApplicationContext(), "Subscribed!", Toast.LENGTH_LONG).show();
                     }
                 });
@@ -462,10 +479,7 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
                     @Override
                     public void run() {
                         isSubscribed = false;
-                        MenuItem actionSubscribe = mOptionsMenu.findItem(R.id.action_subscribe);
-                        MenuItem actionUnsubscribe = mOptionsMenu.findItem(R.id.action_unsubscribe);
-                        actionSubscribe.setVisible(true);
-                        actionUnsubscribe.setVisible(false);
+                        supportInvalidateOptionsMenu();
                         Toast.makeText(getApplicationContext(), "Unsubscribed!", Toast.LENGTH_LONG).show();
                     }
                 });
@@ -484,10 +498,28 @@ public class TopicViewActivity extends AppCompatActivity implements AdapterView.
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem actionReply = menu.findItem((R.id.action_reply));
+        MenuItem actionSubscribe = menu.findItem(R.id.action_subscribe);
+        MenuItem actionUnsubscribe = menu.findItem(R.id.action_unsubscribe);
+
+        if (mForum.getLogin()) {
+            actionReply.setVisible(true);
+            if (isSubscribed) {
+                actionUnsubscribe.setVisible(true);
+                actionSubscribe.setVisible(false);
+            } else {
+                actionSubscribe.setVisible(true);
+                actionUnsubscribe.setVisible(false);
+            }
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_topic_view, menu);
-        mOptionsMenu = menu;
         return true;
     }
 

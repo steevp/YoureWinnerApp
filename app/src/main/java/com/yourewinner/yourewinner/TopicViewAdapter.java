@@ -2,24 +2,31 @@ package com.yourewinner.yourewinner;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.res.ResourcesCompat;
 import android.text.Html;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubeThumbnailLoader;
+import com.google.android.youtube.player.YouTubeThumbnailView;
 import com.squareup.picasso.Picasso;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -29,24 +36,31 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class TopicViewAdapter extends BaseAdapter {
 
-    Context mContext;
-    LayoutInflater mInflater;
-    ArrayList<Object> mPosts;
+    private Context mContext;
+    private LayoutInflater mInflater;
+    private Object[] mPosts;
+    private SparseArray mImageSizes;
 
     public TopicViewAdapter(Context context, LayoutInflater inflater) {
         mContext = context;
         mInflater = inflater;
-        mPosts = new ArrayList<Object>();
+        mPosts = new Object[0];
+        mImageSizes = new SparseArray(0);
     }
 
     public void updateData(Object[] data) {
-        mPosts = new ArrayList<Object>(Arrays.asList(data));
+        mPosts = data;
+        mImageSizes.clear();
         notifyDataSetChanged();
+    }
+
+    public Object[] getData() {
+        return mPosts;
     }
 
     @Override
     public int getCount() {
-        return mPosts.size();
+        return mPosts.length;
     }
 
     @Override
@@ -56,7 +70,7 @@ public class TopicViewAdapter extends BaseAdapter {
             return null;
         }
 
-        return mPosts.get(position);
+        return mPosts[position];
     }
 
     @Override
@@ -65,8 +79,9 @@ public class TopicViewAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, ViewGroup parent) {
         final ViewHolder holder;
+        final DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
 
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.row_topic_view, null);
@@ -109,7 +124,6 @@ public class TopicViewAdapter extends BaseAdapter {
             TextView ratingCount;
             ImageView ratingImage;
 
-            final DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
             final int pixels = (int) (16 * metrics.density + 0.5f);
             final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(pixels, pixels);
 
@@ -201,7 +215,6 @@ public class TopicViewAdapter extends BaseAdapter {
 
         try {
             String username = new String((byte[]) post.get("post_author_name"), "UTF-8");
-            //holder.avatarImageView.setTag(username);
             String imageUsername = post.get("image_username").toString();
             if (imageUsername.length() > 0) {
                 holder.usernameTextView.setVisibility(View.GONE);
@@ -219,16 +232,29 @@ public class TopicViewAdapter extends BaseAdapter {
 
         try {
             String postContent = new String((byte[]) post.get("post_content"), "UTF-8");
-            String[] postContentSplit = postContent.split("(?=\\[img\\])|(?<=\\[/img\\])");
+            String[] postContentSplit = postContent.split("(?=\\[(img|url=.+)\\])|(?<=\\[/(img|url)\\])");
             holder.postContentTextView.removeAllViews();
-            Pattern r = Pattern.compile("\\[img\\](.+)\\[/img\\]");
-            Matcher m;
+            Pattern r1 = Pattern.compile("\\[img\\](.+)\\[/img\\]");
+            Pattern r2 = Pattern.compile("\\[url=https?://(?:www\\.)youtu(?:\\.be/|be\\.com/watch\\?v=)([a-zA-Z0-9\\-_]{11})\\].+\\[/url\\]");
+            Matcher m1, m2;
             for (int i=0;i<postContentSplit.length;i++) {
-                m = r.matcher(postContentSplit[i]);
-                if (m.find()) {
-                    final String imageURL = m.group(1);
+                m1 = r1.matcher(postContentSplit[i]);
+                m2 = r2.matcher(postContentSplit[i]);
+                if (m1.find()) {
+                    final int postID = position;
+                    final int imageID = i;
+
+                    final String imageURL = m1.group(1);
                     final ImageView imageView = new ImageView(mContext);
-                    imageView.setScaleType(ImageView.ScaleType.FIT_START);
+
+                    SparseArray imageSizes = (SparseArray) mImageSizes.get(postID);
+                    if (imageSizes != null) {
+                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) imageSizes.get(imageID);
+                        if (params != null) {
+                            imageView.setLayoutParams(params);
+                        }
+                    }
+
                     imageView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -237,20 +263,94 @@ public class TopicViewAdapter extends BaseAdapter {
                             mContext.startActivity(intent);
                         }
                     });
-                    Glide.with(mContext).load(imageURL).into(imageView);
+                    Glide.with(mContext).load(imageURL).into(new GlideDrawableImageViewTarget(imageView) {
+                        @Override
+                        public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> animation) {
+                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) imageView.getLayoutParams();
+                            final int originalWidthScaled = (int) (resource.getIntrinsicWidth() * metrics.density + 0.5f);
+                            final int originalHeightScaled = (int) (resource.getIntrinsicHeight() * metrics.density + 0.5f);
+                            final int maxWidth = (int) (metrics.widthPixels - 48 * metrics.density + 0.5f);
+                            int width, height;
+
+                            if (originalWidthScaled > maxWidth) {
+                                width = maxWidth;
+                                height = originalHeightScaled * maxWidth / originalWidthScaled;
+                            } else {
+                                width = originalWidthScaled;
+                                height = originalHeightScaled;
+                            }
+
+                            params.width = width;
+                            params.height = height;
+                            SparseArray imageSizes = (SparseArray) mImageSizes.get(postID, new SparseArray(0));
+                            imageSizes.put(imageID, params);
+                            mImageSizes.put(postID, imageSizes);
+                            super.onResourceReady(resource, animation);
+                        }
+                    });
 
                     holder.postContentTextView.addView(imageView);
+                } else if (m2.find()) {
+                    final String videoID = m2.group(1);
+
+                    final RelativeLayout youtubeLayout = new RelativeLayout(mContext);
+                    int originalWidthScaled = (int) (560 * metrics.density + 0.5f);
+                    int originalHeightScaled = (int) (315 * metrics.density + 0.5f);
+                    int maxWidth = (int) (metrics.widthPixels - 48 * metrics.density + 0.5f);
+                    int width, height;
+                    if (originalWidthScaled > maxWidth) {
+                        width = maxWidth;
+                        height = originalHeightScaled * maxWidth / originalWidthScaled;
+                    } else {
+                        width = originalWidthScaled;
+                        height = originalHeightScaled;
+                    }
+                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
+                    youtubeLayout.setLayoutParams(layoutParams);
+
+                    YouTubeThumbnailView thumbnailView = new YouTubeThumbnailView(mContext);
+                    RelativeLayout.LayoutParams thumbnailParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+                    thumbnailView.setLayoutParams(thumbnailParams);
+                    thumbnailView.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color.grey, null));
+
+                    thumbnailView.setTag(videoID);
+                    thumbnailView.initialize(Secrets.YOUTUBE_API_KEY, new YouTubeThumbnailView.OnInitializedListener() {
+                        @Override
+                        public void onInitializationSuccess(YouTubeThumbnailView youTubeThumbnailView, YouTubeThumbnailLoader youTubeThumbnailLoader) {
+                            youTubeThumbnailLoader.setVideo(youTubeThumbnailView.getTag().toString());
+                            ImageView youtubePlayIcon = new ImageView(mContext);
+                            int pixels = (int) (64 * metrics.density + 0.5f);
+                            RelativeLayout.LayoutParams playIconParams = new RelativeLayout.LayoutParams(pixels, pixels);
+                            playIconParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+                            youtubePlayIcon.setLayoutParams(playIconParams);
+                            youtubePlayIcon.setImageResource(R.drawable.youtube_play_icon);
+                            youtubeLayout.addView(youTubeThumbnailView);
+                            youtubeLayout.addView(youtubePlayIcon);
+                        }
+
+                        @Override
+                        public void onInitializationFailure(YouTubeThumbnailView youTubeThumbnailView, YouTubeInitializationResult youTubeInitializationResult) {
+
+                        }
+                    });
+                    thumbnailView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(mContext, YouTubePlayerActivity.class);
+                            intent.putExtra(YouTubePlayerActivity.ARG_VIDEO_ID, view.getTag().toString());
+                            mContext.startActivity(intent);
+                        }
+                    });
+
+                    holder.postContentTextView.addView(youtubeLayout);
                 } else {
                     LinkifyTextView textView = new LinkifyTextView(mContext);
                     textView.setTextSize(18);
-                    //textView.setText(Html.fromHtml(EmoteProcessor.process(BBProcessor.process(postContentSplit[i])), new PicassoImageGetter(textView, mContext.getResources(), Picasso.with(mContext)), null));
                     textView.setText(Html.fromHtml(BBCodeConverter.process(postContentSplit[i]), new EmoteImageGetter(mContext), null));
                     textView.setMovementMethod(LinkMovementMethod.getInstance());
                     holder.postContentTextView.addView(textView);
                 }
             }
-            //holder.postContentTextView.setText(Html.fromHtml(EmoteProcessor.process(BBProcessor.process(postContent)), new PicassoImageGetter(holder.postContentTextView, mContext.getResources(), Picasso.with(mContext)), null));
-            //holder.postContentTextView.setMovementMethod(LinkMovementMethod.getInstance());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
