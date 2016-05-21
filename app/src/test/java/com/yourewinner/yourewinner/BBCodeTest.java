@@ -14,7 +14,7 @@ public class BBCodeTest extends TestCase {
     public void testBBCodes() throws Exception {
         final String in = "[quote][url=http://yourewinner.com]YOU'RE WINNER ![/url][/quote]";
         final String out = BBCodeConverter.process(in);
-        final String expected = "<blockquote><a href=\"http://yourewinner.com\">YOU&apos;RE WINNER !</a></blockquote>";
+        final String expected = "<blockquote_background><a href=\"http://yourewinner.com\">YOU&apos;RE WINNER !</a></blockquote_background>";
         assertEquals(expected, out);
     }
 

@@ -216,4 +216,10 @@ public class Forum {
     public void getNews(XMLRPCCallback listener) {
         client.callAsync(listener, "get_news");
     }
+
+    public void deletePost(String postID, XMLRPCCallback listener) {
+        // 1 = SOFT_DELETE, 2 = HARD_DELETE
+        Object[] params = {postID, 1};
+        client.callAsync(listener, "m_delete_post", params);
+    }
 }

@@ -143,8 +143,10 @@ public class RecentPostsFragment extends Fragment implements SwipeRefreshLayout.
         Map<String,Object> topic = (Map<String,Object>) mPostAdapter.getItem(position);
         if (topic != null) {
             String topicID = (String) topic.get("topic_id");
-            Intent intent = new Intent(mContext, TopicViewActivity.class);
-            intent.putExtra("topicID", topicID);
+            String boardID = (String) topic.get("forum_id");
+            Intent intent = new Intent(mContext, TopicViewActivity2.class);
+            intent.putExtra(TopicViewActivity2.ARG_TOPIC_ID, topicID);
+            intent.putExtra(TopicViewActivity2.ARG_BOARD_ID, boardID);
             startActivity(intent);
         }
     }

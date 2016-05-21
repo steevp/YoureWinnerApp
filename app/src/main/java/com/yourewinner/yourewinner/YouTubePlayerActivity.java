@@ -20,8 +20,6 @@ public class YouTubePlayerActivity extends AppCompatActivity implements YouTubeP
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_youtube_player);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         Intent intent = getIntent();
         mVideoID = intent.getStringExtra(ARG_VIDEO_ID);
         setupPlayer();

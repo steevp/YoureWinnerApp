@@ -144,12 +144,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.yourewinner.yourewinner.PrivateMessageActivity" />
         </activity>
-        <activity android:name=".YouTubePlayerActivity"
-            android:label="@string/title_activity_youtube_player"
+        <activity
+            android:name=".YouTubePlayerActivity"
             android:configChanges="screenSize|orientation"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar.Translucent">
-
-        </activity>
+            android:theme="@style/Theme.AppCompat.NoActionBar.Translucent"></activity>
+        <activity android:name=".TopicViewActivity2"></activity>
     </application>
 
 </manifest>

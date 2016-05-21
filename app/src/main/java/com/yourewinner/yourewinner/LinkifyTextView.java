@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
+import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -32,7 +33,7 @@ public class LinkifyTextView extends TextView {
 
     private void init() {
         //this.setAutoLinkMask(Linkify.ALL);
-        //this.setMovementMethod(LinkMovementMethod.getInstance());
+        this.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     /**

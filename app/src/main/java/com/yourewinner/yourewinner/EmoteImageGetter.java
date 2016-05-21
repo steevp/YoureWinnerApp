@@ -21,11 +21,12 @@ public class EmoteImageGetter implements Html.ImageGetter {
         if (id == 0) return null;
 
         final Drawable drawable = ResourcesCompat.getDrawable(res, id, null);
+
         final DisplayMetrics metrics = res.getDisplayMetrics();
-        final int originalWidthScaled = (int) (drawable.getIntrinsicWidth() * metrics.density + 0.5f);
-        final int originalHeightScaled = (int) (drawable.getIntrinsicHeight() * metrics.density + 0.5f);
+        final int originalWidthScaled = drawable.getIntrinsicWidth();
+        final int originalHeightScaled = drawable.getIntrinsicHeight();
         final int maxWidth = (int) (metrics.widthPixels - 48 * metrics.density + 0.5f);
-        int width, height;
+        final int width, height;
 
         if (originalWidthScaled > maxWidth) {
             width = maxWidth;

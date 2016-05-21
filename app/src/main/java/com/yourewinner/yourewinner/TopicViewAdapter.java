@@ -27,6 +27,7 @@ import com.google.android.youtube.player.YouTubeThumbnailView;
 import com.squareup.picasso.Picasso;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -230,136 +231,168 @@ public class TopicViewAdapter extends BaseAdapter {
             e.printStackTrace();
         }
 
-        try {
-            String postContent = new String((byte[]) post.get("post_content"), "UTF-8");
-            String[] postContentSplit = postContent.split("(?=\\[(img|url=.+)\\])|(?<=\\[/(img|url)\\])");
-            holder.postContentTextView.removeAllViews();
-            Pattern r1 = Pattern.compile("\\[img\\](.+)\\[/img\\]");
-            Pattern r2 = Pattern.compile("\\[url=https?://(?:www\\.)youtu(?:\\.be/|be\\.com/watch\\?v=)([a-zA-Z0-9\\-_]{11})\\].+\\[/url\\]");
-            Matcher m1, m2;
-            for (int i=0;i<postContentSplit.length;i++) {
-                m1 = r1.matcher(postContentSplit[i]);
-                m2 = r2.matcher(postContentSplit[i]);
-                if (m1.find()) {
-                    final int postID = position;
-                    final int imageID = i;
+        String postContent = new String((byte[]) post.get("post_content"), StandardCharsets.UTF_8);
+        String[] postContentSplit = postContent.split("(?=\\[(img|quote)\\])|(?<=\\[/(img|quote)\\])");
+        holder.postContentTextView.removeAllViews();
+        Pattern imgPattern = Pattern.compile("\\[img\\](.+)\\[/img\\]");
+        Pattern youtubePattern = Pattern.compile("\\[url=https?://(?:www\\.)?youtu(?:\\.be/|be\\.com/watch\\?v=)([\\w\\-]{11})\\].+\\[/url\\]");
+        Matcher imgMatcher, youtubeMatcher;
+        LinearLayout blockQuote = null;
+        int numQuotes = 0;
+        for (int i=0;i<postContentSplit.length;i++) {
+            String content = postContentSplit[i].trim();
+            imgMatcher = imgPattern.matcher(content);
+            youtubeMatcher = youtubePattern.matcher(content);
 
-                    final String imageURL = m1.group(1);
-                    final ImageView imageView = new ImageView(mContext);
+            if (content.startsWith("[quote]")) {
+                if (blockQuote == null) {
+                    blockQuote = (LinearLayout) mInflater.inflate(R.layout.blockquote, null);
+                }
+                numQuotes++;
+            }
 
-                    SparseArray imageSizes = (SparseArray) mImageSizes.get(postID);
-                    if (imageSizes != null) {
-                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) imageSizes.get(imageID);
-                        if (params != null) {
-                            imageView.setLayoutParams(params);
-                        }
+            boolean endQuote = content.endsWith("[/quote]");
+
+            content = content.replace("[quote]", "")
+                    .replace("[/quote]", "")
+                    .trim();
+
+            if (imgMatcher.find()) {
+                final int postID = position;
+                final int imageID = i;
+
+                final String imageURL = imgMatcher.group(1);
+                final ImageView imageView = new ImageView(mContext);
+
+                SparseArray imageSizes = (SparseArray) mImageSizes.get(postID);
+                if (imageSizes != null) {
+                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) imageSizes.get(imageID);
+                    if (params != null) {
+                        imageView.setLayoutParams(params);
                     }
+                }
 
-                    imageView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(mContext, ViewPhotoActivity.class);
-                            intent.putExtra("imageURL", imageURL);
-                            mContext.startActivity(intent);
-                        }
-                    });
-                    Glide.with(mContext).load(imageURL).into(new GlideDrawableImageViewTarget(imageView) {
-                        @Override
-                        public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> animation) {
-                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) imageView.getLayoutParams();
-                            final int originalWidthScaled = (int) (resource.getIntrinsicWidth() * metrics.density + 0.5f);
-                            final int originalHeightScaled = (int) (resource.getIntrinsicHeight() * metrics.density + 0.5f);
-                            final int maxWidth = (int) (metrics.widthPixels - 48 * metrics.density + 0.5f);
-                            int width, height;
-
-                            if (originalWidthScaled > maxWidth) {
-                                width = maxWidth;
-                                height = originalHeightScaled * maxWidth / originalWidthScaled;
-                            } else {
-                                width = originalWidthScaled;
-                                height = originalHeightScaled;
-                            }
-
-                            params.width = width;
-                            params.height = height;
-                            SparseArray imageSizes = (SparseArray) mImageSizes.get(postID, new SparseArray(0));
-                            imageSizes.put(imageID, params);
-                            mImageSizes.put(postID, imageSizes);
-                            super.onResourceReady(resource, animation);
-                        }
-                    });
-
-                    holder.postContentTextView.addView(imageView);
-                } else if (m2.find()) {
-                    final String videoID = m2.group(1);
-
-                    final RelativeLayout youtubeLayout = new RelativeLayout(mContext);
-                    int originalWidthScaled = (int) (560 * metrics.density + 0.5f);
-                    int originalHeightScaled = (int) (315 * metrics.density + 0.5f);
-                    int maxWidth = (int) (metrics.widthPixels - 48 * metrics.density + 0.5f);
-                    int width, height;
-                    if (originalWidthScaled > maxWidth) {
-                        width = maxWidth;
-                        height = originalHeightScaled * maxWidth / originalWidthScaled;
-                    } else {
-                        width = originalWidthScaled;
-                        height = originalHeightScaled;
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(mContext, ViewPhotoActivity.class);
+                        intent.putExtra("imageURL", imageURL);
+                        mContext.startActivity(intent);
                     }
-                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
-                    youtubeLayout.setLayoutParams(layoutParams);
+                });
+                Glide.with(mContext).load(imageURL).into(new GlideDrawableImageViewTarget(imageView) {
+                    @Override
+                    public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> animation) {
+                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) imageView.getLayoutParams();
+                        final int originalWidthScaled = (int) (resource.getIntrinsicWidth() * metrics.density + 0.5f);
+                        final int originalHeightScaled = (int) (resource.getIntrinsicHeight() * metrics.density + 0.5f);
+                        final int maxWidth = (int) (metrics.widthPixels - 48 * metrics.density + 0.5f);
+                        int width, height;
 
-                    YouTubeThumbnailView thumbnailView = new YouTubeThumbnailView(mContext);
-                    RelativeLayout.LayoutParams thumbnailParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-                    thumbnailView.setLayoutParams(thumbnailParams);
-                    thumbnailView.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color.grey, null));
-
-                    thumbnailView.setTag(videoID);
-                    thumbnailView.initialize(Secrets.YOUTUBE_API_KEY, new YouTubeThumbnailView.OnInitializedListener() {
-                        @Override
-                        public void onInitializationSuccess(YouTubeThumbnailView youTubeThumbnailView, YouTubeThumbnailLoader youTubeThumbnailLoader) {
-                            youTubeThumbnailLoader.setVideo(youTubeThumbnailView.getTag().toString());
-                            ImageView youtubePlayIcon = new ImageView(mContext);
-                            int pixels = (int) (64 * metrics.density + 0.5f);
-                            RelativeLayout.LayoutParams playIconParams = new RelativeLayout.LayoutParams(pixels, pixels);
-                            playIconParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-                            youtubePlayIcon.setLayoutParams(playIconParams);
-                            youtubePlayIcon.setImageResource(R.drawable.youtube_play_icon);
-                            youtubeLayout.addView(youTubeThumbnailView);
-                            youtubeLayout.addView(youtubePlayIcon);
+                        if (originalWidthScaled > maxWidth) {
+                            width = maxWidth;
+                            height = originalHeightScaled * maxWidth / originalWidthScaled;
+                        } else {
+                            width = originalWidthScaled;
+                            height = originalHeightScaled;
                         }
 
-                        @Override
-                        public void onInitializationFailure(YouTubeThumbnailView youTubeThumbnailView, YouTubeInitializationResult youTubeInitializationResult) {
+                        params.width = width;
+                        params.height = height;
+                        SparseArray imageSizes = (SparseArray) mImageSizes.get(postID, new SparseArray(0));
+                        imageSizes.put(imageID, params);
+                        mImageSizes.put(postID, imageSizes);
+                        super.onResourceReady(resource, animation);
+                    }
+                });
 
-                        }
-                    });
-                    thumbnailView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent intent = new Intent(mContext, YouTubePlayerActivity.class);
-                            intent.putExtra(YouTubePlayerActivity.ARG_VIDEO_ID, view.getTag().toString());
-                            mContext.startActivity(intent);
-                        }
-                    });
-
-                    holder.postContentTextView.addView(youtubeLayout);
+                if (blockQuote != null) {
+                    blockQuote.addView(imageView);
                 } else {
-                    LinkifyTextView textView = new LinkifyTextView(mContext);
-                    textView.setTextSize(18);
-                    textView.setText(Html.fromHtml(BBCodeConverter.process(postContentSplit[i]), new EmoteImageGetter(mContext), null));
-                    textView.setMovementMethod(LinkMovementMethod.getInstance());
+                    holder.postContentTextView.addView(imageView);
+                }
+            } else if (youtubeMatcher.find()) {
+                final String videoID = youtubeMatcher.group(1);
+
+                final RelativeLayout youtubeLayout = new RelativeLayout(mContext);
+                int originalWidthScaled = (int) (560 * metrics.density + 0.5f);
+                int originalHeightScaled = (int) (315 * metrics.density + 0.5f);
+                int maxWidth = (int) (metrics.widthPixels - 48 * metrics.density + 0.5f);
+                int width, height;
+                if (originalWidthScaled > maxWidth) {
+                    width = maxWidth;
+                    height = originalHeightScaled * maxWidth / originalWidthScaled;
+                } else {
+                    width = originalWidthScaled;
+                    height = originalHeightScaled;
+                }
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
+                youtubeLayout.setLayoutParams(layoutParams);
+
+                YouTubeThumbnailView thumbnailView = new YouTubeThumbnailView(mContext);
+                RelativeLayout.LayoutParams thumbnailParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+                thumbnailView.setLayoutParams(thumbnailParams);
+                thumbnailView.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color.grey, null));
+
+                thumbnailView.setTag(videoID);
+                thumbnailView.initialize(Secrets.YOUTUBE_API_KEY, new YouTubeThumbnailView.OnInitializedListener() {
+                    @Override
+                    public void onInitializationSuccess(YouTubeThumbnailView youTubeThumbnailView, YouTubeThumbnailLoader youTubeThumbnailLoader) {
+                        youTubeThumbnailLoader.setVideo(youTubeThumbnailView.getTag().toString());
+                        ImageView youtubePlayIcon = new ImageView(mContext);
+                        int pixels = (int) (64 * metrics.density + 0.5f);
+                        RelativeLayout.LayoutParams playIconParams = new RelativeLayout.LayoutParams(pixels, pixels);
+                        playIconParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+                        youtubePlayIcon.setLayoutParams(playIconParams);
+                        youtubePlayIcon.setImageResource(R.drawable.youtube_play_icon);
+                        youtubeLayout.addView(youTubeThumbnailView);
+                        youtubeLayout.addView(youtubePlayIcon);
+                    }
+
+                    @Override
+                    public void onInitializationFailure(YouTubeThumbnailView youTubeThumbnailView, YouTubeInitializationResult youTubeInitializationResult) {
+
+                    }
+                });
+                thumbnailView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(mContext, YouTubePlayerActivity.class);
+                        intent.putExtra(YouTubePlayerActivity.ARG_VIDEO_ID, view.getTag().toString());
+                        mContext.startActivity(intent);
+                    }
+                });
+
+                if (blockQuote != null) {
+                    blockQuote.addView(youtubeLayout);
+                } else {
+                    holder.postContentTextView.addView(youtubeLayout);
+                }
+            } else {
+                LinkifyTextView textView = new LinkifyTextView(mContext);
+                textView.setTextSize(18);
+                textView.setText(Html.fromHtml(BBCodeConverter.process(content), new EmoteImageGetter(mContext), null));
+                textView.setMovementMethod(LinkMovementMethod.getInstance());
+                if (blockQuote != null) {
+                    blockQuote.addView(textView);
+                } else {
                     holder.postContentTextView.addView(textView);
                 }
             }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+
+            if (endQuote) {
+                numQuotes--;
+                if (numQuotes <= 0) {
+                    holder.postContentTextView.addView(blockQuote);
+                    blockQuote = null;
+                }
+            }
         }
 
         boolean loggedIn = (boolean) post.get("is_online");
 
         String avatar = (String) post.get("icon_url");
         if (avatar.length() > 0) {
-            //Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).transform(new CircleTransform(mContext, loggedIn)).into(holder.avatarImageView);
             Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).fit().into(holder.avatarImageView);
         } else {
             holder.avatarImageView.setImageResource(R.mipmap.no_avatar);

@@ -82,7 +82,6 @@
     <string name="title_activity_edit_post"></string>
     <string name="title_activity_profile_view"></string>
     <string name="title_activity_view_photo">Viewing Photo</string>
-    <string name="title_activity_youtube_player">YouTube Video</string>
 
     <string name="profile_posts_title">Posts</string>
     <string name="profile_registered_title">Registered</string>

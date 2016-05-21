@@ -107,7 +107,7 @@
         <item name="android:background">?android:attr/listDivider</item>
     </style>
 
-    <style name="Theme.AppCompat.Light.DarkActionBar.Translucent">
+    <style name="Theme.AppCompat.NoActionBar.Translucent">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@color/semiTransparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>

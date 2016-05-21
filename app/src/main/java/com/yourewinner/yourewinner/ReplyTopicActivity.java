@@ -23,6 +23,10 @@ import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class ReplyTopicActivity extends AppCompatActivity {
 
+    public final static String ARG_TOPIC_TITLE = "ARG_TOPIC_TITLE";
+    public final static String ARG_TOPIC_ID = "ARG_TOPIC_ID";
+    public final static String ARG_BOARD_ID = "ARG_BOARD_ID";
+
     private Forum mForum;
     private EditText mPostContent;
     private ProgressDialog mDialog;
@@ -51,9 +55,9 @@ public class ReplyTopicActivity extends AppCompatActivity {
         mDialog.setCancelable(false);
 
         Intent intent = getIntent();
-        topicTitle = intent.getStringExtra("topicTitle");
-        topicID = intent.getStringExtra("topicID");
-        boardID = intent.getStringExtra("boardID");
+        topicTitle = intent.getStringExtra(ARG_TOPIC_TITLE);
+        topicID = intent.getStringExtra(ARG_TOPIC_ID);
+        boardID = intent.getStringExtra(ARG_BOARD_ID);
         postID = intent.getStringExtra("postID");
         quote = intent.getBooleanExtra("quote", false);
 
@@ -119,7 +123,7 @@ public class ReplyTopicActivity extends AppCompatActivity {
                     public void run() {
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_LONG).show();
-                        setResult(RESULT_OK);
+                        setResult(TopicViewActivity2.RESULT_RELOAD);
                         // No need to save draft if successful
                         mSaveDraft = false;
                         finish();

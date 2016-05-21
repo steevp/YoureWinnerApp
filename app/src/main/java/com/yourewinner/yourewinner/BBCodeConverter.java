@@ -7,8 +7,8 @@ public class BBCodeConverter {
     private static TextProcessor mProcessor = BBProcessorFactory.getInstance().create();
 
     public static String process(String bbcode) {
-        bbcode = mProcessor.process(bbcode);
-        bbcode = bbcode.replace(":stamp:", getImageTag("stamp"))
+        bbcode = mProcessor.process(bbcode)
+                .replace(":stamp:", getImageTag("stamp"))
                 .replace(":loser:", getImageTag("loser"))
                 .replace(":roddy:", getImageTag("roddy"))
                 .replace(":belair:", getImageTag("belair"))
@@ -70,6 +70,7 @@ public class BBCodeConverter {
                 .replace(":trophy2:", getImageTag("trophy2"))
                 .replace(":cool:", getImageTag("cool"))
                 .replace(":dope:", getImageTag("dope"));
+
         return bbcode;
     }
 
