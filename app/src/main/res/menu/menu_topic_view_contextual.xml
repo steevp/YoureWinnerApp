@@ -6,22 +6,26 @@
         android:id="@+id/action_rate"
         android:title="@string/action_rate"
         android:icon="@drawable/action_rate"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_view_rating"
         android:title="@string/action_view_rating"
+        android:visible="false"
         android:icon="@drawable/action_view_rating"/>
 
     <item
         android:id="@+id/action_quote"
         android:title="@string/action_quote"
         android:icon="@drawable/action_quote"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_edit"
         android:title="@string/action_edit"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 
 </menu>

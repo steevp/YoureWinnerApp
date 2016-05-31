@@ -1,6 +1,5 @@
 package com.yourewinner.yourewinner;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,12 +9,10 @@ import android.widget.TextView;
 
 public class RatingListAdapter extends BaseAdapter {
 
-    private Context mContext;
     private LayoutInflater mInflater;
     private final int[] ratingIDs = {23, 22, 21, 25, 26, 20, 19, 24, 101, 18, 17, 16, 102, 104, 103, 111, 116, 117, 118, 119, 120};
 
-    public RatingListAdapter(Context context, LayoutInflater inflater) {
-        mContext = context;
+    public RatingListAdapter(LayoutInflater inflater) {
         mInflater = inflater;
     }
 
@@ -31,7 +28,7 @@ public class RatingListAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return position;
+        return ratingIDs[position];
     }
 
     @Override

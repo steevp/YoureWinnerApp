@@ -95,9 +95,10 @@ public class Forum {
         client.callAsync(listener, "mark_all_as_read");
     }
 
-    public void ratePost(String postID, String ratingID, XMLRPCCallback listener) {
+    public boolean ratePost(String postID, String ratingID) throws XMLRPCException {
         Object[] params = {postID, ratingID};
-        client.callAsync(listener, "rate_post", params);
+        Map<String, Object> r = (Map<String, Object>) client.call("rate_post", params);
+        return (boolean) r.get("result");
     }
 
     public void getRawPost(String postID, XMLRPCCallback listener) {
@@ -180,16 +181,10 @@ public class Forum {
         client.callAsync(listener, "create_message", params);
     }
 
-    public boolean deleteMessage(String msgID, String boxID) {
+    public boolean deleteMessage(String msgID, String boxID) throws XMLRPCException {
         Object[] params = {msgID, boxID};
-        try {
-            Map<String,Object> r = (Map<String,Object>) client.call("delete_message", params);
-            boolean result = (boolean) r.get("result");
-            return result;
-        } catch (XMLRPCException e) {
-            e.printStackTrace();
-        }
-        return false;
+        Map<String,Object> r = (Map<String,Object>) client.call("delete_message", params);
+        return (boolean) r.get("result");
     }
 
     public void getInboxStat(XMLRPCCallback listener) {

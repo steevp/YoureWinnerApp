@@ -161,9 +161,11 @@ public class SearchActivity extends AppCompatActivity
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Map<String,Object> topic = (Map<String,Object>) mPostAdapter.getItem(position);
         if (topic != null) {
+            String boardID = (String) topic.get("forum_id");
             String topicID = (String) topic.get("topic_id");
             Intent intent = new Intent(this, TopicViewActivity.class);
-            intent.putExtra("topicID", topicID);
+            intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);
+            intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
             startActivity(intent);
         }
     }

@@ -228,8 +228,13 @@ public class PrivateMessageFragment extends Fragment
             if (mMessages.size() > 0) {
                 Map<String, Object> msg = (Map<String, Object>) mMessages.get(0);
                 String msgID = (String) msg.get("msg_id");
-                boolean result = mForum.deleteMessage(msgID, mBoxID);
-                return result;
+                try {
+                    boolean result = mForum.deleteMessage(msgID, mBoxID);
+                    return result;
+                } catch (XMLRPCException e) {
+                    e.printStackTrace();
+                    return false;
+                }
             }
 
             return true;
@@ -290,7 +295,6 @@ public class PrivateMessageFragment extends Fragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final int choiceMode = mMessageList.getChoiceMode();
         if (!ignoreClicks) {
             Map<String, Object> pm = (Map<String, Object>) mAdapter.getItem(position);
 

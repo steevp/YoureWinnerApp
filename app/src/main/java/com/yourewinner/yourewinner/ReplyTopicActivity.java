@@ -123,7 +123,7 @@ public class ReplyTopicActivity extends AppCompatActivity {
                     public void run() {
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_LONG).show();
-                        setResult(TopicViewActivity2.RESULT_RELOAD);
+                        setResult(TopicViewActivity.RESULT_RELOAD);
                         // No need to save draft if successful
                         mSaveDraft = false;
                         finish();

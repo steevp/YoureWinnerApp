@@ -128,7 +128,7 @@ public class EditPostActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        setResult(RESULT_OK);
+                        setResult(TopicViewActivity.RESULT_RELOAD);
                         finish();
                     }
                 });
@@ -136,12 +136,12 @@ public class EditPostActivity extends AppCompatActivity {
 
             @Override
             public void onError(long id, XMLRPCException error) {
-
+                error.printStackTrace();
             }
 
             @Override
             public void onServerError(long id, XMLRPCServerException error) {
-
+                error.printStackTrace();
             }
         });
     }

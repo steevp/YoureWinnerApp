@@ -155,8 +155,10 @@ public class ParticipatedPostsFragment extends Fragment implements SwipeRefreshL
         Map<String,Object> topic = (Map<String,Object>) mPostAdapter.getItem(position);
         if (topic != null) {
             String topicID = (String) topic.get("topic_id");
+            String boardID = (String) topic.get("forum_id");
             Intent intent = new Intent(getActivity(), TopicViewActivity.class);
-            intent.putExtra("topicID", topicID);
+            intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);
+            intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
             startActivity(intent);
         }
     }
