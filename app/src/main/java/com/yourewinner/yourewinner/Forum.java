@@ -24,6 +24,7 @@ public class Forum {
 
     private Forum() {
         isLoggedIn = false;
+        mUsername = "Guest";
         try {
             client = new XMLRPCClient(new URL(API_URL), XMLRPCClient.FLAGS_ENABLE_COOKIES);
         } catch (MalformedURLException e) {

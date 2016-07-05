@@ -30,10 +30,7 @@ public class ParticipatedPostsActivity extends AppCompatActivity {
     }
 
     private void createFragment() {
-        Fragment fragment = new ParticipatedPostsFragment();
-        Bundle args = new Bundle();
-        args.putString(ParticipatedPostsFragment.ARG_USERNAME, mUsername);
-        fragment.setArguments(args);
+        Fragment fragment = PostsFragment.newInstance(PostsFragment.POS_PARTICIPATED, mUsername);
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 }

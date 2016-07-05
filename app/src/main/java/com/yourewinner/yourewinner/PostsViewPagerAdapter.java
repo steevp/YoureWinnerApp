@@ -19,26 +19,7 @@ public class PostsViewPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        switch (position) {
-            case 0:
-                // Recent
-                return RecentPostsFragment.newInstance(position + 1);
-            case 1:
-                // Unread
-                return UnreadPostsFragment.newInstance(position + 1);
-            case 2:
-                // Participated
-                if (mForum.getLogin()) {
-                    return ParticipatedPostsFragment.newInstance(mForum.getUsername());
-                } else {
-                    return new Fragment();
-                }
-            case 3:
-                // Subscribed
-                return SubscribedPostsFragment.newInstance(position + 1);
-            default:
-                return new Fragment();
-        }
+        return PostsFragment.newInstance(position, mForum.getUsername());
     }
 
     @Override
