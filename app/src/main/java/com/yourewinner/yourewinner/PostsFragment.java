@@ -1,5 +1,6 @@
 package com.yourewinner.yourewinner;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -38,6 +39,7 @@ public class PostsFragment extends Fragment
     private SwipeRefreshLayout mSwipeContainer;
     private Forum mForum;
     private View mFooter;
+    private View mEmptyView;
 
     private int lastCount = 0;
     private int currentPage = 1;
@@ -74,7 +76,7 @@ public class PostsFragment extends Fragment
         mPostsList.setOnScrollListener(this);
         mPostsList.setOnItemClickListener(this);
         mFooter = inflater.inflate(R.layout.loading, null);
-        mPostsList.removeFooterView(mFooter);
+        mEmptyView = view.findViewById(R.id.empty_list_item);
         //mSwipeContainer.setRefreshing(true);
         // Workaround to show indicator
         mSwipeContainer.post(new Runnable() {
@@ -122,6 +124,7 @@ public class PostsFragment extends Fragment
 
     @Override
     public void onRefresh() {
+        mPostsList.setEmptyView(null);
         mPostAdapter.clear();
         mPostsList.removeFooterView(mFooter);
         lastCount = 0;
@@ -164,42 +167,52 @@ public class PostsFragment extends Fragment
         Map<String, Object> r = (Map<String, Object>) result;
         final Object[] topics = (Object[]) r.get("topics");
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mPostsList.removeFooterView(mFooter);
-                mPostAdapter.updateData(topics);
-                isLoading = false;
-                mSwipeContainer.setRefreshing(false);
-            }
-        });
+        final Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mPostsList.removeFooterView(mFooter);
+                    mPostAdapter.updateData(topics);
+                    isLoading = false;
+                    mSwipeContainer.setRefreshing(false);
+                    mPostsList.setEmptyView(mEmptyView);
+                }
+            });
+        }
     }
 
     @Override
     public void onError(long id, XMLRPCException error) {
         error.printStackTrace();
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mPostsList.removeFooterView(mFooter);
-                isLoading = false;
-                mSwipeContainer.setRefreshing(false);
-                Toast.makeText(getActivity().getApplicationContext(), "ERROR: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
-            }
-        });
+        final Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mPostsList.removeFooterView(mFooter);
+                    isLoading = false;
+                    mSwipeContainer.setRefreshing(false);
+                    Toast.makeText(activity.getApplicationContext(), "ERROR: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 
     @Override
     public void onServerError(long id, XMLRPCServerException error) {
         error.printStackTrace();
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mPostsList.removeFooterView(mFooter);
-                isLoading = false;
-                mSwipeContainer.setRefreshing(false);
-                Toast.makeText(getActivity().getApplicationContext(), "ERROR: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
-            }
-        });
+        final Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mPostsList.removeFooterView(mFooter);
+                    isLoading = false;
+                    mSwipeContainer.setRefreshing(false);
+                    Toast.makeText(activity.getApplicationContext(), "ERROR: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 }

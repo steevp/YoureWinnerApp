@@ -2,6 +2,7 @@ package com.yourewinner.yourewinner;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,10 @@ public class NewsFragment extends Fragment {
     }
 
     private void getNews() {
+        final AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            activity.getSupportActionBar().setTitle(getString(R.string.action_news));
+        }
         mForum.getNews(new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
@@ -61,5 +66,11 @@ public class NewsFragment extends Fragment {
                 error.printStackTrace();
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getNews();
     }
 }

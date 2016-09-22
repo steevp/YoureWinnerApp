@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +26,17 @@ public class InboxFragment extends Fragment {
     }
 
     private void setupTabLayout() {
+        final AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            activity.getSupportActionBar().setTitle(getString(R.string.action_messages));
+        }
         mViewPager.setAdapter(new InboxViewPagerAdapter(getActivity().getSupportFragmentManager(), getActivity()));
         mTabLayout.setupWithViewPager(mViewPager);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setupTabLayout();
     }
 }

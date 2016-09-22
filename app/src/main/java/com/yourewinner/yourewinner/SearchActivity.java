@@ -2,17 +2,23 @@ package com.yourewinner.yourewinner;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.Map;
@@ -37,6 +43,9 @@ public class SearchActivity extends AppCompatActivity
     private boolean isLoading = false;
     private boolean userScrolled = false;
 
+    private String mSearchUser;
+    private boolean mSearchTitle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Config.loadTheme(this);
@@ -59,14 +68,17 @@ public class SearchActivity extends AppCompatActivity
         mSwipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         mSwipeContainer.setOnRefreshListener(this);
 
-        mFooter = (View) getLayoutInflater().inflate(R.layout.loading, null);
+        mFooter = getLayoutInflater().inflate(R.layout.loading, null);
 
         lastCount = 0;
         currentPage = 1;
         userScrolled = false;
         isLoading = false;
 
-        //searchTopic();
+        mSearchUser = "";
+        mSearchTitle = false;
+
+        handleIntent(getIntent());
     }
 
     public void searchTopic() {
@@ -75,7 +87,7 @@ public class SearchActivity extends AppCompatActivity
         isLoading = true;
         mPostsList.addFooterView(mFooter);
 
-        mForum.searchTopic(mQuery, currentPage, new XMLRPCCallback() {
+        mForum.searchTopic(mQuery, currentPage, mSearchUser, mSearchTitle, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
                 Map<String, Object> r = (Map<String, Object>) result;
@@ -119,6 +131,35 @@ public class SearchActivity extends AppCompatActivity
         });
     }
 
+    private void showAdvanced() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final View view = getLayoutInflater().inflate(R.layout.search_advanced, null);
+        final EditText editText = (EditText) view.findViewById(R.id.search_user);
+        final CheckBox checkBox = (CheckBox) view.findViewById(R.id.search_title);
+        editText.setText(mSearchUser);
+        checkBox.setChecked(mSearchTitle);
+        builder.setView(view);
+        builder.setTitle("Advanced options");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String username = editText.getText().toString().trim();
+                mSearchUser = username;
+                mSearchTitle = checkBox.isChecked();
+            }
+        });
+        builder.show();
+        // Show keyboard
+        editText.post(new Runnable() {
+            @Override
+            public void run() {
+                editText.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }
+        });
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         handleIntent(intent);
@@ -130,7 +171,12 @@ public class SearchActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.menu_search, menu);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        mSearchView = (SearchView) searchItem.getActionView();
+        if (!Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
+            // If we're not sent here with a Search action, expand the search bar
+            MenuItemCompat.expandActionView(searchItem);
+        }
         mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
         return true;
@@ -142,6 +188,12 @@ public class SearchActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        switch (id) {
+            case R.id.action_advanced:
+                showAdvanced();
+                return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }

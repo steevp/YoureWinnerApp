@@ -140,17 +140,19 @@ public class Forum {
         client.callAsync(listener, "get_topic", params);
     }
 
-    public void searchTopic(String search, int page, XMLRPCCallback listener) {
-        /*int start = page * PAGE_SIZE - PAGE_SIZE;
-        int end = page * PAGE_SIZE - 1;
-
-        Object[] params = {search.getBytes(), start, end};
-        client.callAsync(listener, "search_topic", params);*/
-
+    public void searchTopic(String search, int page, String searchUser, boolean titleOnly, XMLRPCCallback listener) {
         Map<String,Object> args = new HashMap<String,Object>();
         args.put("page", page);
         args.put("perpage", PAGE_SIZE);
         args.put("keywords", search.getBytes());
+        if (searchUser != null) {
+            args.put("searchuser", searchUser.getBytes());
+        }
+        if (titleOnly) {
+            args.put("titleonly", 1);
+        }
+        // Hide Deleted Posts board
+        args.put("not_in", new String[]{"20"});
         client.callAsync(listener, "search", args);
     }
 

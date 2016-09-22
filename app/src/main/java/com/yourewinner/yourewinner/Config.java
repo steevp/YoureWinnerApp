@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
  * Created by steven on 1/23/16.
  */
 public class Config {
+    public final static String TAG = "ywtag";
 
     private final static int[] THEMES = {
             R.style.AppTheme,

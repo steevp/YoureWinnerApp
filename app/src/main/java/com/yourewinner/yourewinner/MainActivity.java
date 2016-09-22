@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,6 +19,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,16 +45,16 @@ public class MainActivity extends AppCompatActivity
     public final static String AVATAR = "AVATAR";
     public final static String USERNAME = "USERNAME";
 
+    private final static String PREF_USERNAME = "username";
+    private final static String PREF_PASSWORD = "password";
+    private final static String PREF_AVATAR = "avatar";
+
     private Forum mForum;
     private ProgressDialog mDialog;
     private SharedPreferences mSharedPreferences;
-    private String[] mNavigationItems;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
-    private String mTitle;
-    //private ListView mDrawerList;
     private NavigationView mDrawerView;
-    private View mDrawerHeader;
     private int mDrawerItemId;
 
     private TextView mUsernameView;
@@ -82,9 +85,6 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        mTitle = getTitle().toString();
-
-        mNavigationItems = getResources().getStringArray(R.array.navigation_items);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerView = (NavigationView) findViewById(R.id.left_drawer);
         mDrawerView.setNavigationItemSelectedListener(this);
@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity
         if (topic != null) {
             final String topicID = topic.split("\\.")[0];
             final Intent intent = new Intent(this, TopicViewActivity.class);
-            intent.putExtra("topicID", topicID);
+            intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
             startActivity(intent);
         }
         finish();
@@ -127,8 +127,6 @@ public class MainActivity extends AppCompatActivity
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         mDrawerItemId = intent.getIntExtra(DRAWER_ITEM_ID, R.id.drawer_home);
-        //mUsername = intent.getStringExtra(USERNAME);
-        //mAvatar = intent.getStringExtra(AVATAR);
         mDrawerView.getMenu().findItem(mDrawerItemId).setChecked(true);
         selectItem(mDrawerItemId);
     }
@@ -154,7 +152,7 @@ public class MainActivity extends AppCompatActivity
 
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-                getSupportActionBar().setTitle(mTitle);
+                //getSupportActionBar().setTitle(mTitle);
                 invalidateOptionsMenu();
             }
         };
@@ -164,7 +162,7 @@ public class MainActivity extends AppCompatActivity
 
     private void setupDrawerHeader() {
         if (mAvatar.length() > 0) {
-            Picasso.with(getApplicationContext()).load(mAvatar).placeholder(R.mipmap.no_avatar).fit().into(mAvatarView);
+            Picasso.with(this).load(mAvatar).placeholder(R.mipmap.no_avatar).fit().into(mAvatarView);
         } else {
             mAvatarView.setImageResource(R.mipmap.no_avatar);
         }
@@ -175,13 +173,18 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        SearchManager sm = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView sv = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        sv.setSearchableInfo(sm.getSearchableInfo(getComponentName()));
         return true;
     }
 
     public void doWelcome() {
-        final String username = mSharedPreferences.getString("username", "");
-        final String password = mSharedPreferences.getString("password", "");
-
+        final String username = mSharedPreferences.getString(PREF_USERNAME, "");
+        final String password = mSharedPreferences.getString(PREF_PASSWORD, "");
+        if (mAvatar == null) {
+            mAvatar = mSharedPreferences.getString(PREF_AVATAR, "");
+        }
         if (username.length() == 0 || password.length() == 0) {
             // Show sign in dialog
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -196,8 +199,8 @@ public class MainActivity extends AppCompatActivity
                     String pass = inputPassword.getText().toString();
                     if (user.length() > 0 && pass.length() > 0) {
                         SharedPreferences.Editor editor = mSharedPreferences.edit();
-                        editor.putString("username", user);
-                        editor.putString("password", pass);
+                        editor.putString(PREF_USERNAME, user);
+                        editor.putString(PREF_PASSWORD, pass);
                         editor.commit();
                         doLogin(user, pass);
                     }
@@ -235,6 +238,12 @@ public class MainActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        if (mAvatar.length() > 0) {
+                            // Store avatar url in prefs
+                            SharedPreferences.Editor editor = mSharedPreferences.edit();
+                            editor.putString(PREF_AVATAR, mAvatar);
+                            editor.commit();
+                        }
                         setupDrawerHeader();
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "YOU'RE WINNER, " + username + " !", Toast.LENGTH_LONG).show();
@@ -329,64 +338,47 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
 
-        //noinspection SimplifiableIfStatement
-        /*if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-            return true;
-        }*/
-
         return super.onOptionsItemSelected(item);
     }
 
     private void selectItem(int id) {
 
-        Fragment fragment;
-        Bundle args = new Bundle();
-        Intent intent;
+        Fragment fragment = null;
+        Intent intent = null;
         switch (id) {
             case R.id.drawer_home:
-                mTitle = "yourewinner.com";
                 fragment = new HomeFragment();
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;
             case R.id.drawer_news:
-                mTitle = getString(R.string.action_news);
                 fragment = new NewsFragment();
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;
             case R.id.drawer_profile:
                 intent = new Intent(this, ProfileViewActivity.class);
                 intent.putExtra("username", mUsername);
-                startActivity(intent);
                 break;
             case R.id.drawer_messages:
-                mTitle = getString(R.string.action_messages);
                 fragment = new InboxFragment();
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;
             case R.id.drawer_browse:
-                //mTitle = mNavigationItems[position];
-                mTitle = getString(R.string.action_browse);
                 fragment = new SubForumsFragment();
+                Bundle args = new Bundle();
                 args.putInt(SubForumsFragment.ARG_PAGE, 1);
                 fragment.setArguments(args);
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                 break;
             case R.id.drawer_settings:
                 intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
                 break;
             case R.id.drawer_search:
                 intent = new Intent(this, SearchActivity.class);
-                startActivity(intent);
-                break;
-            default:
-                mTitle = "yourewinner.com";
                 break;
         }
 
-        //mDrawerList.setItemChecked(position, true);
+        if (fragment != null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(null).commit();
+        } else if (intent != null) {
+            startActivity(intent);
+        }
+
         mDrawerLayout.closeDrawer(mDrawerView);
     }
 
@@ -406,17 +398,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
-
-    @Override
     public void onInboxRefresh() {
         // Reload the inbox fragment
         Fragment fragment = new InboxFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(null).commit();
     }
 }

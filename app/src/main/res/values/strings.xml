@@ -98,5 +98,6 @@
 
     <string name="quick_reply">Quick Reply</string>
     <string name="message_to">To:</string>
+    <string name="spoiler_reveal">Click here to reveal spoiler</string>
 
 </resources>

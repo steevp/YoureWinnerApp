@@ -9,12 +9,15 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
+import android.widget.ArrayAdapter;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Map;
 
 import de.timroes.axmlrpc.XMLRPCCallback;
@@ -28,7 +31,7 @@ public class ReplyTopicActivity extends AppCompatActivity {
     public final static String ARG_BOARD_ID = "ARG_BOARD_ID";
 
     private Forum mForum;
-    private EditText mPostContent;
+    private MultiAutoCompleteTextView mPostContent;
     private ProgressDialog mDialog;
     private SharedPreferences mSharedPreferences;
 
@@ -38,6 +41,7 @@ public class ReplyTopicActivity extends AppCompatActivity {
     private String postID;
     private boolean quote;
     private boolean mSaveDraft;
+    private List<String> mMentions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +72,15 @@ public class ReplyTopicActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle(topicTitle);
 
-        mPostContent = (EditText) findViewById(R.id.post_content);
+        mPostContent = (MultiAutoCompleteTextView) findViewById(R.id.post_content);
+        mPostContent.setRawInputType(InputType.TYPE_CLASS_TEXT
+                |InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                |InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
+                |InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        mMentions = Mentions.getInstance().getMentions();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, mMentions);
+        mPostContent.setAdapter(adapter);
+        mPostContent.setTokenizer(new SpaceTokenizer());
 
         if (quote && postID.length() > 0) {
             getQuote();

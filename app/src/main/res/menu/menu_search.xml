@@ -7,4 +7,8 @@
         android:icon="@android:drawable/ic_menu_search"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom"/>
+
+    <item android:id="@+id/action_advanced"
+        android:title="Advanced"
+        app:showAsAction="never" />
 </menu>

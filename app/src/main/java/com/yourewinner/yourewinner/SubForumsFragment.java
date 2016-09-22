@@ -1,8 +1,10 @@
 package com.yourewinner.yourewinner;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,18 +51,24 @@ public class SubForumsFragment extends Fragment implements ExpandableListView.On
     }
 
     public void getSubForums() {
+        final AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            activity.getSupportActionBar().setTitle(getString(R.string.action_browse));
+        }
         mForum.getForum(new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
                 final Object[] data = (Object[]) result;
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSubForumsAdapter = new SubForumsAdapter(getActivity().getApplicationContext(), getActivity().getLayoutInflater(), data);
-                        mSubForumsList.setAdapter(mSubForumsAdapter);
-                    }
-                });
+                final Activity activity = getActivity();
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSubForumsAdapter = new SubForumsAdapter(getActivity().getApplicationContext(), getActivity().getLayoutInflater(), data);
+                            mSubForumsList.setAdapter(mSubForumsAdapter);
+                        }
+                    });
+                }
             }
 
             @Override
@@ -93,5 +101,11 @@ public class SubForumsFragment extends Fragment implements ExpandableListView.On
         intent.putExtra("children", children);
         startActivity(intent);
         return false;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getSubForums();
     }
 }

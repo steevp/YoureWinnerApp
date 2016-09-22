@@ -237,7 +237,7 @@ public class TopicViewPageFragment extends Fragment
             }
         } else {
             Object[] data = mDataFragment.getData();
-            if (data.length > 0) {
+            if (data != null && data.length > 0) {
                 // Restore saved data
                 mPostsAdapter.updateData(data);
                 mLoadingBar.setVisibility(View.GONE);

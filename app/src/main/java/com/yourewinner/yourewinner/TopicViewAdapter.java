@@ -51,6 +51,12 @@ public class TopicViewAdapter extends BaseAdapter {
 
     public void updateData(Object[] data) {
         mPosts = data;
+        // Add usernames to @mentions
+        for (final Object post: mPosts) {
+            final Map<String,Object> p = (Map<String,Object>) post;
+            final String username = new String((byte[]) p.get("post_author_name"), StandardCharsets.UTF_8);
+            Mentions.getInstance().addMention(username);
+        }
         mImageSizes.clear();
         notifyDataSetChanged();
     }
@@ -232,13 +238,16 @@ public class TopicViewAdapter extends BaseAdapter {
         }
 
         String postContent = new String((byte[]) post.get("post_content"), StandardCharsets.UTF_8);
-        String[] postContentSplit = postContent.split("(?=\\[(img|quote)\\])|(?<=\\[/(img|quote)\\])");
+        String[] postContentSplit = postContent.split("(?=\\[(img|quote|spoiler)\\])|(?<=\\[/(img|quote|spoiler)\\])");
         holder.postContentTextView.removeAllViews();
         Pattern imgPattern = Pattern.compile("\\[img\\](.+)\\[/img\\]");
         Pattern youtubePattern = Pattern.compile("\\[url=https?://(?:www\\.)?youtu(?:\\.be/|be\\.com/watch\\?v=)([\\w\\-]{11})\\].+\\[/url\\]");
         Matcher imgMatcher, youtubeMatcher;
         LinearLayout blockQuote = null;
+        RelativeLayout spoiler = null;
+        LinearLayout spoilerContent = null;
         int numQuotes = 0;
+        int numSpoilers = 0;
         for (int i=0;i<postContentSplit.length;i++) {
             String content = postContentSplit[i].trim();
             imgMatcher = imgPattern.matcher(content);
@@ -249,12 +258,21 @@ public class TopicViewAdapter extends BaseAdapter {
                     blockQuote = (LinearLayout) mInflater.inflate(R.layout.blockquote, null);
                 }
                 numQuotes++;
+            } else if (content.startsWith("[spoiler]")) {
+                if (spoiler == null) {
+                    spoiler = (RelativeLayout) mInflater.inflate(R.layout.spoiler, null);
+                    spoilerContent = (LinearLayout) spoiler.findViewById(R.id.spoiler_content);
+                }
+                numSpoilers++;
             }
 
             boolean endQuote = content.endsWith("[/quote]");
+            boolean endSpoiler = content.endsWith("[/spoiler]");
 
             content = content.replace("[quote]", "")
                     .replace("[/quote]", "")
+                    .replace("[spoiler]", "")
+                    .replace("[/spoiler]", "")
                     .trim();
 
             if (imgMatcher.find()) {
@@ -308,6 +326,8 @@ public class TopicViewAdapter extends BaseAdapter {
 
                 if (blockQuote != null) {
                     blockQuote.addView(imageView);
+                } else if (spoilerContent != null) {
+                    spoilerContent.addView(imageView);
                 } else {
                     holder.postContentTextView.addView(imageView);
                 }
@@ -365,6 +385,8 @@ public class TopicViewAdapter extends BaseAdapter {
 
                 if (blockQuote != null) {
                     blockQuote.addView(youtubeLayout);
+                } else if (spoilerContent != null) {
+                    spoilerContent.addView(youtubeLayout);
                 } else {
                     holder.postContentTextView.addView(youtubeLayout);
                 }
@@ -375,6 +397,8 @@ public class TopicViewAdapter extends BaseAdapter {
                 textView.setMovementMethod(LinkMovementMethod.getInstance());
                 if (blockQuote != null) {
                     blockQuote.addView(textView);
+                } else if (spoilerContent != null) {
+                    spoilerContent.addView(textView);
                 } else {
                     holder.postContentTextView.addView(textView);
                 }
@@ -385,6 +409,13 @@ public class TopicViewAdapter extends BaseAdapter {
                 if (numQuotes <= 0) {
                     holder.postContentTextView.addView(blockQuote);
                     blockQuote = null;
+                }
+            } else if (endSpoiler) {
+                numSpoilers--;
+                if (numSpoilers <= 0) {
+                    holder.postContentTextView.addView(spoiler);
+                    spoiler = null;
+                    spoilerContent = null;
                 }
             }
         }
