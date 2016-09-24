@@ -32,10 +32,4 @@ public class HomeFragment extends Fragment {
         mViewPager.setAdapter(new PostsViewPagerAdapter(getActivity().getSupportFragmentManager(), getActivity()));
         mTabLayout.setupWithViewPager(mViewPager);
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setupTabLayout();
-    }
 }

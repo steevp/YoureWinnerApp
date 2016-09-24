@@ -102,10 +102,4 @@ public class SubForumsFragment extends Fragment implements ExpandableListView.On
         startActivity(intent);
         return false;
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getSubForums();
-    }
 }

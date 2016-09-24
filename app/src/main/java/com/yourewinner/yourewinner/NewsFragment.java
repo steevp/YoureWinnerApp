@@ -67,10 +67,4 @@ public class NewsFragment extends Fragment {
             }
         });
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getNews();
-    }
 }

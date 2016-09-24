@@ -45,7 +45,7 @@ public class Call {
 	 * 		be build without errors.
 	 * @see XMLRPCClient
 	 */
-	public String getXML(boolean debugMode) throws XMLRPCException {
+	public String getXML() throws XMLRPCException {
 
 		SimpleXMLCreator creator = new SimpleXMLCreator();
 
@@ -57,21 +57,15 @@ public class Call {
 		methodCall.addChildren(methodName);
 
 		if(params != null && params.length > 0) {
-			XmlElement callParams = new XmlElement(XMLRPCClient.PARAMS);
-			methodCall.addChildren(callParams);
+			XmlElement params = new XmlElement(XMLRPCClient.PARAMS);
+			methodCall.addChildren(params);
 
 			for(Object o : this.params) {
-				callParams.addChildren(getXMLParam(o));
+				params.addChildren(getXMLParam(o));
 			}
 		}
 
-		String result = creator.toString();
-
-		if ( debugMode){
-			System.out.println(result);
-		}
-
-		return result;
+		return creator.toString();
 	}
 
 	/**

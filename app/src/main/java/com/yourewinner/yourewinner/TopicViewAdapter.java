@@ -7,6 +7,7 @@ import android.text.Html;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -430,6 +431,7 @@ public class TopicViewAdapter extends BaseAdapter {
         }
 
         Date then = (Date) post.get("post_time");
+        Log.d("ywtag", then.toString() + " " + avatar);
         long now = System.currentTimeMillis();
         String postTime = DateUtils.getRelativeTimeSpanString(then.getTime(), now, DateUtils.MINUTE_IN_MILLIS).toString();
 

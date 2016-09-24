@@ -36,33 +36,6 @@ public class SerializerHandler {
 
 	private static SerializerHandler instance;
 
-	private StringSerializer string;
-	private BooleanSerializer bool = new BooleanSerializer();
-	private IntSerializer integer = new IntSerializer();
-	private LongSerializer long8 = new LongSerializer();
-	private StructSerializer struct = new StructSerializer();
-	private DoubleSerializer floating = new DoubleSerializer();
-	private DateTimeSerializer datetime = new DateTimeSerializer();
-	private ArraySerializer array = new ArraySerializer();
-	private Base64Serializer base64 = new Base64Serializer();
-	private NullSerializer nil = new NullSerializer();
-
-	private int flags;
-
-	/**
-	 * Generates the SerializerHandler.
-	 * This method can only called from within the class (the initialize method).
-	 *
-	 * @param flags The flags to use.
-	 */
-	private SerializerHandler(int flags) {
-		this.flags = flags;
-		string = new StringSerializer(
-			(flags & XMLRPCClient.FLAGS_NO_STRING_ENCODE) == 0,
-			(flags & XMLRPCClient.FLAGS_NO_STRING_DECODE) == 0
-		);
-	}
-
 	/**
 	 * Initialize the serialization handler. This method must be called before
 	 * the get method returns any object.
@@ -85,6 +58,33 @@ public class SerializerHandler {
 			throw new XMLRPCRuntimeException("The SerializerHandler has not been initialized.");
 		}
 		return instance;
+	}
+
+	private StringSerializer string;
+	private BooleanSerializer bool = new BooleanSerializer();
+	private IntSerializer integer = new IntSerializer();
+	private LongSerializer long8 = new LongSerializer();
+	private StructSerializer struct = new StructSerializer();
+	private DoubleSerializer floating = new DoubleSerializer();
+	private DateTimeSerializer datetime = new DateTimeSerializer();
+	private ArraySerializer array = new ArraySerializer();
+	private Base64Serializer base64 = new Base64Serializer();
+	private NullSerializer nil = new NullSerializer();
+	
+	private int flags;
+
+	/**
+	 * Generates the SerializerHandler.
+	 * This method can only called from within the class (the initialize method).
+	 *
+	 * @param flags The flags to use.
+	 */
+	private SerializerHandler(int flags) {
+		this.flags = flags;
+		string = new StringSerializer(
+			(flags & XMLRPCClient.FLAGS_NO_STRING_ENCODE) == 0,
+			(flags & XMLRPCClient.FLAGS_NO_STRING_DECODE) == 0
+		);
 	}
 
 	/**
@@ -112,17 +112,17 @@ public class SerializerHandler {
 		}
 			
 		// Grep type element from inside value element
-		Element childElement = XMLUtil.getOnlyChildElement(element.getChildNodes());
+		element = XMLUtil.getOnlyChildElement(element.getChildNodes());
 
-		Serializer s;
+		Serializer s = null;
 
 		String type;
 
 		// If FLAGS_IGNORE_NAMESPACE has been set, only use local name.
 		if((flags & XMLRPCClient.FLAGS_IGNORE_NAMESPACES) != 0) {
-			type = childElement.getLocalName() == null ? childElement.getNodeName() : childElement.getLocalName();
+			type = element.getLocalName() == null ? element.getNodeName() : element.getLocalName();
 		} else {
-			type = childElement.getNodeName();
+			type = element.getNodeName();
 		}
 
 		if((flags & XMLRPCClient.FLAGS_NIL) != 0 && TYPE_NULL.equals(type)) {
@@ -154,7 +154,7 @@ public class SerializerHandler {
 			throw new XMLRPCException("No deserializer found for type '" + type + "'.");
 		}
 
-		return s.deserialize(childElement);
+		return s.deserialize(element);
 
 	}
 
@@ -169,7 +169,7 @@ public class SerializerHandler {
 	 */
 	public XmlElement serialize(Object object) throws XMLRPCException {
 
-		Serializer s;
+		Serializer s = null;
 
 		if((flags & XMLRPCClient.FLAGS_NIL) != 0 && object == null) {
 			s = nil;

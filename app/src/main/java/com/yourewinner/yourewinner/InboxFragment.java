@@ -33,10 +33,4 @@ public class InboxFragment extends Fragment {
         mViewPager.setAdapter(new InboxViewPagerAdapter(getActivity().getSupportFragmentManager(), getActivity()));
         mTabLayout.setupWithViewPager(mViewPager);
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setupTabLayout();
-    }
 }

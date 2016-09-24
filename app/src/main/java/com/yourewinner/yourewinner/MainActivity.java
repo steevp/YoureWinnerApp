@@ -21,7 +21,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,6 +48,8 @@ public class MainActivity extends AppCompatActivity
     private final static String PREF_USERNAME = "username";
     private final static String PREF_PASSWORD = "password";
     private final static String PREF_AVATAR = "avatar";
+    private final static String PREF_SMFCOOKIE = "SMFCookie557";
+    private final static String PREF_PHPSESSID = "PHPSESSID";
 
     private Forum mForum;
     private ProgressDialog mDialog;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         Config.loadTheme(this);
+        mForum = Forum.getInstance();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -78,6 +80,7 @@ public class MainActivity extends AppCompatActivity
             mAvatar = savedInstanceState.getString(AVATAR);
         } else {
             mDrawerItemId = R.id.drawer_home;
+            //mForum.setLogin(false);
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -97,8 +100,6 @@ public class MainActivity extends AppCompatActivity
         mDrawerView.addHeaderView(drawerHeader);
         mDrawerView.getMenu().findItem(mDrawerItemId).setChecked(true);
         setupDrawer();
-
-        mForum = Forum.getInstance();
 
         mDialog = new ProgressDialog(this);
         mDialog.setMessage(getString(R.string.login_message));
@@ -230,7 +231,6 @@ public class MainActivity extends AppCompatActivity
         mForum.login(username, password, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
-                Log.d(Config.TAG, mForum.getCookies().toString());
                 mForum.setLogin(true);
 
                 Map<String, Object> r = (Map<String, Object>) result;
@@ -240,12 +240,15 @@ public class MainActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        SharedPreferences.Editor editor = mSharedPreferences.edit();
                         if (mAvatar.length() > 0) {
                             // Store avatar url in prefs
-                            SharedPreferences.Editor editor = mSharedPreferences.edit();
                             editor.putString(PREF_AVATAR, mAvatar);
-                            editor.commit();
                         }
+                        /*Map<String,String> cookies = mForum.getCookies();
+                        editor.putString(PREF_SMFCOOKIE, cookies.get(PREF_SMFCOOKIE));
+                        editor.putString(PREF_PHPSESSID, cookies.get(PREF_PHPSESSID));*/
+                        editor.commit();
                         setupDrawerHeader();
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "YOU'RE WINNER, " + username + " !", Toast.LENGTH_LONG).show();
@@ -376,7 +379,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (fragment != null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(null).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (intent != null) {
             startActivity(intent);
         }
@@ -403,6 +406,6 @@ public class MainActivity extends AppCompatActivity
     public void onInboxRefresh() {
         // Reload the inbox fragment
         Fragment fragment = new InboxFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(null).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 }

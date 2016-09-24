@@ -152,12 +152,6 @@ public class XMLRPCClient {
 	public static final int FLAGS_NO_STRING_ENCODE = 0x1000;
 
 	/**
-	 * Activate debug mode.
-	 * Do NOT use if you don't need it.
-	 */
-	public static final int FLAGS_DEBUG = 0x2000;
-
-	/**
 	 * This flag disables all SSL warnings. It is an alternative to use
 	 * FLAGS_SSL_IGNORE_INVALID_CERT | FLAGS_SSL_IGNORE_INVALID_HOST. There
 	 * is no functional difference.
@@ -292,7 +286,7 @@ public class XMLRPCClient {
 	/**
 	 * Sets the time in seconds after which a call should timeout.
 	 * If {@code timeout} will be zero or less the connection will never timeout.
-	 * In case the connection times out an {@link XMLRPCTimeoutException} will
+	 * In case the connection times out and {@link XMLRPCTimeoutException} will
 	 * be thrown for calls made by {@link #call(java.lang.String, java.lang.Object[])}.
 	 * For calls made by {@link #callAsync(de.timroes.axmlrpc.XMLRPCCallback, java.lang.String, java.lang.Object[])}
 	 * the {@link XMLRPCCallback#onError(long, de.timroes.axmlrpc.XMLRPCException)} method
@@ -317,7 +311,7 @@ public class XMLRPCClient {
 
 	/**
 	 * Sets a proxy to use for this client. If you want to use the system proxy,
-	 * use {@link #FLAGS_USE_SYSTEM_PROXY} instead. If combined with
+	 * use {@link #FLAGS_adbUSE_SYSTEM_PROXY} instead. If combined with
 	 * {@code FLAGS_USE_SYSTEM_PROXY}, this proxy will be used instead of the
 	 * system proxy.
 	 *
@@ -378,7 +372,7 @@ public class XMLRPCClient {
 	 * Set cookies from a {@link Map}. Used to restore saved cookies.
 	 *
 	 * @param cookies A Map of cookies
-     */
+	 */
 	public void setCookies(Map<String,String> cookies) {
 		cookieManager.setCookies(cookies);
 	}
@@ -665,7 +659,7 @@ public class XMLRPCClient {
 				cookieManager.setCookies(http);
 
 				OutputStreamWriter stream = new OutputStreamWriter(http.getOutputStream());
-				stream.write(c.getXML(isFlagSet(FLAGS_DEBUG)));
+				stream.write(c.getXML());
 				stream.flush();
 				stream.close();
 
@@ -707,7 +701,7 @@ public class XMLRPCClient {
 						|| statusCode == HttpURLConnection.HTTP_MOVED_TEMP) {
 					// ... do either a foward
 					if(isFlagSet(FLAGS_FORWARD)) {
-						boolean temporaryForward = statusCode == HttpURLConnection.HTTP_MOVED_TEMP;
+						boolean temporaryForward = (statusCode == HttpURLConnection.HTTP_MOVED_TEMP);
 
 						// Get new location from header field.
 						String newLocation = http.getHeaderField("Location");
@@ -742,13 +736,15 @@ public class XMLRPCClient {
 				}
 
 				// Check for strict parameters
-				if(isFlagSet(FLAGS_STRICT) && !http.getContentType().startsWith(TYPE_XML)) {
-					throw new XMLRPCException("The Content-Type of the response must be text/xml.");
+				if(isFlagSet(FLAGS_STRICT)) {
+					if(!http.getContentType().startsWith(TYPE_XML)) {
+						throw new XMLRPCException("The Content-Type of the response must be text/xml.");
+					}
 				}
 
 				cookieManager.readCookies(http);
 
-				return responseParser.parse(istream, isFlagSet(FLAGS_DEBUG));
+				return responseParser.parse(istream);
 
 			} catch(SocketTimeoutException ex) {
 				throw new XMLRPCTimeoutException("The XMLRPC call timed out.");
