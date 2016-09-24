@@ -145,67 +145,67 @@ public class TopicViewAdapter extends BaseAdapter {
 
                 switch(ratingId) {
                     case 23:
-                        ratingImage.setImageResource(R.mipmap.rating_trophy);
+                        ratingImage.setImageResource(R.drawable.rating_trophy);
                         break;
                     case 22:
-                        ratingImage.setImageResource(R.mipmap.rating_thumbup);
+                        ratingImage.setImageResource(R.drawable.rating_thumbup);
                         break;
                     case 21:
-                        ratingImage.setImageResource(R.mipmap.rating_thumbdown);
+                        ratingImage.setImageResource(R.drawable.rating_thumbdown);
                         break;
                     case 25:
-                        ratingImage.setImageResource(R.mipmap.rating_turd);
+                        ratingImage.setImageResource(R.drawable.rating_turd);
                         break;
                     case 26:
-                        ratingImage.setImageResource(R.mipmap.rating_gay);
+                        ratingImage.setImageResource(R.drawable.rating_gay);
                         break;
                     case 20:
-                        ratingImage.setImageResource(R.mipmap.rating_heart);
+                        ratingImage.setImageResource(R.drawable.rating_heart);
                         break;
                     case 19:
-                        ratingImage.setImageResource(R.mipmap.rating_smug);
+                        ratingImage.setImageResource(R.drawable.rating_smug);
                         break;
                     case 24:
-                        ratingImage.setImageResource(R.mipmap.rating_cheese);
+                        ratingImage.setImageResource(R.drawable.rating_cheese);
                         break;
                     case 101:
-                        ratingImage.setImageResource(R.mipmap.rating_aggro);
+                        ratingImage.setImageResource(R.drawable.rating_aggro);
                         break;
                     case 18:
-                        ratingImage.setImageResource(R.mipmap.rating_twisted);
+                        ratingImage.setImageResource(R.drawable.rating_twisted);
                         break;
                     case 17:
-                        ratingImage.setImageResource(R.mipmap.rating_zigsd);
+                        ratingImage.setImageResource(R.drawable.rating_zigsd);
                         break;
                     case 16:
-                        ratingImage.setImageResource(R.mipmap.rating_old);
+                        ratingImage.setImageResource(R.drawable.rating_old);
                         break;
                     case 102:
-                        ratingImage.setImageResource(R.mipmap.rating_baby);
+                        ratingImage.setImageResource(R.drawable.rating_baby);
                         break;
                     case 104:
-                        ratingImage.setImageResource(R.mipmap.rating_weed);
+                        ratingImage.setImageResource(R.drawable.rating_weed);
                         break;
                     case 103:
-                        ratingImage.setImageResource(R.mipmap.rating_meta);
+                        ratingImage.setImageResource(R.drawable.rating_meta);
                         break;
                     case 111:
-                        ratingImage.setImageResource(R.mipmap.rating_ballin);
+                        ratingImage.setImageResource(R.drawable.rating_ballin);
                         break;
                     case 116:
-                        ratingImage.setImageResource(R.mipmap.rating_coorslight);
+                        ratingImage.setImageResource(R.drawable.rating_coorslight);
                         break;
                     case 117:
-                        ratingImage.setImageResource(R.mipmap.rating_america);
+                        ratingImage.setImageResource(R.drawable.rating_america);
                         break;
                     case 118:
-                        ratingImage.setImageResource(R.mipmap.rating_hipster);
+                        ratingImage.setImageResource(R.drawable.rating_hipster);
                         break;
                     case 119:
-                        ratingImage.setImageResource(R.mipmap.rating_scroogled);
+                        ratingImage.setImageResource(R.drawable.rating_scroogled);
                         break;
                     case 120:
-                        ratingImage.setImageResource(R.mipmap.rating_mistletoe);
+                        ratingImage.setImageResource(R.drawable.rating_mistletoe);
                         break;
                     default:
                         break;
@@ -424,9 +424,9 @@ public class TopicViewAdapter extends BaseAdapter {
 
         String avatar = (String) post.get("icon_url");
         if (avatar.length() > 0) {
-            Picasso.with(mContext).load(avatar).placeholder(R.mipmap.no_avatar).fit().into(holder.avatarImageView);
+            Picasso.with(mContext).load(avatar).placeholder(R.drawable.no_avatar).fit().into(holder.avatarImageView);
         } else {
-            holder.avatarImageView.setImageResource(R.mipmap.no_avatar);
+            holder.avatarImageView.setImageResource(R.drawable.no_avatar);
         }
 
         Date then = (Date) post.get("post_time");

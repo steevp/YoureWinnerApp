@@ -81,27 +81,27 @@ public class RatingViewAdapter extends BaseAdapter {
     }
 
     private void initializeRatings() {
-        RATINGS.put("23", R.mipmap.rating_trophy);
-        RATINGS.put("22", R.mipmap.rating_thumbup);
-        RATINGS.put("21", R.mipmap.rating_thumbdown);
-        RATINGS.put("25", R.mipmap.rating_turd);
-        RATINGS.put("26", R.mipmap.rating_gay);
-        RATINGS.put("20", R.mipmap.rating_heart);
-        RATINGS.put("19", R.mipmap.rating_smug);
-        RATINGS.put("24", R.mipmap.rating_cheese);
-        RATINGS.put("101", R.mipmap.rating_aggro);
-        RATINGS.put("18", R.mipmap.rating_twisted);
-        RATINGS.put("17", R.mipmap.rating_zigsd);
-        RATINGS.put("16", R.mipmap.rating_old);
-        RATINGS.put("102", R.mipmap.rating_baby);
-        RATINGS.put("104", R.mipmap.rating_weed);
-        RATINGS.put("103", R.mipmap.rating_meta);
-        RATINGS.put("111", R.mipmap.rating_ballin);
-        RATINGS.put("116", R.mipmap.rating_coorslight);
-        RATINGS.put("117", R.mipmap.rating_america);
-        RATINGS.put("118", R.mipmap.rating_hipster);
-        RATINGS.put("119", R.mipmap.rating_scroogled);
-        RATINGS.put("120", R.mipmap.rating_mistletoe);
+        RATINGS.put("23", R.drawable.rating_trophy);
+        RATINGS.put("22", R.drawable.rating_thumbup);
+        RATINGS.put("21", R.drawable.rating_thumbdown);
+        RATINGS.put("25", R.drawable.rating_turd);
+        RATINGS.put("26", R.drawable.rating_gay);
+        RATINGS.put("20", R.drawable.rating_heart);
+        RATINGS.put("19", R.drawable.rating_smug);
+        RATINGS.put("24", R.drawable.rating_cheese);
+        RATINGS.put("101", R.drawable.rating_aggro);
+        RATINGS.put("18", R.drawable.rating_twisted);
+        RATINGS.put("17", R.drawable.rating_zigsd);
+        RATINGS.put("16", R.drawable.rating_old);
+        RATINGS.put("102", R.drawable.rating_baby);
+        RATINGS.put("104", R.drawable.rating_weed);
+        RATINGS.put("103", R.drawable.rating_meta);
+        RATINGS.put("111", R.drawable.rating_ballin);
+        RATINGS.put("116", R.drawable.rating_coorslight);
+        RATINGS.put("117", R.drawable.rating_america);
+        RATINGS.put("118", R.drawable.rating_hipster);
+        RATINGS.put("119", R.drawable.rating_scroogled);
+        RATINGS.put("120", R.drawable.rating_mistletoe);
     }
 
     private static class ViewHolder {

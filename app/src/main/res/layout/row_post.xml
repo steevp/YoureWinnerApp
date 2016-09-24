@@ -13,7 +13,7 @@
         app:civ_border_color="?attr/colorAccent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:src="@mipmap/no_avatar"/>
+        android:src="@drawable/no_avatar"/>
 
     <TextView
         android:id="@+id/username"

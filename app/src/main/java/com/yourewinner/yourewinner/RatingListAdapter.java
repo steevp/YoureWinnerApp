@@ -47,87 +47,87 @@ public class RatingListAdapter extends BaseAdapter {
         int ratingID = (int) getItem(position);
         switch (ratingID) {
             case 23:
-                holder.ratingImage.setImageResource(R.mipmap.rating_trophy);
+                holder.ratingImage.setImageResource(R.drawable.rating_trophy);
                 holder.ratingText.setText("Trophy");
                 break;
             case 22:
-                holder.ratingImage.setImageResource(R.mipmap.rating_thumbup);
+                holder.ratingImage.setImageResource(R.drawable.rating_thumbup);
                 holder.ratingText.setText("Thumb Up");
                 break;
             case 21:
-                holder.ratingImage.setImageResource(R.mipmap.rating_thumbdown);
+                holder.ratingImage.setImageResource(R.drawable.rating_thumbdown);
                 holder.ratingText.setText("Thumb Down");
                 break;
             case 25:
-                holder.ratingImage.setImageResource(R.mipmap.rating_turd);
+                holder.ratingImage.setImageResource(R.drawable.rating_turd);
                 holder.ratingText.setText("Turd");
                 break;
             case 26:
-                holder.ratingImage.setImageResource(R.mipmap.rating_gay);
+                holder.ratingImage.setImageResource(R.drawable.rating_gay);
                 holder.ratingText.setText("Gay");
                 break;
             case 20:
-                holder.ratingImage.setImageResource(R.mipmap.rating_heart);
+                holder.ratingImage.setImageResource(R.drawable.rating_heart);
                 holder.ratingText.setText("Heart");
                 break;
             case 19:
-                holder.ratingImage.setImageResource(R.mipmap.rating_smug);
+                holder.ratingImage.setImageResource(R.drawable.rating_smug);
                 holder.ratingText.setText("Smug");
                 break;
             case 24:
-                holder.ratingImage.setImageResource(R.mipmap.rating_cheese);
+                holder.ratingImage.setImageResource(R.drawable.rating_cheese);
                 holder.ratingText.setText("Cheesy");
                 break;
             case 101:
-                holder.ratingImage.setImageResource(R.mipmap.rating_aggro);
+                holder.ratingImage.setImageResource(R.drawable.rating_aggro);
                 holder.ratingText.setText("Aggro");
                 break;
             case 18:
-                holder.ratingImage.setImageResource(R.mipmap.rating_twisted);
+                holder.ratingImage.setImageResource(R.drawable.rating_twisted);
                 holder.ratingText.setText("Twisted");
                 break;
             case 17:
-                holder.ratingImage.setImageResource(R.mipmap.rating_zigsd);
+                holder.ratingImage.setImageResource(R.drawable.rating_zigsd);
                 holder.ratingText.setText("ZIGS'd");
                 break;
             case 16:
-                holder.ratingImage.setImageResource(R.mipmap.rating_old);
+                holder.ratingImage.setImageResource(R.drawable.rating_old);
                 holder.ratingText.setText("Old");
                 break;
             case 102:
-                holder.ratingImage.setImageResource(R.mipmap.rating_baby);
+                holder.ratingImage.setImageResource(R.drawable.rating_baby);
                 holder.ratingText.setText("Baby");
                 break;
             case 104:
-                holder.ratingImage.setImageResource(R.mipmap.rating_weed);
+                holder.ratingImage.setImageResource(R.drawable.rating_weed);
                 holder.ratingText.setText("Weed");
                 break;
             case 103:
-                holder.ratingImage.setImageResource(R.mipmap.rating_meta);
+                holder.ratingImage.setImageResource(R.drawable.rating_meta);
                 holder.ratingText.setText("Meta");
                 break;
             case 111:
-                holder.ratingImage.setImageResource(R.mipmap.rating_ballin);
+                holder.ratingImage.setImageResource(R.drawable.rating_ballin);
                 holder.ratingText.setText("BALLIN'");
                 break;
             case 116:
-                holder.ratingImage.setImageResource(R.mipmap.rating_coorslight);
+                holder.ratingImage.setImageResource(R.drawable.rating_coorslight);
                 holder.ratingText.setText("Coors Light");
                 break;
             case 117:
-                holder.ratingImage.setImageResource(R.mipmap.rating_america);
+                holder.ratingImage.setImageResource(R.drawable.rating_america);
                 holder.ratingText.setText("AMERICA");
                 break;
             case 118:
-                holder.ratingImage.setImageResource(R.mipmap.rating_hipster);
+                holder.ratingImage.setImageResource(R.drawable.rating_hipster);
                 holder.ratingText.setText("Hipster");
                 break;
             case 119:
-                holder.ratingImage.setImageResource(R.mipmap.rating_scroogled);
+                holder.ratingImage.setImageResource(R.drawable.rating_scroogled);
                 holder.ratingText.setText("#scroogled");
                 break;
             case 120:
-                holder.ratingImage.setImageResource(R.mipmap.rating_mistletoe);
+                holder.ratingImage.setImageResource(R.drawable.rating_mistletoe);
                 holder.ratingText.setText("Mistletoe");
                 break;
             default:

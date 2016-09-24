@@ -14,7 +14,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_trophy"/>
+        android:src="@drawable/rating_trophy"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_thumbup"/>
+        android:src="@drawable/rating_thumbup"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_thumbdown"/>
+        android:src="@drawable/rating_thumbdown"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -53,7 +53,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_turd"/>
+        android:src="@drawable/rating_turd"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -66,7 +66,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_gay"/>
+        android:src="@drawable/rating_gay"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_heart"/>
+        android:src="@drawable/rating_heart"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -92,7 +92,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_smug"/>
+        android:src="@drawable/rating_smug"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -105,7 +105,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_cheese"/>
+        android:src="@drawable/rating_cheese"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -118,7 +118,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_aggro"/>
+        android:src="@drawable/rating_aggro"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -131,7 +131,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_twisted"/>
+        android:src="@drawable/rating_twisted"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -144,7 +144,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_zigsd"/>
+        android:src="@drawable/rating_zigsd"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -157,7 +157,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_old"/>
+        android:src="@drawable/rating_old"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -170,7 +170,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_baby"/>
+        android:src="@drawable/rating_baby"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -183,7 +183,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_weed"/>
+        android:src="@drawable/rating_weed"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -196,7 +196,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_meta"/>
+        android:src="@drawable/rating_meta"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -209,7 +209,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_ballin"/>
+        android:src="@drawable/rating_ballin"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -222,7 +222,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_coorslight"/>
+        android:src="@drawable/rating_coorslight"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -235,7 +235,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_america"/>
+        android:src="@drawable/rating_america"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -248,7 +248,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_hipster"/>
+        android:src="@drawable/rating_hipster"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -261,7 +261,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_scroogled"/>
+        android:src="@drawable/rating_scroogled"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -274,6 +274,6 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:visibility="gone"
-        android:src="@mipmap/rating_mistletoe"/>
+        android:src="@drawable/rating_mistletoe"/>
 
 </LinearLayout>

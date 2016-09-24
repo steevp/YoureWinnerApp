@@ -33,9 +33,14 @@ public class Forum {
     }
 
     public void login(String username, String password, XMLRPCCallback listener) {
+        client.clearCookies();
         mUsername = username;
         Object[] params = {username.getBytes(), password.getBytes()};
         client.callAsync(listener, "login", params);
+    }
+
+    public Map<String,String> getCookies() {
+        return client.getCookies();
     }
 
     public void setLogin(Boolean login) {

@@ -21,6 +21,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -162,9 +163,9 @@ public class MainActivity extends AppCompatActivity
 
     private void setupDrawerHeader() {
         if (mAvatar.length() > 0) {
-            Picasso.with(this).load(mAvatar).placeholder(R.mipmap.no_avatar).fit().into(mAvatarView);
+            Picasso.with(this).load(mAvatar).placeholder(R.drawable.no_avatar).fit().into(mAvatarView);
         } else {
-            mAvatarView.setImageResource(R.mipmap.no_avatar);
+            mAvatarView.setImageResource(R.drawable.no_avatar);
         }
         mUsernameView.setText(mUsername);
     }
@@ -229,6 +230,7 @@ public class MainActivity extends AppCompatActivity
         mForum.login(username, password, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
+                Log.d(Config.TAG, mForum.getCookies().toString());
                 mForum.setLogin(true);
 
                 Map<String, Object> r = (Map<String, Object>) result;

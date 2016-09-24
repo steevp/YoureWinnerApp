@@ -99,9 +99,9 @@ public class PrivateMessageActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (avatar.length() > 0) {
-                            Picasso.with(getApplicationContext()).load(avatar).placeholder(R.mipmap.no_avatar).fit().into(mAvatar);
+                            Picasso.with(getApplicationContext()).load(avatar).placeholder(R.drawable.no_avatar).fit().into(mAvatar);
                         } else {
-                            mAvatar.setImageResource(R.mipmap.no_avatar);
+                            mAvatar.setImageResource(R.drawable.no_avatar);
                         }
 
                         mUsername.setText(username);

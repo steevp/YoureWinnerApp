@@ -101,11 +101,11 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
                         if (iconUrl.length() > 0) {
                             Picasso.with(getApplicationContext())
                                     .load(iconUrl)
-                                    .placeholder(R.mipmap.no_avatar)
+                                    .placeholder(R.drawable.no_avatar)
                                     .fit()
                                     .into(mProfileAvatar);
                         } else {
-                            mProfileAvatar.setImageResource(R.mipmap.no_avatar);
+                            mProfileAvatar.setImageResource(R.drawable.no_avatar);
                         }
                         mProfilePosts.setText(postCount.toString());
                         mProfileRegistered.setText(fmt.format(regTime));

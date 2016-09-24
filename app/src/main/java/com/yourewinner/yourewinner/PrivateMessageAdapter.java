@@ -89,9 +89,9 @@ public class PrivateMessageAdapter extends BaseAdapter {
 
         String iconUrl = (String) message.get("icon_url");
         if (iconUrl.length() > 0) {
-            Picasso.with(mContext).load(iconUrl).placeholder(R.mipmap.no_avatar).fit().into(holder.avatarImageView);
+            Picasso.with(mContext).load(iconUrl).placeholder(R.drawable.no_avatar).fit().into(holder.avatarImageView);
         } else {
-            holder.avatarImageView.setImageResource(R.mipmap.no_avatar);
+            holder.avatarImageView.setImageResource(R.drawable.no_avatar);
         }
 
         String sender;
