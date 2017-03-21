@@ -217,7 +217,7 @@ public class MainActivity extends BaseActivity
 
     public void doLogin(final String username, final String password) {
         mDialog.show();
-        long id = mForum.login(username, password, new XMLRPCCallback() {
+        final long id = mForum.login(username, password, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
                 setThreadId(0);

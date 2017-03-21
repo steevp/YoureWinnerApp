@@ -266,6 +266,15 @@ public class TopicViewAdapter extends BaseAdapter {
                 if (spoiler == null) {
                     spoiler = (RelativeLayout) mInflater.inflate(R.layout.spoiler, null);
                     spoilerContent = (LinearLayout) spoiler.findViewById(R.id.spoiler_content);
+                    final LinearLayout finalSpoilerContent = spoilerContent;
+                    final TextView spoilerReveal = (TextView) spoiler.findViewById(R.id.spoiler_reveal);
+                    spoiler.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            spoilerReveal.setVisibility(View.GONE);
+                            finalSpoilerContent.setVisibility(View.VISIBLE);
+                        }
+                    });
                 }
                 numSpoilers++;
             }

@@ -39,6 +39,11 @@ public class Forum {
         return client.callAsync(listener, "login", params);
     }
 
+    public long logout(XMLRPCCallback listener) {
+        isLoggedIn = false;
+        return client.callAsync(listener, "logout_user");
+    }
+
     public Map<String,String> getCookies() {
         return client.getCookies();
     }

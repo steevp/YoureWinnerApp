@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -37,7 +36,7 @@ import de.timroes.axmlrpc.XMLRPCServerException;
 /**
  * Created by steven on 5/19/16.
  */
-public class TopicViewPageFragment extends Fragment
+public class TopicViewPageFragment extends BaseFragment
         implements UpdatableFragment, AdapterView.OnItemClickListener {
 
     public final static String ARG_BOARD_ID = "ARG_BOARD_ID";
@@ -57,6 +56,11 @@ public class TopicViewPageFragment extends Fragment
     private View mLoadingBar;
     private PageLoadedListener mCallback;
     private ProgressDialog mDialog;
+
+    @Override
+    protected void resumeThread() {
+        loadData();
+    }
 
     public interface PageLoadedListener {
         public void onPageCountChanged(int pageCount);
@@ -255,9 +259,10 @@ public class TopicViewPageFragment extends Fragment
     }
 
     public void getTopic() {
-        mForum.getTopic(mTopicID, mPage, new XMLRPCCallback() {
+        final long id = mForum.getTopic(mTopicID, mPage, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
+                setThreadId(0);
                 Map<String,Object> r = (Map<String,Object>) result;
                 int totalPosts = (int) r.get("total_post_num");
                 final int pageCount = (int) Math.ceil((double) totalPosts / 15);
@@ -287,20 +292,24 @@ public class TopicViewPageFragment extends Fragment
 
             @Override
             public void onError(long id, XMLRPCException error) {
+                setThreadId(0);
                 error.printStackTrace();
             }
 
             @Override
             public void onServerError(long id, XMLRPCServerException error) {
+                setThreadId(0);
                 error.printStackTrace();
             }
         });
+        setThreadId(id);
     }
 
     public void getTopicByUnread() {
-        mForum.getTopicByUnread(mTopicID, new XMLRPCCallback() {
+        final long id = mForum.getTopicByUnread(mTopicID, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
+                setThreadId(0);
                 Map<String,Object> r = (Map<String,Object>) result;
                 int totalPosts = (int) r.get("total_post_num");
                 final int pageCount = (int) Math.ceil((double) totalPosts / 15);
@@ -341,14 +350,17 @@ public class TopicViewPageFragment extends Fragment
 
             @Override
             public void onError(long id, XMLRPCException error) {
+                setThreadId(0);
                 error.printStackTrace();
             }
 
             @Override
             public void onServerError(long id, XMLRPCServerException error) {
+                setThreadId(0);
                 error.printStackTrace();
             }
         });
+        setThreadId(id);
     }
 
     private void showRateDialog() {
