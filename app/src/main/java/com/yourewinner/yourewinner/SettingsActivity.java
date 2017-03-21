@@ -9,7 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 public class SettingsActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-
+    public final static int RESULT_RELOAD = 666;
     private SharedPreferences mSharedPreferences;
 
     @Override
@@ -31,10 +31,11 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new SettingsFragment()).commit();
     }
 
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals("theme")) {
-            recreate();
+            setResult(RESULT_RELOAD);
         }
     }
 

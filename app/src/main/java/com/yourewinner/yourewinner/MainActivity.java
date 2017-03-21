@@ -8,11 +8,9 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
@@ -45,15 +43,9 @@ public class MainActivity extends AppCompatActivity
     public final static String AVATAR = "AVATAR";
     public final static String USERNAME = "USERNAME";
 
-    private final static String PREF_USERNAME = "username";
-    private final static String PREF_PASSWORD = "password";
-    private final static String PREF_AVATAR = "avatar";
-    private final static String PREF_SMFCOOKIE = "SMFCookie557";
-    private final static String PREF_PHPSESSID = "PHPSESSID";
-
     private Forum mForum;
     private ProgressDialog mDialog;
-    private SharedPreferences mSharedPreferences;
+    private PrefsManager mPrefs;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mDrawerView;
@@ -66,7 +58,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mPrefs = new PrefsManager(this);
 
         Config.loadTheme(this);
         mForum = Forum.getInstance();
@@ -182,10 +174,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void doWelcome() {
-        final String username = mSharedPreferences.getString(PREF_USERNAME, "");
-        final String password = mSharedPreferences.getString(PREF_PASSWORD, "");
+        final String username = mPrefs.getUsername();
+        final String password = mPrefs.getPassword();
         if (mAvatar == null) {
-            mAvatar = mSharedPreferences.getString(PREF_AVATAR, "");
+            mAvatar = mPrefs.getAvatar();
+        }
+        if (mUsername == null) {
+            mUsername = username;
         }
         if (username.length() == 0 || password.length() == 0) {
             // Show sign in dialog
@@ -200,10 +195,8 @@ public class MainActivity extends AppCompatActivity
                     String user = inputUsername.getText().toString();
                     String pass = inputPassword.getText().toString();
                     if (user.length() > 0 && pass.length() > 0) {
-                        SharedPreferences.Editor editor = mSharedPreferences.edit();
-                        editor.putString(PREF_USERNAME, user);
-                        editor.putString(PREF_PASSWORD, pass);
-                        editor.commit();
+                        mPrefs.setUsername(user);
+                        mPrefs.setPassword(pass);
                         doLogin(user, pass);
                     }
                 }
@@ -240,20 +233,17 @@ public class MainActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        SharedPreferences.Editor editor = mSharedPreferences.edit();
                         if (mAvatar.length() > 0) {
                             // Store avatar url in prefs
-                            editor.putString(PREF_AVATAR, mAvatar);
+                            mPrefs.setAvatar(mAvatar);
                         }
-                        /*Map<String,String> cookies = mForum.getCookies();
-                        editor.putString(PREF_SMFCOOKIE, cookies.get(PREF_SMFCOOKIE));
-                        editor.putString(PREF_PHPSESSID, cookies.get(PREF_PHPSESSID));*/
-                        editor.commit();
+                        Map<String,String> cookies = mForum.getCookies();
+                        mPrefs.setCookies(cookies);
                         setupDrawerHeader();
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "YOU'RE WINNER, " + username + " !", Toast.LENGTH_LONG).show();
                         selectItem(mDrawerItemId);
-                        checkNewMessages();
+                        //checkNewMessages();
                     }
                 });
             }
@@ -381,7 +371,7 @@ public class MainActivity extends AppCompatActivity
         if (fragment != null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (intent != null) {
-            startActivity(intent);
+            startActivityForResult(intent, 1);
         }
 
         mDrawerLayout.closeDrawer(mDrawerView);
@@ -407,5 +397,15 @@ public class MainActivity extends AppCompatActivity
         // Reload the inbox fragment
         Fragment fragment = new InboxFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == SettingsActivity.RESULT_RELOAD) {
+            // recreate activity to load new theme
+            recreate();
+        }
     }
 }

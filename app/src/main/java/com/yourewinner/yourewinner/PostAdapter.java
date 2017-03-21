@@ -35,16 +35,6 @@ public class PostAdapter extends BaseAdapter {
         //mPosts = new ArrayList<Object>(Arrays.asList(data));
         if (data != null) {
             mPosts.addAll(Arrays.asList(data));
-            // Add usernames to @mention autocomplete
-            for (final Object post: mPosts) {
-                final Map<String,Object> p = (Map<String,Object>) post;
-                byte[] userBytes = (byte[]) p.get("post_author_name");
-                if (userBytes == null) {
-                    userBytes = (byte[]) p.get("topic_author_name");
-                }
-                final String username = new String(userBytes, StandardCharsets.UTF_8);
-                Mentions.getInstance().addMention(username);
-            }
             notifyDataSetChanged();
         }
     }

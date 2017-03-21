@@ -24,4 +24,10 @@
         app:showAsAction="ifRoom"
         android:visible="false"/>
 
+    <item
+        android:id="@+id/action_share"
+        android:title="@string/action_share"
+        app:showAsAction="never"
+        android:visible="true"/>
+
 </menu>

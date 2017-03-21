@@ -142,6 +142,7 @@ public class TopicViewPageFragment extends Fragment
                 MenuItem viewRatings = menu.findItem(R.id.action_view_rating);
                 MenuItem quote = menu.findItem(R.id.action_quote);
                 MenuItem edit = menu.findItem(R.id.action_edit);
+                MenuItem share = menu.findItem(R.id.action_share);
 
                 int selected = mPostsList.getCheckedItemCount();
                 boolean loggedIn = mForum.getLogin();
@@ -151,6 +152,7 @@ public class TopicViewPageFragment extends Fragment
                 viewRatings.setVisible(false);
                 quote.setVisible(false);
                 edit.setVisible(false);
+                share.setVisible(selected == 1);
 
                 if (loggedIn && selected == 1) {
                     rate.setVisible(true);
@@ -191,6 +193,9 @@ public class TopicViewPageFragment extends Fragment
                         return true;
                     case R.id.action_view_rating:
                         viewRatings();
+                        return true;
+                    case R.id.action_share:
+                        shareLink();
                         return true;
                 }
                 return false;
@@ -456,6 +461,23 @@ public class TopicViewPageFragment extends Fragment
                         error.printStackTrace();
                     }
                 });
+                break;
+            }
+        }
+    }
+
+    private void shareLink() {
+        final SparseBooleanArray checked = mPostsList.getCheckedItemPositions();
+        for (int i=0, size=checked.size(); i<size; i++) {
+            final int key = checked.keyAt(i);
+            if (checked.get(key)) {
+                final Map<String,Object> post = (Map<String,Object>) mPostsAdapter.getItem(key - 1);
+                final String postID = (String) post.get("post_id");
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_TEXT, "http://yourewinner.com/index.php?topic=" + mTopicID + ".msg" + postID + "#msg" + postID);
+                intent.setType("text/plain");
+                startActivity(Intent.createChooser(intent, getResources().getText(R.string.action_share)));
                 break;
             }
         }

@@ -122,6 +122,9 @@ public class TopicViewActivity extends AppCompatActivity
             case R.id.action_unsubscribe:
                 unsubscribeTopic();
                 return true;
+            case R.id.action_share:
+                shareLink();
+                return true;
         }
         return false;
     }
@@ -308,6 +311,14 @@ public class TopicViewActivity extends AppCompatActivity
                 });
             }
         });
+    }
+
+    private void shareLink() {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, "http://yourewinner.com/index.php?topic=" + mTopicID + ".0");
+        intent.setType("text/plain");
+        startActivity(Intent.createChooser(intent, getResources().getText(R.string.action_share)));
     }
 
     @Override

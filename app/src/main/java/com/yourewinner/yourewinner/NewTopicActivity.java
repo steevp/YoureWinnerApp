@@ -68,7 +68,8 @@ public class NewTopicActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Intent intent = new Intent(getApplicationContext(), TopicViewActivity.class);
-                            intent.putExtra("topicID", topicID);
+                            intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
+                            intent.putExtra(TopicViewActivity.ARG_BOARD_ID, mBoardID);
                             startActivity(intent);
                             mDialog.dismiss();
                             finish();

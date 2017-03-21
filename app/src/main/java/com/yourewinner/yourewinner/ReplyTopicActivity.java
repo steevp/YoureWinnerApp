@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Toast;
@@ -39,9 +40,7 @@ public class ReplyTopicActivity extends AppCompatActivity {
     private String topicID;
     private String boardID;
     private String postID;
-    private boolean quote;
     private boolean mSaveDraft;
-    private List<String> mMentions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +62,7 @@ public class ReplyTopicActivity extends AppCompatActivity {
         topicID = intent.getStringExtra(ARG_TOPIC_ID);
         boardID = intent.getStringExtra(ARG_BOARD_ID);
         postID = intent.getStringExtra("postID");
-        quote = intent.getBooleanExtra("quote", false);
+        boolean quote = intent.getBooleanExtra("quote", false);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -77,8 +76,8 @@ public class ReplyTopicActivity extends AppCompatActivity {
                 |InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
                 |InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
                 |InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-        mMentions = Mentions.getInstance().getMentions();
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, mMentions);
+        List<String> mentions = Mentions.getInstance().getMentions();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, mentions);
         mPostContent.setAdapter(adapter);
         mPostContent.setTokenizer(new SpaceTokenizer());
 
@@ -198,6 +197,17 @@ public class ReplyTopicActivity extends AppCompatActivity {
             saveDraft();
         }
         super.onPause();
+    }
+
+    public void bbButtons(View v) {
+        switch (v.getId()) {
+            case R.id.btn_emotes:
+                mPostContent.append(":bike:");
+                break;
+            case R.id.btn_img:
+                mPostContent.append("[img][/img]");
+                break;
+        }
     }
 
     private void saveDraft() {

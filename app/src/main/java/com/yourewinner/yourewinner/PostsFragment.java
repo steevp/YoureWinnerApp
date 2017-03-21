@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +41,8 @@ public class PostsFragment extends Fragment
     private Forum mForum;
     private View mFooter;
     private View mEmptyView;
+    private long mThreadId;
+    private boolean mThreadKilled;
 
     private int lastCount = 0;
     private int currentPage = 1;
@@ -63,6 +66,7 @@ public class PostsFragment extends Fragment
         mUsername = args.getString(ARG_USERNAME);
         mContext = getActivity();
         mForum = Forum.getInstance();
+        mThreadKilled = false;
     }
 
     @Override
@@ -98,7 +102,7 @@ public class PostsFragment extends Fragment
     public void getPosts() {
         switch (mPosition) {
             case POS_RECENT:
-                mForum.getRecent(currentPage, this);
+                mThreadId = mForum.getRecent(currentPage, this);
                 break;
             case POS_UNREAD:
                 mForum.getUnread(currentPage, this);
@@ -114,6 +118,26 @@ public class PostsFragment extends Fragment
                 }
                 break;
         }
+    }
+
+    @Override
+    public void onPause() {
+        if (mThreadId != 0) {
+            Log.i("ywtag", "canceling thread " + mThreadId);
+            mForum.cancel(mThreadId);
+            mThreadKilled = true;
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        if (mThreadKilled) {
+            Log.i("ywtag", "resuming thread");
+            getPosts();
+            mThreadKilled = false;
+        }
+        super.onResume();
     }
 
     public void addMoreItems() {
@@ -164,6 +188,7 @@ public class PostsFragment extends Fragment
 
     @Override
     public void onResponse(long id, Object result) {
+        mThreadId = 0;
         Map<String, Object> r = (Map<String, Object>) result;
         final Object[] topics = (Object[]) r.get("topics");
 
@@ -184,6 +209,7 @@ public class PostsFragment extends Fragment
 
     @Override
     public void onError(long id, XMLRPCException error) {
+        mThreadId = 0;
         error.printStackTrace();
         final Activity activity = getActivity();
         if (activity != null) {
@@ -201,6 +227,7 @@ public class PostsFragment extends Fragment
 
     @Override
     public void onServerError(long id, XMLRPCServerException error) {
+        mThreadId = 0;
         error.printStackTrace();
         final Activity activity = getActivity();
         if (activity != null) {

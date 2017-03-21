@@ -54,6 +54,7 @@ public class TopicViewAdapter extends BaseAdapter {
         mPosts = data;
         // Add usernames to @mentions
         for (final Object post: mPosts) {
+            @SuppressWarnings("unchecked")
             final Map<String,Object> p = (Map<String,Object>) post;
             final String username = new String((byte[]) p.get("post_author_name"), StandardCharsets.UTF_8);
             Mentions.getInstance().addMention(username);
@@ -88,6 +89,8 @@ public class TopicViewAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        Log.i("ywtag", "getView called!");
+
         final ViewHolder holder;
         final DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
 
