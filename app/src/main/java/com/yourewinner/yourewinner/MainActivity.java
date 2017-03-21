@@ -1,8 +1,6 @@
 package com.yourewinner.yourewinner;
 
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -13,10 +11,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -36,7 +32,7 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, PrivateMessageFragment.InboxRefreshListener {
 
     public final static String DRAWER_ITEM_ID = "DRAWER_ITEM_ID";
@@ -221,9 +217,10 @@ public class MainActivity extends AppCompatActivity
 
     public void doLogin(final String username, final String password) {
         mDialog.show();
-        mForum.login(username, password, new XMLRPCCallback() {
+        long id = mForum.login(username, password, new XMLRPCCallback() {
             @Override
             public void onResponse(long id, Object result) {
+                setThreadId(0);
                 mForum.setLogin(true);
 
                 Map<String, Object> r = (Map<String, Object>) result;
@@ -250,6 +247,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onError(long id, final XMLRPCException error) {
+                setThreadId(0);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -264,6 +262,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onServerError(long id, XMLRPCServerException error) {
+                setThreadId(0);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -275,51 +274,7 @@ public class MainActivity extends AppCompatActivity
                 });
             }
         });
-    }
-
-    private void checkNewMessages() {
-        mForum.getInboxStat(new XMLRPCCallback() {
-            @Override
-            public void onResponse(long id, Object result) {
-                Map<String, Object> r = (Map<String, Object>) result;
-                final int unreadCount = (int) r.get("inbox_unread_count");
-                if (unreadCount > 0) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            //Toast.makeText(getApplicationContext(), "You've got mail!", Toast.LENGTH_LONG).show();
-                            NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
-                                    .setSmallIcon(R.drawable.ic_message)
-                                    .setContentTitle("You've got mail!")
-                                    .setContentText(unreadCount + " unread message(s)")
-                                    .setAutoCancel(true);
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            intent.putExtra(DRAWER_ITEM_ID, R.id.drawer_messages);
-                            //intent.putExtra(USERNAME, mUsername);
-                            //intent.putExtra(AVATAR, mAvatar);
-                            PendingIntent pi = PendingIntent.getActivity(
-                                    getApplicationContext(),
-                                    0,
-                                    intent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT);
-                            builder.setContentIntent(pi);
-                            NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                            notifyMgr.notify(001, builder.build());
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onError(long id, XMLRPCException error) {
-                error.printStackTrace();
-            }
-
-            @Override
-            public void onServerError(long id, XMLRPCServerException error) {
-                error.printStackTrace();
-            }
-        });
+        setThreadId(id);
     }
 
     @Override
@@ -407,5 +362,10 @@ public class MainActivity extends AppCompatActivity
             // recreate activity to load new theme
             recreate();
         }
+    }
+
+    @Override
+    protected void resumeThread() {
+        doWelcome();
     }
 }

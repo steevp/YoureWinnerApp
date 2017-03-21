@@ -4,9 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +19,7 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class PostsFragment extends Fragment
+public class PostsFragment extends BaseFragment
         implements SwipeRefreshLayout.OnRefreshListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener, XMLRPCCallback {
     private final static String ARG_POSITION = "ARG_POSITION";
     // Needed for Participated
@@ -41,8 +39,6 @@ public class PostsFragment extends Fragment
     private Forum mForum;
     private View mFooter;
     private View mEmptyView;
-    private long mThreadId;
-    private boolean mThreadKilled;
 
     private int lastCount = 0;
     private int currentPage = 1;
@@ -66,7 +62,6 @@ public class PostsFragment extends Fragment
         mUsername = args.getString(ARG_USERNAME);
         mContext = getActivity();
         mForum = Forum.getInstance();
-        mThreadKilled = false;
     }
 
     @Override
@@ -102,42 +97,27 @@ public class PostsFragment extends Fragment
     public void getPosts() {
         switch (mPosition) {
             case POS_RECENT:
-                mThreadId = mForum.getRecent(currentPage, this);
+                setThreadId(mForum.getRecent(currentPage, this));
                 break;
             case POS_UNREAD:
-                mForum.getUnread(currentPage, this);
+                setThreadId(mForum.getUnread(currentPage, this));
                 break;
             case POS_PARTICIPATED:
                 if (mForum.getLogin()) {
-                    mForum.getParticipatedTopic(mUsername, currentPage, this);
+                    setThreadId(mForum.getParticipatedTopic(mUsername, currentPage, this));
                 }
                 break;
             case POS_SUBSCRIBED:
                 if (mForum.getLogin()) {
-                    mForum.getSubscribed(currentPage, this);
+                    setThreadId(mForum.getSubscribed(currentPage, this));
                 }
                 break;
         }
     }
 
     @Override
-    public void onPause() {
-        if (mThreadId != 0) {
-            Log.i("ywtag", "canceling thread " + mThreadId);
-            mForum.cancel(mThreadId);
-            mThreadKilled = true;
-        }
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        if (mThreadKilled) {
-            Log.i("ywtag", "resuming thread");
-            getPosts();
-            mThreadKilled = false;
-        }
-        super.onResume();
+    protected void resumeThread() {
+        getPosts();
     }
 
     public void addMoreItems() {
@@ -188,7 +168,7 @@ public class PostsFragment extends Fragment
 
     @Override
     public void onResponse(long id, Object result) {
-        mThreadId = 0;
+        setThreadId(0);
         Map<String, Object> r = (Map<String, Object>) result;
         final Object[] topics = (Object[]) r.get("topics");
 
@@ -209,7 +189,7 @@ public class PostsFragment extends Fragment
 
     @Override
     public void onError(long id, XMLRPCException error) {
-        mThreadId = 0;
+        setThreadId(0);
         error.printStackTrace();
         final Activity activity = getActivity();
         if (activity != null) {
@@ -227,7 +207,7 @@ public class PostsFragment extends Fragment
 
     @Override
     public void onServerError(long id, XMLRPCServerException error) {
-        mThreadId = 0;
+        setThreadId(0);
         error.printStackTrace();
         final Activity activity = getActivity();
         if (activity != null) {
