@@ -73,6 +73,14 @@ public class PrefsManager {
         writePref(PREF_PHPSESSID, cookies.get(PREF_PHPSESSID));
     }
 
+    public void clearAllCookies() {
+        writePref(PREF_USERNAME, "");
+        writePref(PREF_PASSWORD, "");
+        writePref(PREF_AVATAR, "");
+        writePref(PREF_SMFCOOKIE, "");
+        writePref(PREF_PHPSESSID, "");
+    }
+
     private void writePref(String key, String value) {
         SharedPreferences.Editor editor = mPrefs.edit();
         editor.putString(key, value);

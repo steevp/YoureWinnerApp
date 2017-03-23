@@ -18,9 +18,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.squareup.picasso.Picasso;
 
@@ -84,6 +86,15 @@ public class MainActivity extends BaseActivity
         View drawerHeader = getLayoutInflater().inflate(R.layout.navigation_header, null);
         mAvatarView = (CircleImageView) drawerHeader.findViewById(R.id.avatar);
         mUsernameView = (TextView) drawerHeader.findViewById(R.id.username);
+
+        // Toggles the logout menu
+        ToggleButton toggleLogout = (ToggleButton) drawerHeader.findViewById(R.id.toggle_logout);
+        toggleLogout.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mDrawerView.getMenu().setGroupVisible(R.id.logout_group, mForum.getLogin() && b);
+            }
+        });
 
         mDrawerView.addHeaderView(drawerHeader);
         mDrawerView.getMenu().findItem(mDrawerItemId).setChecked(true);
@@ -277,6 +288,17 @@ public class MainActivity extends BaseActivity
         setThreadId(id);
     }
 
+    public void doLogout() {
+        mPrefs.clearAllCookies();
+        mAvatar = "";
+        mUsername = "Guest";
+        mForum.setLogin(false);
+        mForum.setUsername(mUsername);
+        setupDrawerHeader();
+        Toast.makeText(this, "Good-bye!", Toast.LENGTH_LONG).show();
+        finish();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -320,6 +342,9 @@ public class MainActivity extends BaseActivity
                 break;
             case R.id.drawer_search:
                 intent = new Intent(this, SearchActivity.class);
+                break;
+            case R.id.drawer_logout:
+                doLogout();
                 break;
         }
 

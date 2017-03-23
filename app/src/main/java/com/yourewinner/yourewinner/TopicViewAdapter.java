@@ -197,7 +197,7 @@ public class TopicViewAdapter extends BaseAdapter {
                         ratingImage.setImageResource(R.drawable.rating_ballin);
                         break;
                     case 116:
-                        ratingImage.setImageResource(R.drawable.rating_coorslight);
+                        ratingImage.setImageResource(R.drawable.rating_beer);
                         break;
                     case 117:
                         ratingImage.setImageResource(R.drawable.rating_america);

@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">yourewinner.com</string>
     <string name="action_settings">Settings</string>
+    <string name="action_login">Login</string>
+    <string name="action_logout">Logout</string>
     <string name="action_home">Home</string>
     <string name="action_news">News</string>
     <string name="action_messages">Messages</string>

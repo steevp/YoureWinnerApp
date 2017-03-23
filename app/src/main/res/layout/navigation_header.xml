@@ -26,7 +26,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/avatar"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="16dp"
         android:layout_centerVertical="true"/>
+    
+    <ToggleButton
+        android:id="@+id/toggle_logout"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="center"
+        android:alpha=".54"
+        android:background="@drawable/toggle_expand_collapse"
+        android:textOff="@null"
+        android:textOn="@null" />
 
 </RelativeLayout>

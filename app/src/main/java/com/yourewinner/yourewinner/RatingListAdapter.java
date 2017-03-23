@@ -111,8 +111,8 @@ public class RatingListAdapter extends BaseAdapter {
                 holder.ratingText.setText("BALLIN'");
                 break;
             case 116:
-                holder.ratingImage.setImageResource(R.drawable.rating_coorslight);
-                holder.ratingText.setText("Coors Light");
+                holder.ratingImage.setImageResource(R.drawable.rating_beer);
+                holder.ratingText.setText("Beer");
                 break;
             case 117:
                 holder.ratingImage.setImageResource(R.drawable.rating_america);

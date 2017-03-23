@@ -97,7 +97,7 @@ public class RatingViewAdapter extends BaseAdapter {
         RATINGS.put("104", R.drawable.rating_weed);
         RATINGS.put("103", R.drawable.rating_meta);
         RATINGS.put("111", R.drawable.rating_ballin);
-        RATINGS.put("116", R.drawable.rating_coorslight);
+        RATINGS.put("116", R.drawable.rating_beer);
         RATINGS.put("117", R.drawable.rating_america);
         RATINGS.put("118", R.drawable.rating_hipster);
         RATINGS.put("119", R.drawable.rating_scroogled);
