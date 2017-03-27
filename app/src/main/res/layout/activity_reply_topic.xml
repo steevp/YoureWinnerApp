@@ -36,20 +36,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center|bottom">
+        android:gravity="center"
+        android:background="?attr/colorPrimary">
 
-        <Button
-            android:id="@+id/btn_img"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="[img]"
+        <ImageButton
+            android:id="@+id/btn_emotes"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:src="@drawable/emotes"
+            android:background="@null"
             android:onClick="bbButtons"/>
 
-        <Button
-            android:id="@+id/btn_emotes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="emotes"
+        <ImageButton
+            android:id="@+id/btn_bbcode"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:src="@drawable/bbcode"
+            android:background="@null"
             android:onClick="bbButtons"/>
 
     </LinearLayout>

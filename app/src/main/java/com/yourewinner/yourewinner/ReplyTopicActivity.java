@@ -25,7 +25,7 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class ReplyTopicActivity extends AppCompatActivity {
+public class ReplyTopicActivity extends AppCompatActivity implements EmoteGridFragment.OnEmotePickedListener {
 
     public final static String ARG_TOPIC_TITLE = "ARG_TOPIC_TITLE";
     public final static String ARG_TOPIC_ID = "ARG_TOPIC_ID";
@@ -200,14 +200,20 @@ public class ReplyTopicActivity extends AppCompatActivity {
     }
 
     public void bbButtons(View v) {
+        int page;
         switch (v.getId()) {
             case R.id.btn_emotes:
-                mPostContent.append(":bike:");
+                page = 0;
                 break;
-            case R.id.btn_img:
-                mPostContent.append("[img][/img]");
+            case R.id.btn_bbcode:
+                page = 1;
+                break;
+            default:
+                page = 0;
                 break;
         }
+        EmoteDialog dlg = EmoteDialog.newInstance(page);
+        dlg.show(getSupportFragmentManager(), "dialog");
     }
 
     private void saveDraft() {
@@ -245,5 +251,34 @@ public class ReplyTopicActivity extends AppCompatActivity {
             });
             builder.show();
         }
+    }
+
+    @Override
+    public void onEmotePicked(String emote, boolean isBbcode) {
+        if (isBbcode) {
+            insertBbcode(emote);
+        } else {
+            insertText(emote);
+        }
+    }
+
+    private void insertBbcode(String bbcode) {
+        // Get selected text so we can wrap the bbcode around it
+        int selectionStart = mPostContent.getSelectionStart();
+        int selectionEnd = mPostContent.getSelectionEnd();
+        String selectedText = mPostContent.getText().toString().substring(selectionStart, selectionEnd);
+        bbcode = bbcode + selectedText + bbcode.replace("[", "[/");
+        insertText(bbcode);
+    }
+
+    private void insertText(String textToInsert) {
+        // Insert text at cursor position
+        int start = Math.max(mPostContent.getSelectionStart(), 0);
+        int end = Math.max(mPostContent.getSelectionEnd(), 0);
+        if (start > 0) {
+            textToInsert = " " + textToInsert;
+        }
+        mPostContent.getText().replace(Math.min(start, end), Math.max(start, end),
+                textToInsert, 0, textToInsert.length());
     }
 }

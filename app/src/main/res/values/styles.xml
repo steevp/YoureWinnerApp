@@ -10,6 +10,7 @@
         <!-- Customize your theme here. -->
         <item name="windowActionModeOverlay">true</item>
         <item name="colorPrimary">@color/winnerOrange</item>
+        <item name="background_dialog">@color/winnerBlue</item>
         <item name="colorPrimaryDark">@color/winnerOrangeDark</item>
         <item name="colorAccent">@color/winnerOrangeDark</item>
         <item name="android:windowBackground">@color/winnerBlue</item>
@@ -27,6 +28,7 @@
     <style name="GayPrideTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
         <item name="colorPrimary">@color/winnerPink</item>
+        <item name="background_dialog">@color/winnerPurple</item>
         <item name="colorPrimaryDark">@color/winnerPinkDark</item>
         <item name="colorAccent">@color/winnerPinkDark</item>
         <item name="android:windowBackground">@color/winnerPurple</item>
@@ -44,6 +46,7 @@
     <style name="StonerTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
         <item name="colorPrimary">@color/winnerSilver</item>
+        <item name="background_dialog">@color/winnerGreen</item>
         <item name="colorPrimaryDark">@color/winnerSilverDark</item>
         <item name="colorAccent">@color/winnerSilverDark</item>
         <item name="android:windowBackground">@color/winnerGreen</item>
@@ -61,6 +64,7 @@
     <style name="DarkTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
         <item name="color_username">@color/colorLink</item>
+        <item name="background_dialog">#ff212121</item>
         <item name="ic_action_first">@drawable/ic_action_first</item>
         <item name="ic_action_previous">@drawable/ic_action_previous</item>
         <item name="ic_action_next">@drawable/ic_action_next</item>
@@ -70,6 +74,7 @@
     <style name="LightTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
         <item name="color_username">@color/colorLink</item>
+        <item name="background_dialog">#fff5f5f5</item>
         <item name="ic_action_first">@drawable/ic_action_first_dark</item>
         <item name="ic_action_previous">@drawable/ic_action_previous_dark</item>
         <item name="ic_action_next">@drawable/ic_action_next_dark</item>
@@ -117,5 +122,22 @@
 
     <color name="semiTransparent">#c0000000</color>
     <color name="grey">#BEBEBE</color>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_up_dialog</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_down</item>
+    </style>
+
+    <!-- animation for dialog box -->
+    <style name="DialogSlideAnim" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="colorAccent">@null</item>
+        <item name="android:gravity">bottom</item>
+        <item name="android:background">?attr/background_dialog</item>
+    </style>
 
 </resources>
