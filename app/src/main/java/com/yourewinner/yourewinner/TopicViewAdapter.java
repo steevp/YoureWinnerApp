@@ -36,8 +36,6 @@ import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static com.yourewinner.yourewinner.R.id.avatar;
-
 public class TopicViewAdapter extends BaseAdapter {
 
     private Context mContext;
@@ -100,7 +98,7 @@ public class TopicViewAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.usernameTextView = (TextView) convertView.findViewById(R.id.username);
             holder.usernameImageView = (ImageView) convertView.findViewById(R.id.image_username);
-            holder.avatarImageView = (CircleImageView) convertView.findViewById(avatar);
+            holder.avatarImageView = (CircleImageView) convertView.findViewById(R.id.avatar);
             holder.onlineNow = (ImageView) convertView.findViewById(R.id.online_now);
             holder.postContentTextView = (LinearLayout) convertView.findViewById(R.id.post_content);
             holder.postTimeTextView = (TextView) convertView.findViewById(R.id.post_time);
@@ -446,7 +444,6 @@ public class TopicViewAdapter extends BaseAdapter {
         }
 
         Date then = (Date) post.get("post_time");
-        Log.d("ywtag", then.toString() + " " + avatar);
         long now = System.currentTimeMillis();
         String postTime = DateUtils.getRelativeTimeSpanString(then.getTime(), now, DateUtils.MINUTE_IN_MILLIS).toString();
 
