@@ -30,4 +30,10 @@
         app:showAsAction="never"
         android:visible="true"/>
 
+    <item
+        android:id="@+id/action_delete_topic"
+        android:title="@string/action_delete_topic"
+        app:showAsAction="never"
+        android:visible="false"/>
+
 </menu>

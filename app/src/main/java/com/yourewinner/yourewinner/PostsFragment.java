@@ -145,7 +145,7 @@ public class PostsFragment extends BaseFragment
             Intent intent = new Intent(mContext, TopicViewActivity.class);
             intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
             intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);
-            startActivity(intent);
+            startActivityForResult(intent, 1);
         }
     }
 

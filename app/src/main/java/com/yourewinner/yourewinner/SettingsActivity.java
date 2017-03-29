@@ -9,7 +9,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 public class SettingsActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-    public final static int RESULT_RELOAD = 666;
     private SharedPreferences mSharedPreferences;
 
     @Override
@@ -35,7 +34,7 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals("theme")) {
-            setResult(RESULT_RELOAD);
+            setResult(MainActivity.RESULT_RELOAD);
         }
     }
 

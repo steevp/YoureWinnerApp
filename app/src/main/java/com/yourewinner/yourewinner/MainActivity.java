@@ -40,6 +40,7 @@ public class MainActivity extends BaseActivity
     public final static String DRAWER_ITEM_ID = "DRAWER_ITEM_ID";
     public final static String AVATAR = "AVATAR";
     public final static String USERNAME = "USERNAME";
+    public final static int RESULT_RELOAD = 666;
 
     private Forum mForum;
     private ProgressDialog mDialog;
@@ -119,7 +120,7 @@ public class MainActivity extends BaseActivity
             final String topicID = topic.split("\\.")[0];
             final Intent intent = new Intent(this, TopicViewActivity.class);
             intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
-            startActivity(intent);
+            startActivityForResult(intent, 1);
         }
         finish();
     }
@@ -235,6 +236,10 @@ public class MainActivity extends BaseActivity
                 mForum.setLogin(true);
 
                 Map<String, Object> r = (Map<String, Object>) result;
+
+                final boolean canModerate = (boolean) r.get("can_moderate");
+                mForum.setModerator(canModerate);
+
                 mAvatar = (String) r.get("icon_url");
                 mUsername = new String((byte[]) r.get("username"), StandardCharsets.UTF_8);
 
@@ -245,6 +250,7 @@ public class MainActivity extends BaseActivity
                             // Store avatar url in prefs
                             mPrefs.setAvatar(mAvatar);
                         }
+                        mPrefs.setModerator(canModerate);
                         Map<String,String> cookies = mForum.getCookies();
                         mPrefs.setCookies(cookies);
                         setupDrawerHeader();
@@ -264,6 +270,7 @@ public class MainActivity extends BaseActivity
                     public void run() {
                         error.printStackTrace();
                         mForum.setLogin(false);
+                        mForum.setModerator(false);
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
                         selectItem(mDrawerItemId);
@@ -278,6 +285,7 @@ public class MainActivity extends BaseActivity
                     @Override
                     public void run() {
                         mForum.setLogin(false);
+                        mForum.setModerator(false);
                         mDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
                         selectItem(mDrawerItemId);
@@ -293,6 +301,7 @@ public class MainActivity extends BaseActivity
         mAvatar = "";
         mUsername = "Guest";
         mForum.setLogin(false);
+        mForum.setModerator(false);
         mForum.setUsername(mUsername);
         setupDrawerHeader();
         Toast.makeText(this, "Good-bye!", Toast.LENGTH_LONG).show();
@@ -383,7 +392,7 @@ public class MainActivity extends BaseActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == SettingsActivity.RESULT_RELOAD) {
+        if (resultCode == RESULT_RELOAD) {
             // recreate activity to load new theme
             recreate();
         }

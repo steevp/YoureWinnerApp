@@ -16,6 +16,7 @@ public class Forum {
     private final static int PAGE_SIZE = 15;
     private XMLRPCClient client;
     private Boolean isLoggedIn;
+    private Boolean isModerator;
     private String mUsername;
 
     public static Forum getInstance() {
@@ -24,6 +25,7 @@ public class Forum {
 
     private Forum() {
         isLoggedIn = false;
+        isModerator = false;
         mUsername = "Guest";
         try {
             client = new XMLRPCClient(new URL(API_URL), XMLRPCClient.FLAGS_ENABLE_COOKIES);
@@ -54,6 +56,14 @@ public class Forum {
 
     public void setLogin(Boolean login) {
         isLoggedIn = login;
+    }
+
+    public void setModerator(Boolean moderator) {
+        isModerator = moderator;
+    }
+
+    public Boolean canModerate() {
+        return isModerator;
     }
 
     public Boolean getLogin() {
@@ -245,5 +255,12 @@ public class Forum {
         // 1 = SOFT_DELETE, 2 = HARD_DELETE
         Object[] params = {postID, 1};
         return client.callAsync(listener, "m_delete_post", params);
+    }
+
+    public long deleteTopic(String topicID, XMLRPCCallback listener) {
+        // 1 = SOFT_DELETE, 2 = HARD_DELETE
+        String reason = "Deleted by yw.com app";
+        Object[] params = {topicID, 1, reason.getBytes()};
+        return client.callAsync(listener, "m_delete_topic", params);
     }
 }

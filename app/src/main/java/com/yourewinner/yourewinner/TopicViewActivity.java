@@ -1,6 +1,7 @@
 package com.yourewinner.yourewinner;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -95,11 +96,13 @@ public class TopicViewActivity extends AppCompatActivity
         MenuItem actionReply = menu.findItem((R.id.action_reply));
         MenuItem actionSubscribe = menu.findItem(R.id.action_subscribe);
         MenuItem actionUnsubscribe = menu.findItem(R.id.action_unsubscribe);
+        MenuItem actionDeleteTopic = menu.findItem(R.id.action_delete_topic);
 
         if (mForum.getLogin()) {
             actionReply.setVisible(true);
             actionUnsubscribe.setVisible(mSubscribed);
             actionSubscribe.setVisible(!mSubscribed);
+            actionDeleteTopic.setVisible(mForum.canModerate());
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -124,6 +127,9 @@ public class TopicViewActivity extends AppCompatActivity
                 return true;
             case R.id.action_share:
                 shareLink();
+                return true;
+            case R.id.action_delete_topic:
+                deleteTopic();
                 return true;
         }
         return false;
@@ -319,6 +325,59 @@ public class TopicViewActivity extends AppCompatActivity
         intent.putExtra(Intent.EXTRA_TEXT, "http://yourewinner.com/index.php?topic=" + mTopicID + ".0");
         intent.setType("text/plain");
         startActivity(Intent.createChooser(intent, getResources().getText(R.string.action_share)));
+    }
+
+    private void deleteTopic() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete topic");
+        builder.setMessage("Are you sure you want to delete this topic?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                mForum.deleteTopic(mTopicID, new XMLRPCCallback() {
+                    @Override
+                    public void onResponse(long id, Object result) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Topic deleted!", Toast.LENGTH_LONG).show();
+                                setResult(MainActivity.RESULT_RELOAD);
+                                finish();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(long id, XMLRPCException error) {
+                        error.printStackTrace();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Unable to delete topic!", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onServerError(long id, XMLRPCServerException error) {
+                        error.printStackTrace();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Unable to delete topic!", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        builder.show();
     }
 
     @Override

@@ -29,10 +29,12 @@ public class Config {
         if (!forum.getLogin()) {
             String username = prefs.getUsername();
             Map<String,String> cookies = prefs.getCookies();
+            boolean canModerate = prefs.getModerator();
             if (username.length() > 0 && prefs.getSmfCookie().length() > 0 && prefs.getPhpSessId().length() > 0) {
                 forum.setUsername(username);
                 forum.setCookies(cookies);
                 forum.setLogin(true);
+                forum.setModerator(canModerate);
             }
         }
     }

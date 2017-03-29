@@ -14,6 +14,7 @@ public class PrefsManager {
     private final static String PREF_AVATAR = "avatar";
     private final static String PREF_SMFCOOKIE = "SMFCookie557";
     private final static String PREF_PHPSESSID = "PHPSESSID";
+    private final static String PREF_MODERATOR = "PREF_MODERATOR";
 
     private SharedPreferences mPrefs;
 
@@ -53,6 +54,14 @@ public class PrefsManager {
         writePref(PREF_AVATAR, avatar);
     }
 
+    public void setModerator(Boolean canModerate) {
+        writePref(PREF_MODERATOR, canModerate);
+    }
+
+    public Boolean getModerator() {
+        return mPrefs.getBoolean(PREF_MODERATOR, false);
+    }
+
     public Map<String,String> getCookies() {
         Map<String,String> map = new HashMap<>();
         map.put(PREF_SMFCOOKIE, getSmfCookie());
@@ -79,11 +88,18 @@ public class PrefsManager {
         writePref(PREF_AVATAR, "");
         writePref(PREF_SMFCOOKIE, "");
         writePref(PREF_PHPSESSID, "");
+        writePref(PREF_MODERATOR, false);
     }
 
     private void writePref(String key, String value) {
         SharedPreferences.Editor editor = mPrefs.edit();
         editor.putString(key, value);
+        editor.commit();
+    }
+
+    private void writePref(String key, Boolean value) {
+        SharedPreferences.Editor editor = mPrefs.edit();
+        editor.putBoolean(key, value);
         editor.commit();
     }
 }
