@@ -36,6 +36,8 @@ import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static com.yourewinner.yourewinner.R.id.avatar;
+
 public class TopicViewAdapter extends BaseAdapter {
 
     private Context mContext;
@@ -89,8 +91,7 @@ public class TopicViewAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.i("ywtag", "getView called!");
-
+        Log.i("ywtag", "getView called " + position);
         final ViewHolder holder;
         final DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
 
@@ -99,7 +100,8 @@ public class TopicViewAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.usernameTextView = (TextView) convertView.findViewById(R.id.username);
             holder.usernameImageView = (ImageView) convertView.findViewById(R.id.image_username);
-            holder.avatarImageView = (CircleImageView) convertView.findViewById(R.id.avatar);
+            holder.avatarImageView = (CircleImageView) convertView.findViewById(avatar);
+            holder.onlineNow = (ImageView) convertView.findViewById(R.id.online_now);
             holder.postContentTextView = (LinearLayout) convertView.findViewById(R.id.post_content);
             holder.postTimeTextView = (TextView) convertView.findViewById(R.id.post_time);
             holder.ratingBar = (LinearLayout) convertView.findViewById(R.id.rating_bar);
@@ -434,6 +436,7 @@ public class TopicViewAdapter extends BaseAdapter {
         }
 
         boolean loggedIn = (boolean) post.get("is_online");
+        holder.onlineNow.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
 
         String avatar = (String) post.get("icon_url");
         if (avatar.length() > 0) {
@@ -456,6 +459,7 @@ public class TopicViewAdapter extends BaseAdapter {
         public TextView usernameTextView;
         public ImageView usernameImageView;
         public CircleImageView avatarImageView;
+        public ImageView onlineNow;
         public LinearLayout postContentTextView;
         public TextView postTimeTextView;
         public LinearLayout ratingBar;

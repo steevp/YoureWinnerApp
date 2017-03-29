@@ -1,22 +1,23 @@
 package com.yourewinner.yourewinner;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
-
-import uk.co.senab.photoview.PhotoViewAttacher;
+import com.github.chrisbanes.photoview.PhotoView;
 
 public class ViewPhotoActivity extends AppCompatActivity {
 
     private ImageView mPhoto;
-    private PhotoViewAttacher mAttacher;
+    private String mPhotoUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,26 +31,43 @@ public class ViewPhotoActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        Intent intent = getIntent();
-        String imageURL = intent.getStringExtra("imageURL");
+        mPhotoUrl = getIntent().getStringExtra("imageURL");
 
-        mPhoto = (ImageView) findViewById(R.id.photo);
-        mAttacher = new PhotoViewAttacher(mPhoto);
+        mPhoto = (PhotoView) findViewById(R.id.photo);
+        Glide.with(this).load(mPhotoUrl).into(mPhoto);
+    }
 
-        Glide.with(this)
-                .load(imageURL)
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        return false;
-                    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_view_photo, menu);
+        return true;
+    }
 
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        //mAttacher.update();
-                        return false;
-                    }
-                })
-                .into(mPhoto);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_share:
+                shareLink();
+                return true;
+            case R.id.action_copy:
+                copyToClipboard();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void shareLink() {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, mPhotoUrl);
+        intent.setType("text/plain");
+        startActivity(Intent.createChooser(intent, getResources().getText(R.string.action_share)));
+    }
+
+    private void copyToClipboard() {
+        ClipboardManager clip = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipData data = ClipData.newPlainText("image", mPhotoUrl);
+        clip.setPrimaryClip(data);
+        Toast.makeText(this, "Copied to clipboard!", Toast.LENGTH_LONG).show();
     }
 }

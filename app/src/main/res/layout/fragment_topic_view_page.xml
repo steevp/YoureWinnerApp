@@ -7,7 +7,7 @@
         android:id="@+id/loading_content"
         layout="@layout/loading_content" />
 
-    <com.yourewinner.yourewinner.CustomListView
+    <ListView
         android:id="@+id/posts_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
