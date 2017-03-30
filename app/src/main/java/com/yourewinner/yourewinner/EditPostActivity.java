@@ -12,7 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Toast;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
@@ -92,8 +92,8 @@ public class EditPostActivity extends AppCompatActivity {
                 @SuppressWarnings("unchecked")
                 Map<String,Object> r = (Map<String,Object>) result;
 
-                postTitle = new String((byte[]) r.get("post_title"), StandardCharsets.UTF_8);
-                postContent = new String((byte[]) r.get("post_content"), StandardCharsets.UTF_8);
+                postTitle = new String((byte[]) r.get("post_title"), Charset.forName("UTF-8"));
+                postContent = new String((byte[]) r.get("post_content"), Charset.forName("UTF-8"));
 
                 runOnUiThread(new Runnable() {
                     @Override

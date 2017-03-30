@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,7 +24,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +69,7 @@ public class TopicViewPageFragment extends BaseFragment
         public void onSubscribedStateChanged(boolean subscribedState);
         public void onCreateActionMode(ActionMode actionMode);
         public void onDestroyActionMode(ActionMode actionMode);
+        public void destroyActionMode();
     }
 
     public static TopicViewPageFragment newInstance(String boardID, String topicID, int page) {
@@ -147,6 +149,7 @@ public class TopicViewPageFragment extends BaseFragment
                 MenuItem quote = menu.findItem(R.id.action_quote);
                 MenuItem edit = menu.findItem(R.id.action_edit);
                 MenuItem share = menu.findItem(R.id.action_share);
+                MenuItem delete = menu.findItem(R.id.action_delete_post);
 
                 int selected = mPostsList.getCheckedItemCount();
                 boolean loggedIn = mForum.getLogin();
@@ -156,6 +159,7 @@ public class TopicViewPageFragment extends BaseFragment
                 viewRatings.setVisible(false);
                 quote.setVisible(false);
                 edit.setVisible(false);
+                delete.setVisible(false);
                 share.setVisible(selected == 1);
 
                 if (loggedIn && selected == 1) {
@@ -170,7 +174,9 @@ public class TopicViewPageFragment extends BaseFragment
                             Map<String,Object> post = (Map<String,Object>) mPostsAdapter.getItem(key - 1);
                             boolean canEdit = (boolean) post.get("can_edit");
                             edit.setVisible(canEdit);
-                            String username = new String((byte[]) post.get("post_author_name"), StandardCharsets.UTF_8);
+                            boolean canDelete = (boolean) post.get("can_delete");
+                            delete.setVisible(canDelete);
+                            String username = new String((byte[]) post.get("post_author_name"), Charset.forName("UTF-8"));
                             actionMode.setTitle(username);
                             break;
                         }
@@ -200,6 +206,9 @@ public class TopicViewPageFragment extends BaseFragment
                         return true;
                     case R.id.action_share:
                         shareLink();
+                        return true;
+                    case R.id.action_delete_post:
+                        deletePost();
                         return true;
                 }
                 return false;
@@ -267,7 +276,7 @@ public class TopicViewPageFragment extends BaseFragment
                 int totalPosts = (int) r.get("total_post_num");
                 final int pageCount = (int) Math.ceil((double) totalPosts / 15);
                 final Object[] posts = (Object[]) r.get("posts");
-                final String topicTitle = new String((byte[]) r.get("topic_title"), StandardCharsets.UTF_8);
+                final String topicTitle = new String((byte[]) r.get("topic_title"), Charset.forName("UTF-8"));
                 final boolean subscribedState = (boolean) r.get("is_subscribed");
                 final Activity activity = getActivity();
                 // Might get destroyed before thread finishes
@@ -317,7 +326,7 @@ public class TopicViewPageFragment extends BaseFragment
                 final int page = (int) Math.ceil((double) pos / 15);
                 final int scrollPos = pos % 15;
                 final Object[] posts = (Object[]) r.get("posts");
-                final String topicTitle = new String((byte[]) r.get("topic_title"), StandardCharsets.UTF_8);
+                final String topicTitle = new String((byte[]) r.get("topic_title"), Charset.forName("UTF-8"));
                 final Activity activity = getActivity();
                 final FragmentManager fm = getFragmentManager();
                 final String tagName = "page" + page;
@@ -427,6 +436,68 @@ public class TopicViewPageFragment extends BaseFragment
                 break;
             }
         }
+    }
+
+    private void deletePost() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Delete post");
+        builder.setMessage("Are you sure you want to delete this post?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int position) {
+                final SparseBooleanArray checked = mPostsList.getCheckedItemPositions();
+                for (int i = 0, size = checked.size(); i < size; i++) {
+                    final int key = checked.keyAt(i);
+                    if (checked.get(key)) {
+                        final Map<String, Object> post = (Map<String, Object>) mPostsAdapter.getItem(key - 1);
+                        final String postID = post.get("post_id").toString();
+                        mForum.deletePost(postID, new XMLRPCCallback() {
+                            @Override
+                            public void onResponse(long id, Object result) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mCallback.destroyActionMode();
+                                        Toast.makeText(getActivity(), "Post deleted!", Toast.LENGTH_LONG).show();
+                                        getTopic();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(long id, XMLRPCException error) {
+                                error.printStackTrace();
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity(), "Unable to delete post!", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onServerError(long id, XMLRPCServerException error) {
+                                error.printStackTrace();
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity(), "Unable to delete post!", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                        });
+                        break;
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int position) {
+
+            }
+        });
+        builder.show();
     }
 
     private void viewRatings() {

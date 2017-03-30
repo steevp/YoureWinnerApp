@@ -226,6 +226,11 @@ public class TopicViewActivity extends AppCompatActivity
     @Override
     public void onPageSelected(int position) {
         mPage = position;
+        destroyActionMode();
+    }
+
+    @Override
+    public void destroyActionMode() {
         if (mActionMode != null) {
             mActionMode.finish();
         }

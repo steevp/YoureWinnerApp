@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -44,7 +44,7 @@ public class NewsFragment extends Fragment {
                     final Object[] newsObject = (Object[]) r.get("news");
                     final ArrayList<String> news = new ArrayList<String>();
                     for (int i=0; i<newsObject.length; i++) {
-                        news.add(new String((byte[]) newsObject[i], StandardCharsets.UTF_8));
+                        news.add(new String((byte[]) newsObject[i], Charset.forName("UTF-8")));
                     }
                     getActivity().runOnUiThread(new Runnable() {
                         @Override

@@ -20,7 +20,7 @@ import com.squareup.picasso.Picasso;
 import org.kefirsf.bb.BBProcessorFactory;
 import org.kefirsf.bb.TextProcessor;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Map;
 
@@ -89,9 +89,9 @@ public class PrivateMessageActivity extends AppCompatActivity {
             public void onResponse(long id, Object result) {
                 Map<String,Object> r = (Map<String,Object>) result;
                 final String avatar = (String) r.get("icon_url");
-                final String username = new String((byte[]) r.get("msg_from"), StandardCharsets.UTF_8);
-                final String subject = new String((byte[]) r.get("msg_subject"), StandardCharsets.UTF_8);
-                final String msg = new String((byte[]) r.get("text_body"), StandardCharsets.UTF_8);
+                final String username = new String((byte[]) r.get("msg_from"), Charset.forName("UTF-8"));
+                final String subject = new String((byte[]) r.get("msg_subject"), Charset.forName("UTF-8"));
+                final String msg = new String((byte[]) r.get("text_body"), Charset.forName("UTF-8"));
                 Date timestamp = (Date) r.get("sent_date");
                 long now = System.currentTimeMillis();
                 final String date = DateUtils.getRelativeTimeSpanString(timestamp.getTime(), now, DateUtils.MINUTE_IN_MILLIS).toString();

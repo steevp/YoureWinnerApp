@@ -34,4 +34,10 @@
         app:showAsAction="never"
         android:visible="false"/>
 
+    <item
+        android:id="@+id/action_delete_post"
+        android:title="@string/action_delete_post"
+        app:showAsAction="never"
+        android:visible="false" />
+
 </menu>

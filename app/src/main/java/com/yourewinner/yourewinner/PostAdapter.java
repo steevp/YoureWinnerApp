@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -86,16 +86,16 @@ public class PostAdapter extends BaseAdapter {
 
 
         byte[] userBytes = post.get("post_author_name") != null ? (byte[]) post.get("post_author_name") : (byte[]) post.get("topic_author_name");
-        String username = new String(userBytes, StandardCharsets.UTF_8);
+        String username = new String(userBytes, Charset.forName("UTF-8"));
         holder.usernameTextView.setText(username);
 
-        String boardName = new String((byte[]) post.get("forum_name"), StandardCharsets.UTF_8);
+        String boardName = new String((byte[]) post.get("forum_name"), Charset.forName("UTF-8"));
         holder.boardNameTextView.setText(boardName);
 
-        String topicTitle = new String((byte[]) post.get("topic_title"), StandardCharsets.UTF_8);
+        String topicTitle = new String((byte[]) post.get("topic_title"), Charset.forName("UTF-8"));
         holder.topicTitleTextView.setText(Html.fromHtml("<strong>" + topicTitle + "</strong>"));
 
-        String postContent = new String((byte[]) post.get("short_content"), StandardCharsets.UTF_8);
+        String postContent = new String((byte[]) post.get("short_content"), Charset.forName("UTF-8"));
         holder.postContentTextView.setText(postContent);
 
         String avatar = (String) post.get("icon_url");

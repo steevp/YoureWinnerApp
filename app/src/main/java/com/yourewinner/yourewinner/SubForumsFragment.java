@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -87,7 +87,7 @@ public class SubForumsFragment extends Fragment implements ExpandableListView.On
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
         Map<String,Object> child = (Map<String,Object>) mSubForumsAdapter.getChild(groupPosition, childPosition);
         final String boardID = (String) child.get("forum_id");
-        final String boardName = new String((byte[]) child.get("forum_name"), StandardCharsets.UTF_8);
+        final String boardName = new String((byte[]) child.get("forum_name"), Charset.forName("UTF-8"));
         final Object[] c = (Object[]) child.get("child");
         ArrayList<Map<String,Object>> children = new ArrayList<Map<String,Object>>();
         if (c != null) {

@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -112,8 +112,8 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
 
                         for (int i=0;i<customFieldsList.length;i++) {
                             Map<String,Object> map = (Map<String,Object>) customFieldsList[i];
-                            String name = new String((byte[]) map.get("name"), StandardCharsets.UTF_8);
-                            String value = new String((byte[]) map.get("value"), StandardCharsets.UTF_8);
+                            String name = new String((byte[]) map.get("name"), Charset.forName("UTF-8"));
+                            String value = new String((byte[]) map.get("value"), Charset.forName("UTF-8"));
                             if (name.equals("Position")) {
                                 mProfileGroup.setText(value);
                             } else if (name.equals("Email")) {

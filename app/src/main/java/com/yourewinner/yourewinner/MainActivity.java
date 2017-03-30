@@ -26,7 +26,7 @@ import android.widget.ToggleButton;
 
 import com.squareup.picasso.Picasso;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -241,7 +241,7 @@ public class MainActivity extends BaseActivity
                 mForum.setModerator(canModerate);
 
                 mAvatar = (String) r.get("icon_url");
-                mUsername = new String((byte[]) r.get("username"), StandardCharsets.UTF_8);
+                mUsername = new String((byte[]) r.get("username"), Charset.forName("UTF-8"));
 
                 runOnUiThread(new Runnable() {
                     @Override

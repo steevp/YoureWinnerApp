@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -100,19 +100,19 @@ public class PrivateMessageAdapter extends BaseAdapter {
             ArrayList<String> senders = new ArrayList<String>();
             for (int i=0;i<msgTo.length;i++) {
                 Map<String,Object> map = (Map<String,Object>) msgTo[i];
-                senders.add(new String((byte[]) map.get("username"), StandardCharsets.UTF_8));
+                senders.add(new String((byte[]) map.get("username"), Charset.forName("UTF-8")));
             }
             sender = TextUtils.join(", ", senders);
         } else {
-            sender = new String((byte[]) message.get("msg_from"), StandardCharsets.UTF_8);
+            sender = new String((byte[]) message.get("msg_from"), Charset.forName("UTF-8"));
         }
 
         holder.usernameTextView.setText(sender);
 
-        String subject = new String((byte[]) message.get("msg_subject"), StandardCharsets.UTF_8);
+        String subject = new String((byte[]) message.get("msg_subject"), Charset.forName("UTF-8"));
         holder.subjectTextView.setText(subject);
 
-        String body = new String((byte[]) message.get("short_content"), StandardCharsets.UTF_8);
+        String body = new String((byte[]) message.get("short_content"), Charset.forName("UTF-8"));
         holder.bodyTextview.setText(body);
 
         Date timestamp = (Date) message.get("sent_date");

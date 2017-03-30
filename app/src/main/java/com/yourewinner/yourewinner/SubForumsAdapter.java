@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +28,7 @@ public class SubForumsAdapter extends BaseExpandableListAdapter {
         mChildren = new HashMap<String,Object[]>();
         for (int i=0;i<data.length;i++) {
             Map<String,Object> cat = (Map<String,Object>) data[i];
-            String catName = new String((byte[]) cat.get("forum_name"), StandardCharsets.UTF_8);
+            String catName = new String((byte[]) cat.get("forum_name"), Charset.forName("UTF-8"));
             Object[] child = (Object[]) cat.get("child");
             mCategories.add(catName);
             mChildren.put(catName, child);
@@ -92,7 +92,7 @@ public class SubForumsAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         Map<String,Object> child = (Map<String,Object>) getChild(groupPosition, childPosition);
-        final String boardText = new String((byte[]) child.get("forum_name"), StandardCharsets.UTF_8);
+        final String boardText = new String((byte[]) child.get("forum_name"), Charset.forName("UTF-8"));
 
         ViewHolder holder;
         if (convertView == null) {

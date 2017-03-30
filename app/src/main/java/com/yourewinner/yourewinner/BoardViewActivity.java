@@ -15,7 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -100,7 +100,7 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
             RelativeLayout headerItem = (RelativeLayout) getLayoutInflater().inflate(R.layout.board_header_item, null);
             TextView headerTitle = (TextView) headerItem.findViewById(R.id.board_header_title);
             Map<String,Object> child = (Map<String,Object>) mChildren.get(i);
-            final String boardName = new String((byte[]) child.get("forum_name"), StandardCharsets.UTF_8);
+            final String boardName = new String((byte[]) child.get("forum_name"), Charset.forName("UTF-8"));
             headerTitle.setText(boardName);
             final String boardID = (String) child.get("forum_id");
             final Object[] c = (Object[]) child.get("child");

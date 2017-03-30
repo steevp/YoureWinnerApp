@@ -28,7 +28,7 @@ import com.google.android.youtube.player.YouTubeThumbnailView;
 import com.squareup.picasso.Picasso;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -56,7 +56,7 @@ public class TopicViewAdapter extends BaseAdapter {
         for (final Object post: mPosts) {
             @SuppressWarnings("unchecked")
             final Map<String,Object> p = (Map<String,Object>) post;
-            final String username = new String((byte[]) p.get("post_author_name"), StandardCharsets.UTF_8);
+            final String username = new String((byte[]) p.get("post_author_name"), Charset.forName("UTF-8"));
             Mentions.getInstance().addMention(username);
         }
         mImageSizes.clear();
@@ -241,7 +241,7 @@ public class TopicViewAdapter extends BaseAdapter {
             e.printStackTrace();
         }
 
-        String postContent = new String((byte[]) post.get("post_content"), StandardCharsets.UTF_8);
+        String postContent = new String((byte[]) post.get("post_content"), Charset.forName("UTF-8"));
         String[] postContentSplit = postContent.split("(?=\\[(img|quote|spoiler)\\])|(?<=\\[/(img|quote|spoiler)\\])");
         holder.postContentTextView.removeAllViews();
         Pattern imgPattern = Pattern.compile("\\[img\\](.+)\\[/img\\]");

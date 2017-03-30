@@ -36,6 +36,7 @@
     <string name="action_share">Share link</string>
     <string name="action_copy">Copy to clipboard</string>
     <string name="action_delete_topic">Delete topic</string>
+    <string name="action_delete_post">Delete post</string>
     <string name="action_select">Select All</string>
     <string name="action_deselect">Deselect All</string>
     <string name="action_search">Search</string>

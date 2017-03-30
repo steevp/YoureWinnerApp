@@ -253,7 +253,8 @@ public class Forum {
 
     public long deletePost(String postID, XMLRPCCallback listener) {
         // 1 = SOFT_DELETE, 2 = HARD_DELETE
-        Object[] params = {postID, 1};
+        String reason = "Deleted by yw.com app";
+        Object[] params = {postID, 1, reason.getBytes()};
         return client.callAsync(listener, "m_delete_post", params);
     }
 
