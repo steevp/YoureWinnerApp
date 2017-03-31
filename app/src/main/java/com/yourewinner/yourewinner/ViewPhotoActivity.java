@@ -8,15 +8,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.github.chrisbanes.photoview.PhotoView;
 
 public class ViewPhotoActivity extends AppCompatActivity {
 
     private PhotoView mPhoto;
+    private ProgressBar mProgress;
     private String mPhotoUrl;
 
     @Override
@@ -34,7 +40,24 @@ public class ViewPhotoActivity extends AppCompatActivity {
         mPhotoUrl = getIntent().getStringExtra("imageURL");
 
         mPhoto = (PhotoView) findViewById(R.id.photo);
-        Glide.with(this).load(mPhotoUrl).diskCacheStrategy(DiskCacheStrategy.SOURCE).into(mPhoto);
+        mProgress = (ProgressBar) findViewById(R.id.progress);
+        Glide.with(this)
+                .load(mPhotoUrl)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        mProgress.setVisibility(View.GONE);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        mProgress.setVisibility(View.GONE);
+                        return false;
+                    }
+                })
+                .into(mPhoto);
     }
 
     @Override

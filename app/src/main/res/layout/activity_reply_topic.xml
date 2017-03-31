@@ -1,61 +1,66 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:fitsSystemWindows="true"
     tools:context="com.yourewinner.yourewinner.ReplyTopicActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:fitsSystemWindows="true"/>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <MultiAutoCompleteTextView
-            android:inputType="textCapSentences|textMultiLine"
-            android:id="@+id/post_content"
-            android:textSize="18sp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:dropDownHeight="100dp"
-            android:gravity="top"
-            android:padding="16dp"
-            android:hint="@string/hint_body"
-            android:background="@android:color/transparent"/>
-
-    </ScrollView>
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:background="?attr/colorPrimary">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/btn_emotes"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:src="@drawable/emotes"
-            android:background="@null"
-            android:onClick="bbButtons"/>
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:background="?attr/colorPrimary" />
 
-        <ImageButton
-            android:id="@+id/btn_bbcode"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:src="@drawable/bbcode"
-            android:background="@null"
-            android:onClick="bbButtons"/>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <MultiAutoCompleteTextView
+                android:inputType="textCapSentences|textMultiLine"
+                android:id="@+id/post_content"
+                android:textSize="18sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:dropDownHeight="100dp"
+                android:gravity="top"
+                android:padding="16dp"
+                android:hint="@string/hint_body"
+                android:background="@android:color/transparent"/>
+
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="?attr/colorPrimary">
+
+            <ImageButton
+                android:id="@+id/btn_emotes"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/emotes"
+                android:background="@null"
+                android:onClick="bbButtons"/>
+
+            <ImageButton
+                android:id="@+id/btn_bbcode"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/bbcode"
+                android:background="@null"
+                android:onClick="bbButtons"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
 
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

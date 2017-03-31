@@ -45,7 +45,7 @@
 
     <style name="StonerTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
-        <item name="colorPrimary">@color/winnerSilver</item>
+        <item name="colorPrimary">@color/winnerSilverDark</item>
         <item name="background_dialog">@color/winnerGreen</item>
         <item name="colorPrimaryDark">@color/winnerSilverDark</item>
         <item name="colorAccent">@color/winnerSilverDark</item>
