@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Toast;
@@ -20,7 +21,7 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class EditPostActivity extends AppCompatActivity {
+public class EditPostActivity extends AppCompatActivity implements EmoteGridFragment.OnEmotePickedListener {
 
     private Forum mForum;
     private ProgressDialog mDialog;
@@ -83,6 +84,23 @@ public class EditPostActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void bbButtons(View v) {
+        int page;
+        switch (v.getId()) {
+            case R.id.btn_emotes:
+                page = 0;
+                break;
+            case R.id.btn_bbcode:
+                page = 1;
+                break;
+            default:
+                page = 0;
+                break;
+        }
+        EmoteDialog dlg = EmoteDialog.newInstance(page);
+        dlg.show(getSupportFragmentManager(), "dialog");
     }
 
     public void getEditPost() {
@@ -172,4 +190,32 @@ public class EditPostActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onEmotePicked(String emote, boolean isBbcode) {
+        if (isBbcode) {
+            insertBbcode(emote);
+        } else {
+            insertText(emote);
+        }
+    }
+
+    private void insertBbcode(String bbcode) {
+        // Get selected text so we can wrap the bbcode around it
+        int selectionStart = mPostContent.getSelectionStart();
+        int selectionEnd = mPostContent.getSelectionEnd();
+        String selectedText = mPostContent.getText().toString().substring(selectionStart, selectionEnd);
+        bbcode = bbcode + selectedText + bbcode.replace("[", "[/");
+        insertText(bbcode);
+    }
+
+    private void insertText(String textToInsert) {
+        // Insert text at cursor position
+        int start = Math.max(mPostContent.getSelectionStart(), 0);
+        int end = Math.max(mPostContent.getSelectionEnd(), 0);
+        if (start > 0) {
+            textToInsert = " " + textToInsert;
+        }
+        mPostContent.getText().replace(Math.min(start, end), Math.max(start, end),
+                textToInsert, 0, textToInsert.length());
+    }
 }

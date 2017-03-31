@@ -19,6 +19,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
@@ -241,11 +242,17 @@ public class TopicViewAdapter extends BaseAdapter {
             e.printStackTrace();
         }
 
+        // Nasty regex coming up
         String postContent = new String((byte[]) post.get("post_content"), Charset.forName("UTF-8"));
-        String[] postContentSplit = postContent.split("(?=\\[(img|quote|spoiler)\\])|(?<=\\[/(img|quote|spoiler)\\])");
+        // Replace youtube links with yt bbcode
+        postContent = postContent.replaceAll("\\[url=https?://(?:www\\.)?youtu(?:\\.be/|be\\.com/watch\\?v=)([\\w\\-]{11})\\].+\\[/url\\]",
+                "[yt]$1[/yt]");
+        // Separate text from bbcodes we need to implement
+        String[] postContentSplit = postContent.split("(?=\\[(yt|img|quote|spoiler)\\])|(?<=\\[/(yt|img|quote|spoiler)\\])");
         holder.postContentTextView.removeAllViews();
         Pattern imgPattern = Pattern.compile("\\[img\\](.+)\\[/img\\]");
-        Pattern youtubePattern = Pattern.compile("\\[url=https?://(?:www\\.)?youtu(?:\\.be/|be\\.com/watch\\?v=)([\\w\\-]{11})\\].+\\[/url\\]");
+        //Pattern youtubePattern = Pattern.compile("\\[url=https?://(?:www\\.)?youtu(?:\\.be/|be\\.com/watch\\?v=)([\\w\\-]{11})\\].+\\[/url\\]");
+        Pattern youtubePattern = Pattern.compile("\\[yt\\]([\\w\\-]{11})\\[/yt\\]");
         Matcher imgMatcher, youtubeMatcher;
         LinearLayout blockQuote = null;
         RelativeLayout spoiler = null;
@@ -311,7 +318,10 @@ public class TopicViewAdapter extends BaseAdapter {
                         mContext.startActivity(intent);
                     }
                 });
-                Glide.with(mContext).load(imageURL).into(new GlideDrawableImageViewTarget(imageView) {
+                Glide.with(mContext)
+                        .load(imageURL)
+                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                        .into(new GlideDrawableImageViewTarget(imageView) {
                     @Override
                     public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> animation) {
                         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) imageView.getLayoutParams();
@@ -406,7 +416,12 @@ public class TopicViewAdapter extends BaseAdapter {
             } else {
                 LinkifyTextView textView = new LinkifyTextView(mContext);
                 textView.setTextSize(18);
-                textView.setText(Html.fromHtml(BBCodeConverter.process(content), new EmoteImageGetter(mContext), null));
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                    textView.setText(Html.fromHtml(BBCodeConverter.process(content), Html.FROM_HTML_MODE_LEGACY, new EmoteImageGetter(mContext), null));
+                } else {
+                    //noinspection deprecation
+                    textView.setText(Html.fromHtml(BBCodeConverter.process(content), new EmoteImageGetter(mContext), null));
+                }
                 textView.setMovementMethod(LinkMovementMethod.getInstance());
                 if (blockQuote != null) {
                     blockQuote.addView(textView);

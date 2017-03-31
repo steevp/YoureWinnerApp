@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.github.chrisbanes.photoview.PhotoView;
 
 public class ViewPhotoActivity extends AppCompatActivity {
@@ -33,7 +34,7 @@ public class ViewPhotoActivity extends AppCompatActivity {
         mPhotoUrl = getIntent().getStringExtra("imageURL");
 
         mPhoto = (PhotoView) findViewById(R.id.photo);
-        Glide.with(this).load(mPhotoUrl).into(mPhoto);
+        Glide.with(this).load(mPhotoUrl).diskCacheStrategy(DiskCacheStrategy.SOURCE).into(mPhoto);
     }
 
     @Override
@@ -59,7 +60,7 @@ public class ViewPhotoActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_TEXT, mPhotoUrl);
-        intent.setType("text/plain");
+        intent.setType("image/*");
         startActivity(Intent.createChooser(intent, getResources().getText(R.string.action_share)));
     }
 

@@ -100,9 +100,7 @@ public class PostAdapter extends BaseAdapter {
 
         String avatar = (String) post.get("icon_url");
         if (avatar.length() > 0) {
-            //Picasso.with(mContext).load(avatar).placeholder(R.drawable.no_avatar).fit().transform(new CircleTransform(mContext, false)).into(holder.avatarImageView);
             Picasso.with(mContext).load(avatar).placeholder(R.drawable.no_avatar).fit().into(holder.avatarImageView);
-            //Glide.with(mContext).load(avatar).placeholder(R.drawable.no_avatar).centerCrop().into(holder.avatarImageView);
         } else {
             holder.avatarImageView.setImageResource(R.drawable.no_avatar);
         }

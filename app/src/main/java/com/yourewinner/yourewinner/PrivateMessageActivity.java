@@ -109,7 +109,12 @@ public class PrivateMessageActivity extends AppCompatActivity {
                         getSupportActionBar().setTitle(subject);
 
                         TextProcessor processor = BBProcessorFactory.getInstance().create();
-                        mBody.setText(Html.fromHtml(processor.process(msg), new PicassoImageGetter(mBody, getResources(), Picasso.with(getApplicationContext())), null));
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                            mBody.setText(Html.fromHtml(processor.process(msg), Html.FROM_HTML_MODE_LEGACY, new EmoteImageGetter(PrivateMessageActivity.this), null));
+                        } else {
+                            //noinspection deprecation
+                            mBody.setText(Html.fromHtml(processor.process(msg), new EmoteImageGetter(PrivateMessageActivity.this), null));
+                        }
                         mBody.setMovementMethod(LinkMovementMethod.getInstance());
 
                         mDate.setText(date);
