@@ -3,8 +3,7 @@
     package="com.yourewinner.yourewinner">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -145,6 +144,7 @@
             android:name=".YouTubePlayerActivity"
             android:configChanges="screenSize|orientation"
             android:theme="@style/Theme.AppCompat.NoActionBar.Translucent" />
+        <activity android:name=".LoginActivity"></activity>
     </application>
 
 </manifest>

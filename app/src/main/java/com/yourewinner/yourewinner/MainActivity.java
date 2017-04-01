@@ -1,10 +1,7 @@
 package com.yourewinner.yourewinner;
 
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -19,20 +16,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.squareup.picasso.Picasso;
 
-import java.nio.charset.Charset;
-import java.util.Map;
-
 import de.hdodenhof.circleimageview.CircleImageView;
-import de.timroes.axmlrpc.XMLRPCCallback;
-import de.timroes.axmlrpc.XMLRPCException;
-import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, PrivateMessageFragment.InboxRefreshListener {
@@ -41,9 +31,9 @@ public class MainActivity extends BaseActivity
     public final static String AVATAR = "AVATAR";
     public final static String USERNAME = "USERNAME";
     public final static int RESULT_RELOAD = 666;
+    public final static int LOGIN_AGAIN = 777;
 
     private Forum mForum;
-    private ProgressDialog mDialog;
     private PrefsManager mPrefs;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -100,10 +90,6 @@ public class MainActivity extends BaseActivity
         mDrawerView.addHeaderView(drawerHeader);
         mDrawerView.getMenu().findItem(mDrawerItemId).setChecked(true);
         setupDrawer();
-
-        mDialog = new ProgressDialog(this);
-        mDialog.setMessage(getString(R.string.login_message));
-        mDialog.setCancelable(false);
 
         final Intent intent = getIntent();
         final String action = intent.getAction();
@@ -190,110 +176,18 @@ public class MainActivity extends BaseActivity
         if (mUsername == null) {
             mUsername = username;
         }
-        if (username.length() == 0 || password.length() == 0) {
-            // Show sign in dialog
-            AlertDialog.Builder alert = new AlertDialog.Builder(this);
-            final View input = getLayoutInflater().inflate(R.layout.dialog_signin, null);
-            alert.setView(input);
-            alert.setPositiveButton(R.string.signin, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    EditText inputUsername = (EditText) input.findViewById(R.id.username);
-                    EditText inputPassword = (EditText) input.findViewById(R.id.password);
-                    String user = inputUsername.getText().toString();
-                    String pass = inputPassword.getText().toString();
-                    if (user.length() > 0 && pass.length() > 0) {
-                        mPrefs.setUsername(user);
-                        mPrefs.setPassword(pass);
-                        doLogin(user, pass);
-                    }
-                }
-            });
 
-            alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    selectItem(mDrawerItemId);
-                }
-            });
-
-            alert.show();
-
-        } else if (!mForum.getLogin()) {
-            doLogin(username, password);
+        if (username.length() == 0 || password.length() == 0 || !mForum.getLogin()) {
+            startLogin();
         } else {
             setupDrawerHeader();
             selectItem(mDrawerItemId);
         }
     }
 
-    public void doLogin(final String username, final String password) {
-        mDialog.show();
-        final long id = mForum.login(username, password, new XMLRPCCallback() {
-            @Override
-            public void onResponse(long id, Object result) {
-                setThreadId(0);
-                mForum.setLogin(true);
-
-                Map<String, Object> r = (Map<String, Object>) result;
-
-                final boolean canModerate = (boolean) r.get("can_moderate");
-                mForum.setModerator(canModerate);
-
-                mAvatar = (String) r.get("icon_url");
-                mUsername = new String((byte[]) r.get("username"), Charset.forName("UTF-8"));
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mAvatar.length() > 0) {
-                            // Store avatar url in prefs
-                            mPrefs.setAvatar(mAvatar);
-                        }
-                        mPrefs.setModerator(canModerate);
-                        Map<String,String> cookies = mForum.getCookies();
-                        mPrefs.setCookies(cookies);
-                        setupDrawerHeader();
-                        mDialog.dismiss();
-                        Toast.makeText(getApplicationContext(), "YOU'RE WINNER, " + username + " !", Toast.LENGTH_LONG).show();
-                        selectItem(mDrawerItemId);
-                        //checkNewMessages();
-                    }
-                });
-            }
-
-            @Override
-            public void onError(long id, final XMLRPCException error) {
-                setThreadId(0);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        error.printStackTrace();
-                        mForum.setLogin(false);
-                        mForum.setModerator(false);
-                        mDialog.dismiss();
-                        Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
-                        selectItem(mDrawerItemId);
-                    }
-                });
-            }
-
-            @Override
-            public void onServerError(long id, XMLRPCServerException error) {
-                setThreadId(0);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mForum.setLogin(false);
-                        mForum.setModerator(false);
-                        mDialog.dismiss();
-                        Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_LONG).show();
-                        selectItem(mDrawerItemId);
-                    }
-                });
-            }
-        });
-        setThreadId(id);
+    private void startLogin() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivityForResult(intent, 1);
     }
 
     public void doLogout() {
@@ -392,9 +286,17 @@ public class MainActivity extends BaseActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_RELOAD) {
-            // recreate activity to load new theme
-            recreate();
+        switch (resultCode) {
+            case RESULT_RELOAD:
+                if (data != null) {
+                    mAvatar = data.getStringExtra(AVATAR);
+                    mUsername = data.getStringExtra(USERNAME);
+                }
+                recreate();
+                break;
+            case LOGIN_AGAIN:
+                startLogin();
+                break;
         }
     }
 
