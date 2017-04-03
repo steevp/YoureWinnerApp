@@ -17,6 +17,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/right_arrow"/>
+        android:src="?attr/right_arrow"/>
 
 </RelativeLayout>

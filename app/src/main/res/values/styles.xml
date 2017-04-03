@@ -23,6 +23,9 @@
         <item name="ic_action_previous">@drawable/ic_action_previous</item>
         <item name="ic_action_next">@drawable/ic_action_next</item>
         <item name="ic_action_last">@drawable/ic_action_last</item>
+        <item name="popupTheme">@style/AppTheme.PopupOverlayDark</item>
+        <item name="android:dialogTheme">@style/DialogSlideAnim</item>
+        <item name="right_arrow">@drawable/right_arrow</item>
     </style>
 
     <style name="GayPrideTheme.Base" parent="Theme.AppCompat.NoActionBar">
@@ -41,14 +44,17 @@
         <item name="ic_action_previous">@drawable/ic_action_previous</item>
         <item name="ic_action_next">@drawable/ic_action_next</item>
         <item name="ic_action_last">@drawable/ic_action_last</item>
+        <item name="popupTheme">@style/AppTheme.PopupOverlayDark</item>
+        <item name="android:dialogTheme">@style/DialogSlideAnim</item>
+        <item name="right_arrow">@drawable/right_arrow</item>
     </style>
 
     <style name="StonerTheme.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
-        <item name="colorPrimary">@color/winnerSilverDark</item>
+        <item name="colorPrimary">@color/winnerSilver</item>
         <item name="background_dialog">@color/winnerGreen</item>
         <item name="colorPrimaryDark">@color/winnerSilverDark</item>
-        <item name="colorAccent">@color/winnerSilverDark</item>
+        <item name="colorAccent">@color/winnerYellow</item>
         <item name="android:windowBackground">@color/winnerGreen</item>
         <item name="android:textColorPrimary">@color/fontColor</item>
         <item name="android:textColorSecondary">@color/fontColor</item>
@@ -59,6 +65,9 @@
         <item name="ic_action_previous">@drawable/ic_action_previous</item>
         <item name="ic_action_next">@drawable/ic_action_next</item>
         <item name="ic_action_last">@drawable/ic_action_last</item>
+        <item name="popupTheme">@style/AppTheme.PopupOverlayDark</item>
+        <item name="android:dialogTheme">@style/DialogSlideAnim</item>
+        <item name="right_arrow">@drawable/right_arrow</item>
     </style>
 
     <style name="DarkTheme.Base" parent="Theme.AppCompat.NoActionBar">
@@ -69,16 +78,25 @@
         <item name="ic_action_previous">@drawable/ic_action_previous</item>
         <item name="ic_action_next">@drawable/ic_action_next</item>
         <item name="ic_action_last">@drawable/ic_action_last</item>
+        <item name="popupTheme">@style/AppTheme.PopupOverlayDark</item>
+        <item name="android:dialogTheme">@style/DialogSlideAnim</item>
+        <item name="right_arrow">@drawable/right_arrow</item>
     </style>
 
-    <style name="LightTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="LightTheme.Base" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="windowActionModeOverlay">true</item>
-        <item name="color_username">@color/colorLink</item>
+        <item name="colorPrimary">@color/materialBlue</item>
+        <item name="color_username">@color/materialPink</item>
+        <item name="colorPrimaryDark">@color/materialBlueDark</item>
+        <item name="colorAccent">@color/materialPink</item>
         <item name="background_dialog">#fff5f5f5</item>
         <item name="ic_action_first">@drawable/ic_action_first_dark</item>
         <item name="ic_action_previous">@drawable/ic_action_previous_dark</item>
         <item name="ic_action_next">@drawable/ic_action_next_dark</item>
         <item name="ic_action_last">@drawable/ic_action_last_dark</item>
+        <item name="popupTheme">@style/AppTheme.PopupOverlay</item>
+        <item name="android:dialogTheme">@style/DialogSlideAnim.Light</item>
+        <item name="right_arrow">@drawable/right_arrow_dark</item>
     </style>
 
     <color name="winnerOrange">#BE752A</color>
@@ -92,10 +110,14 @@
     <color name="winnerPurple">#3C1C45</color>
     <color name="winnerPinkLink">#D233B7</color>
 
-    <color name="winnerSilver">#EBEBEB</color>
-    <color name="winnerSilverDark">#C7C7C7</color>
+    <color name="winnerSilver">#C7C7C7</color>
+    <color name="winnerSilverDark">#B7B7B7</color>
     <color name="winnerGreen">#1E3F1E</color>
     <color name="winnerYellow">#FF6</color>
+    <color name="materialBlue">#3F51B5</color>
+    <color name="materialBlueDark">#303F9F</color>
+    <color name="materialPink">#FF4081</color>
+
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
@@ -105,6 +127,8 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="AppTheme.PopupOverlayDark" parent="ThemeOverlay.AppCompat.Dark" />
 
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>
@@ -130,6 +154,17 @@
 
     <!-- animation for dialog box -->
     <style name="DialogSlideAnim" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="colorAccent">@null</item>
+        <item name="android:gravity">bottom</item>
+        <item name="android:background">?attr/background_dialog</item>
+    </style>
+
+    <style name="DialogSlideAnim.Light" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
         <item name="android:windowBackground">@null</item>
         <item name="android:windowNoTitle">true</item>

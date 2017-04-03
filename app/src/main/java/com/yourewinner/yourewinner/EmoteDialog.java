@@ -31,7 +31,7 @@ public class EmoteDialog extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPage = getArguments().getInt(ARG_PAGE);
-        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.DialogSlideAnim);
+        //setStyle(DialogFragment.STYLE_NO_TITLE, R.style.DialogSlideAnim);
     }
 
     @Override

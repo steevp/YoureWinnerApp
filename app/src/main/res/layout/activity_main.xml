@@ -7,25 +7,19 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
     <!-- The main content view -->
-    <LinearLayout
+    <android.support.design.widget.CoordinatorLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:fitsSystemWindows="true"/>
+        <include layout="@layout/toolbar" />
 
         <FrameLayout
             android:id="@+id/content_frame"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+    </android.support.design.widget.CoordinatorLayout>
     <!-- The navigation drawer -->
     <android.support.design.widget.NavigationView android:id="@+id/left_drawer"
         android:layout_width="wrap_content"
@@ -35,6 +29,5 @@
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
         android:background="?android:attr/windowBackground"
-        app:menu="@menu/drawer"
-        android:fitsSystemWindows="true"/>
+        app:menu="@menu/drawer" />
 </android.support.v4.widget.DrawerLayout>
