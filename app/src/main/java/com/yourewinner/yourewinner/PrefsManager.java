@@ -15,6 +15,7 @@ public class PrefsManager {
     private final static String PREF_SMFCOOKIE = "SMFCookie557";
     private final static String PREF_PHPSESSID = "PHPSESSID";
     private final static String PREF_MODERATOR = "PREF_MODERATOR";
+    private final static String PREF_BANNER = "rotating_banner";
 
     private SharedPreferences mPrefs;
 
@@ -60,6 +61,13 @@ public class PrefsManager {
 
     public Boolean getModerator() {
         return mPrefs.getBoolean(PREF_MODERATOR, false);
+    }
+
+    public void setBanner(Boolean banner) {
+        writePref(PREF_BANNER, banner);
+    }
+    public Boolean getBanner() {
+        return mPrefs.getBoolean(PREF_BANNER, false);
     }
 
     public Map<String,String> getCookies() {

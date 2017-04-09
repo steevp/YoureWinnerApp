@@ -33,7 +33,7 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("theme")) {
+        if (key.equals("theme") || key.equals("rotating_banner")) {
             setResult(MainActivity.RESULT_RELOAD);
         }
     }

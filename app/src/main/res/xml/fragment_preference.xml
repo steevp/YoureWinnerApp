@@ -27,6 +27,11 @@
             android:entryValues="@array/theme_values"
             android:defaultValue="0"/>
 
+        <CheckBoxPreference
+            android:key="rotating_banner"
+            android:title="@string/pref_banner"
+            android:summary="@string/pref_banner_summary" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

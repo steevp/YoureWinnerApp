@@ -6,20 +6,25 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -36,6 +41,8 @@ public class MainActivity extends BaseActivity
     private Forum mForum;
     private PrefsManager mPrefs;
     private DrawerLayout mDrawerLayout;
+    private AppBarLayout mAppBarLayout;
+    private CollapsingToolbarLayout mCollapsingToolbarLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mDrawerView;
     private int mDrawerItemId;
@@ -44,6 +51,7 @@ public class MainActivity extends BaseActivity
     private CircleImageView mAvatarView;
     private String mUsername;
     private String mAvatar;
+    private ImageView mBanner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +61,13 @@ public class MainActivity extends BaseActivity
         mForum = Forum.getInstance();
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        if (mPrefs.getBanner()) {
+            // Rotating banner
+            setContentView(R.layout.activity_main);
+        } else {
+            // No banner
+            setContentView(R.layout.activity_main_no_banner);
+        }
 
         if (savedInstanceState != null) {
             mDrawerItemId = savedInstanceState.getInt(DRAWER_ITEM_ID);
@@ -71,12 +85,18 @@ public class MainActivity extends BaseActivity
         getSupportActionBar().setHomeButtonEnabled(true);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout);
+        setupCollapsingToolbar();
         mDrawerView = (NavigationView) findViewById(R.id.left_drawer);
         mDrawerView.setNavigationItemSelectedListener(this);
 
         View drawerHeader = getLayoutInflater().inflate(R.layout.navigation_header, null);
         mAvatarView = (CircleImageView) drawerHeader.findViewById(R.id.avatar);
         mUsernameView = (TextView) drawerHeader.findViewById(R.id.username);
+
+        mBanner = (ImageView) findViewById(R.id.banner);
+        loadBanner();
 
         // Toggles the logout menu
         ToggleButton toggleLogout = (ToggleButton) drawerHeader.findViewById(R.id.toggle_logout);
@@ -198,8 +218,39 @@ public class MainActivity extends BaseActivity
         mForum.setModerator(false);
         mForum.setUsername(mUsername);
         setupDrawerHeader();
-        Toast.makeText(this, "Good-bye!", Toast.LENGTH_LONG).show();
-        finish();
+        startLogin();
+    }
+
+    private void setupCollapsingToolbar() {
+        if (mCollapsingToolbarLayout != null) {
+            getSupportActionBar().setTitle(" ");
+            mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+                private boolean mCollapsed = false;
+                @Override
+                public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                    if (mCollapsed && verticalOffset == 0) {
+                        Log.i("ywtag", "appbar expanded");
+                        mCollapsed = false;
+                        mCollapsingToolbarLayout.setTitle(" ");
+                    } else if (!mCollapsed && Math.abs(verticalOffset) >= mAppBarLayout.getTotalScrollRange()) {
+                        Log.i("ywtag", "appbar collapsed");
+                        mCollapsed = true;
+                        mCollapsingToolbarLayout.setTitle(getString(R.string.app_name));
+                        loadBanner();
+                    }
+                }
+            });
+        }
+    }
+
+    private void loadBanner() {
+        if (mBanner != null) {
+            Glide.with(this)
+                    .load("https://www.yourewinner.com/banners/steevbanner.php")
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .into(mBanner);
+        }
     }
 
     @Override

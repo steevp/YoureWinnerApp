@@ -5,12 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.Map;
@@ -20,7 +21,7 @@ import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class PostsFragment extends BaseFragment
-        implements SwipeRefreshLayout.OnRefreshListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener, XMLRPCCallback {
+        implements PostsAdapterRv.OnItemClickedListener, SwipeRefreshLayout.OnRefreshListener, XMLRPCCallback {
     private final static String ARG_POSITION = "ARG_POSITION";
     // Needed for Participated
     private final static String ARG_USERNAME = "ARG_USERNAME";
@@ -33,11 +34,13 @@ public class PostsFragment extends BaseFragment
     private int mPosition;
     private String mUsername;
     private Context mContext;
-    private ListView mPostsList;
-    private PostAdapter mPostAdapter;
+
+    private RecyclerView mRecyclerView;
+    private PostsAdapterRv mAdapter;
+    private LinearLayoutManager mLayoutManager;
+
     private SwipeRefreshLayout mSwipeContainer;
     private Forum mForum;
-    private View mFooter;
     private View mEmptyView;
 
     private int lastCount = 0;
@@ -66,17 +69,42 @@ public class PostsFragment extends BaseFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_posts_view, container, false);
-        mPostsList = (ListView) view.findViewById(R.id.posts_list);
+        View view = inflater.inflate(R.layout.fragment_posts_view_rv, container, false);
+
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.posts_recycler);
+        mLayoutManager = new LinearLayoutManager(mRecyclerView.getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new PostsAdapterRv(mRecyclerView.getContext(), this);
+        mRecyclerView.setAdapter(mAdapter);
+        DividerItemDecoration divider = new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation());
+        mRecyclerView.addItemDecoration(divider);
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+                    userScrolled = true;
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int lastVisibleItem = mLayoutManager.findFirstVisibleItemPosition() + mRecyclerView.getChildCount();
+                int totalItemCount = mLayoutManager.getItemCount();
+
+                if (userScrolled && lastVisibleItem == totalItemCount && totalItemCount > lastCount && !isLoading) {
+                    isLoading = true;
+                    lastCount = totalItemCount;
+                    addMoreItems();
+                }
+            }
+        });
+
         mSwipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         mSwipeContainer.setOnRefreshListener(this);
-        mPostAdapter = new PostAdapter(mContext, inflater);
-        mPostsList.setAdapter(mPostAdapter);
-        mPostsList.setOnScrollListener(this);
-        mPostsList.setOnItemClickListener(this);
-        mFooter = inflater.inflate(R.layout.loading, null);
         mEmptyView = view.findViewById(R.id.empty_list_item);
-        //mSwipeContainer.setRefreshing(true);
         // Workaround to show indicator
         mSwipeContainer.post(new Runnable() {
             @Override
@@ -120,50 +148,33 @@ public class PostsFragment extends BaseFragment
         getPosts();
     }
 
-    public void addMoreItems() {
+    private void addItems(Object[] items) {
+        if ((mLayoutManager.getItemCount() + items.length) == 0) {
+            // Empty RecyclerView
+            mEmptyView.setVisibility(View.VISIBLE);
+        } else {
+            mEmptyView.setVisibility(View.GONE);
+            mAdapter.updateData(items);
+        }
+    }
+    private void addMoreItems() {
         currentPage++;
-        mPostsList.addFooterView(mFooter);
+        mAdapter.setFooterEnabled(true);
         getPosts();
+    }
+
+    private void stopLoading() {
+        mAdapter.setFooterEnabled(false);
+        isLoading = false;
+        mSwipeContainer.setRefreshing(false);
     }
 
     @Override
     public void onRefresh() {
-        mPostsList.setEmptyView(null);
-        mPostAdapter.clear();
-        mPostsList.removeFooterView(mFooter);
+        mAdapter.clear();
         lastCount = 0;
         currentPage = 1;
         getPosts();
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Map<String,Object> topic = (Map<String,Object>) mPostAdapter.getItem(position);
-        if (topic != null) {
-            String topicID = (String) topic.get("topic_id");
-            String boardID = (String) topic.get("forum_id");
-            Intent intent = new Intent(mContext, TopicViewActivity.class);
-            intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
-            intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);
-            startActivityForResult(intent, 1);
-        }
-    }
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
-            userScrolled = true;
-        }
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        final int lastItem = firstVisibleItem + visibleItemCount - mPostsList.getFooterViewsCount();
-        if (userScrolled && lastItem == totalItemCount && totalItemCount > lastCount && !isLoading) {
-            isLoading = true;
-            lastCount = totalItemCount;
-            addMoreItems();
-        }
     }
 
     @Override
@@ -172,54 +183,49 @@ public class PostsFragment extends BaseFragment
         Map<String, Object> r = (Map<String, Object>) result;
         final Object[] topics = (Object[]) r.get("topics");
 
-        final Activity activity = getActivity();
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mPostsList.removeFooterView(mFooter);
-                    mPostAdapter.updateData(topics);
-                    isLoading = false;
-                    mSwipeContainer.setRefreshing(false);
-                    mPostsList.setEmptyView(mEmptyView);
-                }
-            });
-        }
+        ((Activity) mContext).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                stopLoading();
+                addItems(topics);
+            }
+        });
     }
 
     @Override
     public void onError(long id, XMLRPCException error) {
         setThreadId(0);
         error.printStackTrace();
-        final Activity activity = getActivity();
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mPostsList.removeFooterView(mFooter);
-                    isLoading = false;
-                    mSwipeContainer.setRefreshing(false);
-                    Toast.makeText(activity.getApplicationContext(), "ERROR: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
-                }
-            });
-        }
+        ((Activity) mContext).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                stopLoading();
+                Toast.makeText(mContext, "ERROR: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
     public void onServerError(long id, XMLRPCServerException error) {
         setThreadId(0);
         error.printStackTrace();
-        final Activity activity = getActivity();
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mPostsList.removeFooterView(mFooter);
-                    isLoading = false;
-                    mSwipeContainer.setRefreshing(false);
-                    Toast.makeText(activity.getApplicationContext(), "ERROR: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
-                }
-            });
-        }
+        ((Activity) mContext).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                stopLoading();
+                Toast.makeText(mContext, "ERROR: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public void onItemClicked(Map<String, Object> item) {
+        // Load topic
+        String topicID = (String) item.get("topic_id");
+        String boardID = (String) item.get("forum_id");
+        Intent intent = new Intent(mContext, TopicViewActivity.class);
+        intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
+        intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);
+        startActivityForResult(intent, 1);
     }
 }

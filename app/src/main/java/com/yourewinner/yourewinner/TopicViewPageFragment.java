@@ -288,7 +288,13 @@ public class TopicViewPageFragment extends BaseFragment
                             mLoadingBar.setVisibility(View.GONE);
                             mPostsList.setVisibility(View.VISIBLE);
                             if (mScrollPos > 0) {
-                                mPostsList.smoothScrollToPosition(mScrollPos + 1);
+                                mPostsList.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mPostsList.setSelection(mScrollPos + 1);
+                                    }
+                                });
+                                //mPostsList.smoothScrollToPosition(mScrollPos + 1);
                             }
                             // Tell the activity to update the page count
                             mCallback.onPageCountChanged(pageCount);
@@ -349,7 +355,13 @@ public class TopicViewPageFragment extends BaseFragment
                                 mPostsAdapter.updateData(posts);
                                 mLoadingBar.setVisibility(View.GONE);
                                 mPostsList.setVisibility(View.VISIBLE);
-                                mPostsList.smoothScrollToPosition(scrollPos + 1);
+                                //mPostsList.smoothScrollToPosition(scrollPos + 1);
+                                mPostsList.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mPostsList.setSelection(scrollPos + 1);
+                                    }
+                                });
                             }
                             activity.setTitle(topicTitle);
                         }
