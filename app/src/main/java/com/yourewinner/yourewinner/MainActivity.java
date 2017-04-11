@@ -120,6 +120,15 @@ public class MainActivity extends BaseActivity
         }
     }
 
+    @Override
+    public void setTitle(CharSequence title) {
+        if (mCollapsingToolbarLayout != null) {
+            mCollapsingToolbarLayout.setTitle(title);
+        } else {
+            super.setTitle(title);
+        }
+    }
+
     private void handleUri(Uri uri) {
         final String topic = uri.getQueryParameter("topic");
         if (topic != null) {
@@ -165,7 +174,7 @@ public class MainActivity extends BaseActivity
             }
         };
         mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
     }
 
     private void setupDrawerHeader() {
@@ -222,35 +231,41 @@ public class MainActivity extends BaseActivity
     }
 
     private void setupCollapsingToolbar() {
-        if (mCollapsingToolbarLayout != null) {
-            getSupportActionBar().setTitle(" ");
-            mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-                private boolean mCollapsed = false;
-                @Override
-                public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                    if (mCollapsed && verticalOffset == 0) {
-                        Log.i("ywtag", "appbar expanded");
-                        mCollapsed = false;
-                        mCollapsingToolbarLayout.setTitle(" ");
-                    } else if (!mCollapsed && Math.abs(verticalOffset) >= mAppBarLayout.getTotalScrollRange()) {
-                        Log.i("ywtag", "appbar collapsed");
-                        mCollapsed = true;
-                        mCollapsingToolbarLayout.setTitle(getString(R.string.app_name));
-                        loadBanner();
-                    }
-                }
-            });
+        if (mCollapsingToolbarLayout == null) {
+            // Banner disabled
+            return;
         }
+        // Collapse by default
+        mAppBarLayout.setExpanded(false, false);
+        mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            private boolean mCollapsed = false;
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (mCollapsed && verticalOffset == 0) {
+                    Log.i("ywtag", "appbar expanded");
+                    mCollapsed = false;
+                    mCollapsingToolbarLayout.setTitle(" ");
+                } else if (!mCollapsed && Math.abs(verticalOffset) >= mAppBarLayout.getTotalScrollRange()) {
+                    Log.i("ywtag", "appbar collapsed");
+                    mCollapsed = true;
+                    mCollapsingToolbarLayout.setTitle(getString(R.string.app_name));
+                    loadBanner();
+                }
+            }
+        });
     }
 
     private void loadBanner() {
-        if (mBanner != null) {
-            Glide.with(this)
-                    .load("https://www.yourewinner.com/banners/steevbanner.php")
-                    .skipMemoryCache(true)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .into(mBanner);
+        if (mBanner == null) {
+            // Banner disabled
+            return;
         }
+
+        Glide.with(this)
+                .load("https://www.yourewinner.com/banners/steevbanner.php")
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .into(mBanner);
     }
 
     @Override
@@ -273,9 +288,11 @@ public class MainActivity extends BaseActivity
         Intent intent = null;
         switch (id) {
             case R.id.drawer_home:
+                setTitle(getString(R.string.app_name));
                 fragment = new HomeFragment();
                 break;
             case R.id.drawer_news:
+                setTitle(getString(R.string.action_news));
                 fragment = new NewsFragment();
                 break;
             case R.id.drawer_profile:
@@ -283,9 +300,11 @@ public class MainActivity extends BaseActivity
                 intent.putExtra("username", mUsername);
                 break;
             case R.id.drawer_messages:
+                setTitle(getString(R.string.action_messages));
                 fragment = new InboxFragment();
                 break;
             case R.id.drawer_browse:
+                setTitle(getString(R.string.action_browse));
                 fragment = new SubForumsFragment();
                 Bundle args = new Bundle();
                 args.putInt(SubForumsFragment.ARG_PAGE, 1);

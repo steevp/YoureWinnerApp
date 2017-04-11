@@ -3,6 +3,7 @@ package com.yourewinner.yourewinner;
 import android.content.Context;
 
 import java.util.Map;
+import java.util.Random;
 
 public class Config {
 
@@ -14,6 +15,8 @@ public class Config {
             R.style.LightTheme
     };
 
+    private static Random rng = new Random();
+
     /**
      * This method is called in each activity's onCreate().
      *
@@ -23,6 +26,10 @@ public class Config {
         PrefsManager prefs = new PrefsManager(context);
         String theme = prefs.getTheme();
         int themeId = Integer.parseInt(theme);
+        if (themeId == 5) {
+            // Roguelike mode
+            themeId = rng.nextInt(THEMES.length);
+        }
         context.setTheme(THEMES[themeId]);
 
         Forum forum = Forum.getInstance();

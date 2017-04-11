@@ -21,6 +21,6 @@
         android:visibility="gone"
         android:gravity="center"
         android:textSize="18sp"
-        android:text="No topics!"/>
+        android:text="@string/no_topics"/>
 
 </FrameLayout>

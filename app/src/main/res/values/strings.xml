@@ -77,6 +77,7 @@
         <item>Stoner Theme</item>
         <item>Dark Theme</item>
         <item>Light Theme</item>
+        <item>Roguelike Mode</item>
     </string-array>
 
     <string-array name="theme_values">
@@ -85,6 +86,7 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+        <item>5</item>
     </string-array>
 
     <string name="title_activity_edit_post"></string>
@@ -109,5 +111,6 @@
     <string name="spoiler_reveal">Click here to reveal spoiler</string>
     <string name="server_error">ERROR: yourewinner.com might be down!</string>
     <string name="edit_error">Unable to edit your post!</string>
+    <string name="no_topics">No topics!</string>
 
 </resources>
