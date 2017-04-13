@@ -27,10 +27,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.squareup.picasso.Picasso;
 
+import java.util.Map;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener, PrivateMessageFragment.InboxRefreshListener {
+        implements PostsAdapter.OnItemClickedListener, NavigationView.OnNavigationItemSelectedListener, PrivateMessageFragment.InboxRefreshListener {
 
     public final static String DRAWER_ITEM_ID = "DRAWER_ITEM_ID";
     public final static String AVATAR = "AVATAR";
@@ -373,5 +375,16 @@ public class MainActivity extends BaseActivity
     @Override
     protected void resumeThread() {
         doWelcome();
+    }
+
+    @Override
+    public void onItemClicked(Map<String, Object> item) {
+        // Load topic
+        String topicID = (String) item.get("topic_id");
+        String boardID = (String) item.get("forum_id");
+        Intent intent = new Intent(this, TopicViewActivity.class);
+        intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
+        intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);
+        startActivityForResult(intent, 1);
     }
 }

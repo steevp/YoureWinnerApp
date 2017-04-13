@@ -19,11 +19,7 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-/**
- * Created by steven on 4/4/17.
- */
-
-public class PostsAdapterRv extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final static int TYPE_ITEM = 0;
     private final static int TYPE_FOOTER = 1;
 
@@ -73,10 +69,14 @@ public class PostsAdapterRv extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    public PostsAdapterRv(Context c, OnItemClickedListener listener) {
+    public PostsAdapter(Context c) {
         mContext = c;
         mDataSet = new ArrayList<>();
-        mCallback = listener;
+        try {
+            mCallback = (OnItemClickedListener) c;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(c.toString() + " must implement PostsAdapter.OnItemClickedListener!");
+        }
     }
 
     public void setFooterEnabled(boolean b) {

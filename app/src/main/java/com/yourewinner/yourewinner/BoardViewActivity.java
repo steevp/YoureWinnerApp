@@ -4,13 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,16 +24,15 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class BoardViewActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
-
+public class BoardViewActivity extends AppCompatActivity implements PostsAdapter.OnItemClickedListener {
     private Forum mForum;
-    private ListView mPostList;
-    private PostAdapter mPostAdapter;
+    private RecyclerView mRecyclerView;
+    private PostsAdapter mAdapter;
+    private LinearLayoutManager mLayoutManager;
     private String mBoardID;
     private String mBoardName;
     private ArrayList<Map<String,Object>> mChildren;
     private LinearLayout mHeader;
-    private View mFooter;
 
     private int lastCount = 0;
     private int currentPage = 1;
@@ -60,19 +60,39 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
         getSupportActionBar().setTitle(mBoardName);
 
         mForum = Forum.getInstance();
-        mPostList = (ListView) findViewById(R.id.posts_list);
-        mPostList.setOnItemClickListener(this);
-        mPostList.setOnScrollListener(this);
-        mPostAdapter = new PostAdapter(this, getLayoutInflater());
-        mPostList.setAdapter(mPostAdapter);
+        mRecyclerView = (RecyclerView) findViewById(R.id.posts_recycler);
+        mLayoutManager = new LinearLayoutManager(mRecyclerView.getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new PostsAdapter(mRecyclerView.getContext());
+        mRecyclerView.setAdapter(mAdapter);
+        // Add divider
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation()));
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+                    userScrolled = true;
+                }
+            }
 
-        mHeader = (LinearLayout) getLayoutInflater().inflate(R.layout.board_header, null);
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int lastVisibleItem = mLayoutManager.findFirstVisibleItemPosition() + mRecyclerView.getChildCount();
+                int totalItemCount = mLayoutManager.getItemCount();
+
+                if (userScrolled && lastVisibleItem == totalItemCount && totalItemCount > lastCount && !isLoading) {
+                    isLoading = true;
+                    lastCount = totalItemCount;
+                    addMoreItems();
+                }
+            }
+        });
+
+        //mHeader = (LinearLayout) getLayoutInflater().inflate(R.layout.board_header, null);
+        mHeader = (LinearLayout) findViewById(R.id.board_header);
         populateHeader();
-
-        mPostList.addHeaderView(mHeader);
-
-        mFooter = (View) getLayoutInflater().inflate(R.layout.loading, null);
-        mPostList.addFooterView(mFooter);
 
         lastCount = 0;
         currentPage = 1;
@@ -97,7 +117,7 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
         mHeader.removeAllViews();
 
         for (int i=0;i<mChildren.size();i++) {
-            RelativeLayout headerItem = (RelativeLayout) getLayoutInflater().inflate(R.layout.board_header_item, null);
+            RelativeLayout headerItem = (RelativeLayout) getLayoutInflater().inflate(R.layout.board_header_item, mHeader, false);
             TextView headerTitle = (TextView) headerItem.findViewById(R.id.board_header_title);
             Map<String,Object> child = (Map<String,Object>) mChildren.get(i);
             final String boardName = new String((byte[]) child.get("forum_name"), Charset.forName("UTF-8"));
@@ -113,7 +133,7 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
             headerItem.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), BoardViewActivity.class);
+                    Intent intent = new Intent(BoardViewActivity.this, BoardViewActivity.class);
                     intent.putExtra("boardName", boardName);
                     intent.putExtra("boardID", boardID);
                     intent.putExtra("children", children);
@@ -135,8 +155,8 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mPostList.removeFooterView(mFooter);
-                        mPostAdapter.updateData(topics);
+                        mAdapter.setFooterEnabled(false);
+                        mAdapter.updateData(topics);
                         isLoading = false;
                     }
                 });
@@ -149,7 +169,7 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mPostList.removeFooterView(mFooter);
+                        mAdapter.setFooterEnabled(false);
                         isLoading = false;
                         Toast.makeText(getApplicationContext(), "Error loading board!", Toast.LENGTH_LONG).show();
                     }
@@ -163,7 +183,7 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mPostList.removeFooterView(mFooter);
+                        mAdapter.setFooterEnabled(false);
                         isLoading = false;
                         Toast.makeText(getApplicationContext(), "FUCK: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
                     }
@@ -172,50 +192,10 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
         });
     }
 
-    public void getChildBoard(String boardName, String boardID) {
-        mBoardName = boardName;
-        getSupportActionBar().setTitle(mBoardName);
-        mBoardID = boardID;
-        mHeader.removeAllViews();
-        mPostAdapter = new PostAdapter(this, getLayoutInflater());
-        mPostList.setAdapter(mPostAdapter);
-        getBoard();
-    }
-
     public void addMoreItems() {
         currentPage++;
-        mPostList.addFooterView(mFooter);
+        mAdapter.setFooterEnabled(true);
         getBoard();
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Map<String,Object> topic = (Map<String,Object>) mPostAdapter.getItem(position-1);
-        if (topic != null) {
-            String boardID = (String) topic.get("forum_id");
-            String topicID = (String) topic.get("topic_id");
-            Intent intent = new Intent(this, TopicViewActivity.class);
-            intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);
-            intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
-            startActivity(intent);
-        }
-    }
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
-            userScrolled = true;
-        }
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        final int lastItem = firstVisibleItem + visibleItemCount - mPostList.getFooterViewsCount();
-        if (userScrolled && lastItem == totalItemCount && totalItemCount > lastCount && !isLoading) {
-            isLoading = true;
-            lastCount = totalItemCount;
-            addMoreItems();
-        }
     }
 
     @Override
@@ -229,5 +209,15 @@ public class BoardViewActivity extends AppCompatActivity implements AdapterView.
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemClicked(Map<String, Object> item) {
+        // Load topic
+        String topicID = item.get("topic_id").toString();
+        Intent intent = new Intent(this, TopicViewActivity.class);
+        intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
+        intent.putExtra(TopicViewActivity.ARG_BOARD_ID, mBoardID);
+        startActivity(intent);
     }
 }

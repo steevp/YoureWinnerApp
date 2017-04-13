@@ -9,6 +9,9 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -16,10 +19,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ListView;
 
 import java.util.Map;
 
@@ -28,15 +29,14 @@ import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class SearchActivity extends AppCompatActivity
-        implements AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener, AbsListView.OnScrollListener {
-
+        implements PostsAdapter.OnItemClickedListener, SwipeRefreshLayout.OnRefreshListener {
     private Forum mForum;
     private SearchView mSearchView;
-    private ListView mPostsList;
-    private PostAdapter mPostAdapter;
+    private RecyclerView mRecyclerView;
+    private PostsAdapter mAdapter;
+    private LinearLayoutManager mLayoutManager;
     private SwipeRefreshLayout mSwipeContainer;
     private String mQuery;
-    private View mFooter;
 
     private int lastCount = 0;
     private int currentPage = 1;
@@ -60,15 +60,38 @@ public class SearchActivity extends AppCompatActivity
 
         mForum = Forum.getInstance();
 
-        mPostsList = (ListView) findViewById(R.id.posts_list);
-        mPostsList.setOnItemClickListener(this);
-        mPostsList.setOnScrollListener(this);
-        mPostAdapter = new PostAdapter(this, getLayoutInflater());
-        mPostsList.setAdapter(mPostAdapter);
+        mRecyclerView = (RecyclerView) findViewById(R.id.posts_recycler);
+        mLayoutManager = new LinearLayoutManager(mRecyclerView.getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new PostsAdapter(mRecyclerView.getContext());
+        mRecyclerView.setAdapter(mAdapter);
+        // Add divider
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation()));
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+                    userScrolled = true;
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int lastVisibleItem = mLayoutManager.findFirstVisibleItemPosition() + mRecyclerView.getChildCount();
+                int totalItemCount = mLayoutManager.getItemCount();
+
+                if (userScrolled && lastVisibleItem == totalItemCount && totalItemCount > lastCount && !isLoading) {
+                    isLoading = true;
+                    lastCount = totalItemCount;
+                    addMoreItems();
+                }
+            }
+        });
+
         mSwipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         mSwipeContainer.setOnRefreshListener(this);
-
-        mFooter = getLayoutInflater().inflate(R.layout.loading, null);
 
         lastCount = 0;
         currentPage = 1;
@@ -82,10 +105,7 @@ public class SearchActivity extends AppCompatActivity
     }
 
     public void searchTopic() {
-        mPostsList.removeFooterView(mFooter);
-
         isLoading = true;
-        mPostsList.addFooterView(mFooter);
 
         mForum.searchTopic(mQuery, currentPage, mSearchUser, mSearchTitle, new XMLRPCCallback() {
             @Override
@@ -95,8 +115,8 @@ public class SearchActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mPostsList.removeFooterView(mFooter);
-                        mPostAdapter.updateData(topics);
+                        mAdapter.setFooterEnabled(false);
+                        mAdapter.updateData(topics);
                         isLoading = false;
                         mSwipeContainer.setRefreshing(false);
                     }
@@ -109,7 +129,7 @@ public class SearchActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mPostsList.removeFooterView(mFooter);
+                        mAdapter.setFooterEnabled(false);
                         isLoading = false;
                         mSwipeContainer.setRefreshing(false);
                     }
@@ -122,7 +142,7 @@ public class SearchActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mPostsList.removeFooterView(mFooter);
+                        mAdapter.setFooterEnabled(false);
                         isLoading = false;
                         mSwipeContainer.setRefreshing(false);
                     }
@@ -203,22 +223,15 @@ public class SearchActivity extends AppCompatActivity
             mQuery = intent.getStringExtra(SearchManager.QUERY).trim();
             if (mQuery.length() > 0) {
                 getSupportActionBar().setTitle("\"" + mQuery + "\"");
+                mSwipeContainer.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSwipeContainer.setRefreshing(true);
+                    }
+                });
                 clearSearch();
                 searchTopic();
             }
-        }
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Map<String,Object> topic = (Map<String,Object>) mPostAdapter.getItem(position);
-        if (topic != null) {
-            String boardID = (String) topic.get("forum_id");
-            String topicID = (String) topic.get("topic_id");
-            Intent intent = new Intent(this, TopicViewActivity.class);
-            intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);
-            intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
-            startActivity(intent);
         }
     }
 
@@ -228,34 +241,28 @@ public class SearchActivity extends AppCompatActivity
         searchTopic();
     }
 
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
-            userScrolled = true;
-        }
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        final int lastItem = firstVisibleItem + visibleItemCount - mPostsList.getFooterViewsCount();
-        if (userScrolled && lastItem == totalItemCount && totalItemCount > lastCount && !isLoading) {
-            isLoading = true;
-            lastCount = totalItemCount;
-            addMoreItems();
-        }
-    }
-
     private void addMoreItems() {
         currentPage++;
-        //mPostsList.addFooterView(mFooter);
+        mAdapter.setFooterEnabled(true);
         searchTopic();
     }
 
     private void clearSearch() {
-        mPostAdapter.clear();
+        mAdapter.clear();
         lastCount = 0;
         currentPage = 1;
         userScrolled = false;
         isLoading = false;
+    }
+
+    @Override
+    public void onItemClicked(Map<String, Object> item) {
+        // Load topic
+        String topicID = (String) item.get("topic_id");
+        String boardID = (String) item.get("forum_id");
+        Intent intent = new Intent(this, TopicViewActivity.class);
+        intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
+        intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);
+        startActivity(intent);
     }
 }

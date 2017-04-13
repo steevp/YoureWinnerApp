@@ -2,7 +2,6 @@ package com.yourewinner.yourewinner;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
@@ -20,8 +19,7 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class PostsFragment extends BaseFragment
-        implements PostsAdapterRv.OnItemClickedListener, SwipeRefreshLayout.OnRefreshListener, XMLRPCCallback {
+public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener, XMLRPCCallback {
     private final static String ARG_POSITION = "ARG_POSITION";
     // Needed for Participated
     private final static String ARG_USERNAME = "ARG_USERNAME";
@@ -36,7 +34,7 @@ public class PostsFragment extends BaseFragment
     private Context mContext;
 
     private RecyclerView mRecyclerView;
-    private PostsAdapterRv mAdapter;
+    private PostsAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
 
     private SwipeRefreshLayout mSwipeContainer;
@@ -69,12 +67,12 @@ public class PostsFragment extends BaseFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_posts_view_rv, container, false);
+        View view = inflater.inflate(R.layout.fragment_posts_view, container, false);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.posts_recycler);
         mLayoutManager = new LinearLayoutManager(mRecyclerView.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new PostsAdapterRv(mRecyclerView.getContext(), this);
+        mAdapter = new PostsAdapter(mRecyclerView.getContext());
         mRecyclerView.setAdapter(mAdapter);
         DividerItemDecoration divider = new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation());
         mRecyclerView.addItemDecoration(divider);
@@ -216,16 +214,5 @@ public class PostsFragment extends BaseFragment
                 Toast.makeText(mContext, "ERROR: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    @Override
-    public void onItemClicked(Map<String, Object> item) {
-        // Load topic
-        String topicID = (String) item.get("topic_id");
-        String boardID = (String) item.get("forum_id");
-        Intent intent = new Intent(mContext, TopicViewActivity.class);
-        intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
-        intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);
-        startActivityForResult(intent, 1);
     }
 }
