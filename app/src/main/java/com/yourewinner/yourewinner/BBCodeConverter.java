@@ -74,6 +74,14 @@ public class BBCodeConverter {
         return bbcode;
     }
 
+    public static String[] split(String text) {
+        // Replace youtube links with yt bbcode
+        text = text.replaceAll("\\[url=https?://(?:www\\.)?youtu(?:\\.be/|be\\.com/watch\\?v=)([\\w\\-]{11})\\].+\\[/url\\]",
+                "[yt]$1[/yt]");
+        // Separate text from bbcodes we need to implement
+        return text.split("(?=\\[(yt|img|quote|spoiler)\\])|(?<=\\[/(yt|img|quote|spoiler)\\])");
+    }
+
     private static String getImageTag(String src) {
         return "<img src=\"" + src + "\">";
     }

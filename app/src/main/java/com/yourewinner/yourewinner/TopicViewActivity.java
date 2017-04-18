@@ -256,7 +256,7 @@ public class TopicViewActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Subscribed!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(TopicViewActivity.this, "Subscribed!", Toast.LENGTH_LONG).show();
                         mSubscribed = true;
                         supportInvalidateOptionsMenu();
                     }
@@ -269,7 +269,7 @@ public class TopicViewActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Failed to subscribe to topic!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(TopicViewActivity.this, "Failed to subscribe to topic!", Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -280,7 +280,7 @@ public class TopicViewActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Please check your internet connection!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(TopicViewActivity.this, "Please check your internet connection!", Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -294,7 +294,7 @@ public class TopicViewActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Unsubscribed!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(TopicViewActivity.this, "Unsubscribed!", Toast.LENGTH_LONG).show();
                         mSubscribed = false;
                         supportInvalidateOptionsMenu();
                     }
@@ -307,7 +307,7 @@ public class TopicViewActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Failed to unsubscribe from topic!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(TopicViewActivity.this, "Failed to unsubscribe from topic!", Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -317,7 +317,7 @@ public class TopicViewActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Please check your internet connection!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(TopicViewActivity.this, "Please check your internet connection!", Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -345,7 +345,7 @@ public class TopicViewActivity extends AppCompatActivity
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getApplicationContext(), "Topic deleted!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(TopicViewActivity.this, "Topic deleted!", Toast.LENGTH_LONG).show();
                                 setResult(MainActivity.RESULT_RELOAD);
                                 finish();
                             }
@@ -358,7 +358,7 @@ public class TopicViewActivity extends AppCompatActivity
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getApplicationContext(), "Unable to delete topic!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(TopicViewActivity.this, "Unable to delete topic!", Toast.LENGTH_LONG).show();
                             }
                         });
                     }
@@ -369,7 +369,7 @@ public class TopicViewActivity extends AppCompatActivity
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getApplicationContext(), "Unable to delete topic!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(TopicViewActivity.this, "Unable to delete topic!", Toast.LENGTH_LONG).show();
                             }
                         });
                     }

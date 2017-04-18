@@ -149,6 +149,8 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             // Set post content
             String postContent = new String((byte[]) post.get("short_content"), Charset.forName("UTF-8"));
+            // Strip out spoilers
+            postContent = postContent.replaceAll("\\[spoiler\\].*?\\[/spoiler\\]", "hidden");
             vhItem.mPostContent.setText(postContent);
 
             // Set avatar

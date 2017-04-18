@@ -9,19 +9,19 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.nio.charset.Charset;
@@ -34,11 +34,8 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-/**
- * Created by steven on 5/19/16.
- */
 public class TopicViewPageFragment extends BaseFragment
-        implements UpdatableFragment, AdapterView.OnItemClickListener {
+        implements UpdatableFragment, TopicViewAdapter.ItemCheckedStateListener {
 
     public final static String ARG_BOARD_ID = "ARG_BOARD_ID";
     public final static String ARG_TOPIC_ID = "ARG_TOPIC_ID";
@@ -51,8 +48,11 @@ public class TopicViewPageFragment extends BaseFragment
     private int mScrollPos;
 
     private Forum mForum;
-    private ListView mPostsList;
-    private TopicViewAdapter mPostsAdapter;
+    private RecyclerView mRecyclerView;
+    private TopicViewAdapter mAdapter;
+    private LinearLayoutManager mLayoutManager;
+    private ActionMode mActionMode;
+
     private TopicViewDataFragment mDataFragment;
     private View mLoadingBar;
     private PageLoadedListener mCallback;
@@ -61,6 +61,14 @@ public class TopicViewPageFragment extends BaseFragment
     @Override
     protected void resumeThread() {
         loadData();
+    }
+
+    @Override
+    public void onItemCheckedStateChanged() {
+        if (mActionMode == null) {
+            getActivity().startActionMode(new TopicViewCallBack());
+        }
+        mActionMode.invalidate(); // triggers onPrepareActionMode
     }
 
     public interface PageLoadedListener {
@@ -83,14 +91,10 @@ public class TopicViewPageFragment extends BaseFragment
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        mPostsList.setItemChecked(position, true);
-    }
-
-    @Override
     public void update(SparseIntArray unreadPos) {
         mScrollPos = unreadPos.get(mPage, 0);
-        mPostsList.setVisibility(View.GONE);
+        //mPostsList.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.GONE);
         mLoadingBar.setVisibility(View.VISIBLE);
         getTopic();
     }
@@ -125,110 +129,15 @@ public class TopicViewPageFragment extends BaseFragment
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_topic_view_page, container, false);
-        mPostsList = (ListView) view.findViewById(R.id.posts_list);
-        mPostsList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-        mPostsList.setOnItemClickListener(this);
-        mPostsList.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-            @Override
-            public void onItemCheckedStateChanged(ActionMode actionMode, int position, long id, boolean checked) {
-                actionMode.invalidate(); // triggers onPrepareActionMode
-            }
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.posts_recycler);
+        mLayoutManager = new LinearLayoutManager(mRecyclerView.getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new TopicViewAdapter(mRecyclerView.getContext(), mPage, this);
+        mRecyclerView.setAdapter(mAdapter);
+        // Add divider
+        DividerItemDecoration divider = new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation());
+        mRecyclerView.addItemDecoration(divider);
 
-            @Override
-            public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-                MenuInflater inflater = actionMode.getMenuInflater();
-                inflater.inflate(R.menu.menu_topic_view_contextual, menu);
-                mCallback.onCreateActionMode(actionMode);
-                return true;
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-                MenuItem rate = menu.findItem(R.id.action_rate);
-                MenuItem viewRatings = menu.findItem(R.id.action_view_rating);
-                MenuItem quote = menu.findItem(R.id.action_quote);
-                MenuItem edit = menu.findItem(R.id.action_edit);
-                MenuItem share = menu.findItem(R.id.action_share);
-                MenuItem delete = menu.findItem(R.id.action_delete_post);
-
-                int selected = mPostsList.getCheckedItemCount();
-                boolean loggedIn = mForum.getLogin();
-
-                // Make them all invisible and selectively turn them on
-                rate.setVisible(false);
-                viewRatings.setVisible(false);
-                quote.setVisible(false);
-                edit.setVisible(false);
-                delete.setVisible(false);
-                share.setVisible(selected == 1);
-
-                if (loggedIn && selected == 1) {
-                    rate.setVisible(true);
-                    viewRatings.setVisible(true);
-                    quote.setVisible(true);
-
-                    SparseBooleanArray checkedStates = mPostsList.getCheckedItemPositions();
-                    for (int i=0;i<checkedStates.size();i++) {
-                        int key = checkedStates.keyAt(i);
-                        if (checkedStates.get(key)) {
-                            Map<String,Object> post = (Map<String,Object>) mPostsAdapter.getItem(key - 1);
-                            boolean canEdit = (boolean) post.get("can_edit");
-                            edit.setVisible(canEdit);
-                            boolean canDelete = (boolean) post.get("can_delete");
-                            delete.setVisible(canDelete);
-                            String username = new String((byte[]) post.get("post_author_name"), Charset.forName("UTF-8"));
-                            actionMode.setTitle(username);
-                            break;
-                        }
-                    }
-                } else if (loggedIn && selected > 1) {
-                    rate.setVisible(true);
-                    actionMode.setTitle(selected + " selected");
-                }
-
-                return true;
-            }
-
-            @Override
-            public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.action_rate:
-                        showRateDialog();
-                        return true;
-                    case R.id.action_quote:
-                        quotePost();
-                        return true;
-                    case R.id.action_edit:
-                        editPost();
-                        return true;
-                    case R.id.action_view_rating:
-                        viewRatings();
-                        return true;
-                    case R.id.action_share:
-                        shareLink();
-                        return true;
-                    case R.id.action_delete_post:
-                        deletePost();
-                        return true;
-                }
-                return false;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode actionMode) {
-                mCallback.onDestroyActionMode(actionMode);
-            }
-        });
-        mPostsAdapter = new TopicViewAdapter(getActivity(), inflater);
-        mPostsList.setAdapter(mPostsAdapter);
-        View header = inflater.inflate(R.layout.pagelinks, null);
-        View footer = inflater.inflate(R.layout.pagelinks, null);
-        mPostsList.addHeaderView(header);
-        mPostsList.addFooterView(footer);
-        TextView headerTextView = (TextView) header.findViewById(R.id.curpage);
-        TextView footerTextView = (TextView) footer.findViewById(R.id.curpage);
-        headerTextView.setText("Page " + mPage);
-        footerTextView.setText("Page " + mPage);
         mLoadingBar = view.findViewById(R.id.loading_content);
         mDialog = new ProgressDialog(getActivity());
         mDialog.setIndeterminate(true);
@@ -241,7 +150,9 @@ public class TopicViewPageFragment extends BaseFragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mDataFragment.setData(mPostsAdapter.getData());
+        // Release youtube loaders
+        mAdapter.releaseLoaders();
+        mDataFragment.setData(mAdapter.getData());
     }
 
     public void loadData() {
@@ -257,9 +168,11 @@ public class TopicViewPageFragment extends BaseFragment
             Object[] data = mDataFragment.getData();
             if (data != null && data.length > 0) {
                 // Restore saved data
-                mPostsAdapter.updateData(data);
+                //mPostsAdapter.updateData(data);
+                mAdapter.updateData(data);
                 mLoadingBar.setVisibility(View.GONE);
-                mPostsList.setVisibility(View.VISIBLE);
+                //mPostsList.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.VISIBLE);
             } else {
                 // Fetch data
                 getTopic();
@@ -284,17 +197,19 @@ public class TopicViewPageFragment extends BaseFragment
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mPostsAdapter.updateData(posts);
+                            //mPostsAdapter.updateData(posts);
+                            mAdapter.updateData(posts);
                             mLoadingBar.setVisibility(View.GONE);
-                            mPostsList.setVisibility(View.VISIBLE);
+                            //mPostsList.setVisibility(View.VISIBLE);
+                            mRecyclerView.setVisibility(View.VISIBLE);
                             if (mScrollPos > 0) {
-                                mPostsList.post(new Runnable() {
+                                mRecyclerView.scrollToPosition(mScrollPos + 1);
+                                mRecyclerView.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        mPostsList.setSelection(mScrollPos + 1);
+                                        mRecyclerView.smoothScrollToPosition(mScrollPos + 1);
                                     }
-                                });
-                                //mPostsList.smoothScrollToPosition(mScrollPos + 1);
+                                }, 420);
                             }
                             // Tell the activity to update the page count
                             mCallback.onPageCountChanged(pageCount);
@@ -352,16 +267,16 @@ public class TopicViewPageFragment extends BaseFragment
                                 mCallback.jumpToUnread(page, scrollPos);
                             } else {
                                 // 1 page, no need to switch
-                                mPostsAdapter.updateData(posts);
+                                mAdapter.updateData(posts);
                                 mLoadingBar.setVisibility(View.GONE);
-                                mPostsList.setVisibility(View.VISIBLE);
-                                //mPostsList.smoothScrollToPosition(scrollPos + 1);
-                                mPostsList.post(new Runnable() {
+                                mRecyclerView.setVisibility(View.VISIBLE);
+                                mRecyclerView.scrollToPosition(scrollPos + 1);
+                                mRecyclerView.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        mPostsList.setSelection(scrollPos + 1);
+                                        mRecyclerView.smoothScrollToPosition(scrollPos + 1);
                                     }
-                                });
+                                }, 420);
                             }
                             activity.setTitle(topicTitle);
                         }
@@ -393,12 +308,12 @@ public class TopicViewPageFragment extends BaseFragment
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 mDialog.show();
-                SparseBooleanArray checked = mPostsList.getCheckedItemPositions();
+                SparseBooleanArray checked = mAdapter.getCheckedItemPositions();
                 List<Map<String,String>> ratingList = new ArrayList<Map<String, String>>();
                 for (int i = 0, size = checked.size(); i < size; i++) {
                     final int key = checked.keyAt(i);
                     if (checked.get(key)) {
-                        Map<String, Object> post = (Map<String, Object>) mPostsAdapter.getItem(key - 1);
+                        Map<String, Object> post = mAdapter.getItem(key - 1);
                         String postID = post.get("post_id").toString();
                         String ratingID = Long.toString(adapter.getItemId(position));
                         Map<String,String> rating = new HashMap<String, String>();
@@ -421,11 +336,11 @@ public class TopicViewPageFragment extends BaseFragment
         intent.putExtra(ReplyTopicActivity.ARG_TOPIC_TITLE, getActivity().getTitle());
         intent.putExtra(ReplyTopicActivity.ARG_TOPIC_ID, mTopicID);
         intent.putExtra(ReplyTopicActivity.ARG_BOARD_ID, mBoardID);
-        final SparseBooleanArray checked = mPostsList.getCheckedItemPositions();
+        final SparseBooleanArray checked = mAdapter.getCheckedItemPositions();
         for (int i=0, size=checked.size();i<size;i++) {
             final int key = checked.keyAt(i);
             if (checked.get(key)) {
-                final Map<String,Object> post = (Map<String,Object>) mPostsAdapter.getItem(key - 1);
+                final Map<String,Object> post = mAdapter.getItem(key - 1);
                 final String postID = post.get("post_id").toString();
                 intent.putExtra("postID", postID);
                 break;
@@ -436,11 +351,11 @@ public class TopicViewPageFragment extends BaseFragment
     }
 
     private void editPost() {
-        final SparseBooleanArray checked = mPostsList.getCheckedItemPositions();
+        final SparseBooleanArray checked = mAdapter.getCheckedItemPositions();
         for (int i = 0, size = checked.size(); i < size; i++) {
             final int key = checked.keyAt(i);
             if (checked.get(key)) {
-                final Map<String, Object> post = (Map<String, Object>) mPostsAdapter.getItem(key - 1);
+                final Map<String, Object> post = mAdapter.getItem(key - 1);
                 final String postID = post.get("post_id").toString();
                 final Intent intent = new Intent(getActivity(), EditPostActivity.class);
                 intent.putExtra("postID", postID);
@@ -457,11 +372,11 @@ public class TopicViewPageFragment extends BaseFragment
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int position) {
-                final SparseBooleanArray checked = mPostsList.getCheckedItemPositions();
+                final SparseBooleanArray checked = mAdapter.getCheckedItemPositions();
                 for (int i = 0, size = checked.size(); i < size; i++) {
                     final int key = checked.keyAt(i);
                     if (checked.get(key)) {
-                        final Map<String, Object> post = (Map<String, Object>) mPostsAdapter.getItem(key - 1);
+                        final Map<String, Object> post = mAdapter.getItem(key - 1);
                         final String postID = post.get("post_id").toString();
                         mForum.deletePost(postID, new XMLRPCCallback() {
                             @Override
@@ -471,7 +386,7 @@ public class TopicViewPageFragment extends BaseFragment
                                     public void run() {
                                         mCallback.destroyActionMode();
                                         Toast.makeText(getActivity(), "Post deleted!", Toast.LENGTH_LONG).show();
-                                        getTopic();
+                                        mAdapter.removeItem(key);
                                     }
                                 });
                             }
@@ -513,11 +428,11 @@ public class TopicViewPageFragment extends BaseFragment
     }
 
     private void viewRatings() {
-        final SparseBooleanArray checked = mPostsList.getCheckedItemPositions();
+        final SparseBooleanArray checked = mAdapter.getCheckedItemPositions();
         for (int i=0, size=checked.size(); i<size; i++) {
             final int key = checked.keyAt(i);
             if (checked.get(key)) {
-                final Map<String,Object> post = (Map<String,Object>) mPostsAdapter.getItem(key - 1);
+                final Map<String,Object> post = mAdapter.getItem(key - 1);
                 final String postID = (String) post.get("post_id");
                 mForum.viewRatings(postID, new XMLRPCCallback() {
                     @Override
@@ -562,11 +477,11 @@ public class TopicViewPageFragment extends BaseFragment
     }
 
     private void shareLink() {
-        final SparseBooleanArray checked = mPostsList.getCheckedItemPositions();
+        final SparseBooleanArray checked = mAdapter.getCheckedItemPositions();
         for (int i=0, size=checked.size(); i<size; i++) {
             final int key = checked.keyAt(i);
             if (checked.get(key)) {
-                final Map<String,Object> post = (Map<String,Object>) mPostsAdapter.getItem(key - 1);
+                final Map<String,Object> post = mAdapter.getItem(key - 1);
                 final String postID = (String) post.get("post_id");
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_SEND);
@@ -575,6 +490,101 @@ public class TopicViewPageFragment extends BaseFragment
                 startActivity(Intent.createChooser(intent, getResources().getText(R.string.action_share)));
                 break;
             }
+        }
+    }
+
+    private class TopicViewCallBack implements ActionMode.Callback {
+
+        @Override
+        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            mActionMode = actionMode;
+            actionMode.getMenuInflater().inflate(R.menu.menu_topic_view_contextual, menu);
+            mCallback.onCreateActionMode(actionMode);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            if (mAdapter.getCheckedItemCount() == 0) {
+                actionMode.finish();
+                return false;
+            }
+
+            MenuItem rate = menu.findItem(R.id.action_rate);
+            MenuItem viewRatings = menu.findItem(R.id.action_view_rating);
+            MenuItem quote = menu.findItem(R.id.action_quote);
+            MenuItem edit = menu.findItem(R.id.action_edit);
+            MenuItem share = menu.findItem(R.id.action_share);
+            MenuItem delete = menu.findItem(R.id.action_delete_post);
+
+            int selected = mAdapter.getCheckedItemCount();
+            boolean loggedIn = mForum.getLogin();
+
+            // Make them all invisible and selectively turn them on
+            rate.setVisible(false);
+            viewRatings.setVisible(false);
+            quote.setVisible(false);
+            edit.setVisible(false);
+            delete.setVisible(false);
+            share.setVisible(selected == 1);
+
+            if (loggedIn && selected == 1) {
+                rate.setVisible(true);
+                viewRatings.setVisible(true);
+                quote.setVisible(true);
+
+                SparseBooleanArray checkedStates = mAdapter.getCheckedItemPositions();
+                for (int i=0;i<checkedStates.size();i++) {
+                    int key = checkedStates.keyAt(i);
+                    if (checkedStates.get(key)) {
+                        Map<String,Object> post = mAdapter.getItem(key - 1);
+                        boolean canEdit = (boolean) post.get("can_edit");
+                        edit.setVisible(canEdit);
+                        boolean canDelete = (boolean) post.get("can_delete");
+                        delete.setVisible(canDelete);
+                        String username = new String((byte[]) post.get("post_author_name"), Charset.forName("UTF-8"));
+                        actionMode.setTitle(username);
+                        break;
+                    }
+                }
+            } else if (loggedIn && selected > 1) {
+                rate.setVisible(true);
+                actionMode.setTitle(selected + " selected");
+            }
+
+            return true;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            switch (menuItem.getItemId()) {
+                case R.id.action_rate:
+                    showRateDialog();
+                    return true;
+                case R.id.action_quote:
+                    quotePost();
+                    return true;
+                case R.id.action_edit:
+                    editPost();
+                    return true;
+                case R.id.action_view_rating:
+                    viewRatings();
+                    return true;
+                case R.id.action_share:
+                    shareLink();
+                    return true;
+                case R.id.action_delete_post:
+                    deletePost();
+                    return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode actionMode) {
+            mActionMode = null;
+            mAdapter.clearCheckedItems();
+            mCallback.onDestroyActionMode(actionMode);
         }
     }
 
