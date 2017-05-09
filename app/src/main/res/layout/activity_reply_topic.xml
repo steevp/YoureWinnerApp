@@ -32,30 +32,7 @@
 
         </ScrollView>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:background="?attr/colorPrimary">
-
-            <ImageButton
-                android:id="@+id/btn_emotes"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:src="@drawable/emotes"
-                android:background="@null"
-                android:onClick="bbButtons"/>
-
-            <ImageButton
-                android:id="@+id/btn_bbcode"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:src="@drawable/bbcode"
-                android:background="@null"
-                android:onClick="bbButtons"/>
-
-        </LinearLayout>
+        <include layout="@layout/emote_bar" />
 
     </LinearLayout>
 

@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -16,7 +17,8 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class NewTopicActivity extends AppCompatActivity {
+public class NewTopicActivity extends AppCompatActivity
+        implements EmoteGridFragment.OnEmotePickedListener, View.OnFocusChangeListener {
 
     public final static String ARG_BOARDID = "ARG_BOARDID";
     public final static String ARG_BOARDNAME = "ARG_BOARDNAME";
@@ -24,7 +26,8 @@ public class NewTopicActivity extends AppCompatActivity {
     private String mBoardName;
     private Forum mForum;
     private EditText mSubject;
-    private EditText mBody;
+    private EditText mPostContent;
+    private EditText mFocusedEditText;
     private ProgressDialog mDialog;
 
     @Override
@@ -50,12 +53,14 @@ public class NewTopicActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(mBoardName);
 
         mSubject = (EditText) findViewById(R.id.subject);
-        mBody = (EditText) findViewById(R.id.body);
+        mSubject.setOnFocusChangeListener(this);
+        mPostContent = (EditText) findViewById(R.id.body);
+        mPostContent.setOnFocusChangeListener(this);
     }
 
     private void createNewTopic() {
         String subject = mSubject.getText().toString();
-        String body = mBody.getText().toString();
+        String body = mPostContent.getText().toString();
 
         if (subject.length() > 0 && body.length() > 0) {
             mDialog.show();
@@ -125,5 +130,63 @@ public class NewTopicActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void bbButtons(View v) {
+        int page;
+        switch (v.getId()) {
+            case R.id.btn_emotes:
+                page = 0;
+                break;
+            case R.id.btn_bbcode:
+                page = 1;
+                break;
+            default:
+                page = 0;
+                break;
+        }
+        EmoteDialog dlg = EmoteDialog.newInstance(page);
+        dlg.show(getSupportFragmentManager(), "dialog");
+    }
+
+    @Override
+    public void onEmotePicked(String emote, boolean isBbcode) {
+        if (mFocusedEditText == null) {
+            return;
+        }
+        if (isBbcode) {
+            insertBbcode(emote);
+        } else {
+            insertText(emote);
+        }
+    }
+
+    private void insertBbcode(String bbcode) {
+        // Get selected text so we can wrap the bbcode around it
+        int selectionStart = mFocusedEditText.getSelectionStart();
+        int selectionEnd = mFocusedEditText.getSelectionEnd();
+        String selectedText = mFocusedEditText.getText().toString().substring(selectionStart, selectionEnd);
+        bbcode = bbcode + selectedText + bbcode.replace("[", "[/");
+        insertText(bbcode);
+    }
+
+    private void insertText(String textToInsert) {
+        // Insert text at cursor position
+        int start = Math.max(mFocusedEditText.getSelectionStart(), 0);
+        int end = Math.max(mFocusedEditText.getSelectionEnd(), 0);
+        if (start > 0) {
+            textToInsert = " " + textToInsert;
+        }
+        mFocusedEditText.getText().replace(Math.min(start, end), Math.max(start, end),
+                textToInsert, 0, textToInsert.length());
+    }
+
+    @Override
+    public void onFocusChange(View view, boolean hasFocus) {
+        if (hasFocus) {
+            mFocusedEditText = (EditText) view;
+        } else {
+            mFocusedEditText = null;
+        }
     }
 }

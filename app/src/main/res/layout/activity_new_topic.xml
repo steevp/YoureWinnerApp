@@ -30,20 +30,28 @@
 
         <View style="@style/Divider" />
 
-        <EditText
-            android:textSize="18sp"
-            android:hint="@string/hint_body"
-            android:id="@+id/body"
-            android:inputType="textCapSentences|textMultiLine"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="top"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:background="@android:color/transparent"/>
+            android:layout_weight="1">
+
+            <EditText
+                android:textSize="18sp"
+                android:hint="@string/hint_body"
+                android:id="@+id/body"
+                android:inputType="textCapSentences|textMultiLine"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:background="@android:color/transparent"/>
+
+        </ScrollView>
+
+        <include layout="@layout/emote_bar" />
 
     </LinearLayout>
 
