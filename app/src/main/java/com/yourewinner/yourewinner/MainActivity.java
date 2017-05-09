@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.NavigationView;
@@ -364,7 +365,13 @@ public class MainActivity extends BaseActivity
                     mAvatar = data.getStringExtra(AVATAR);
                     mUsername = data.getStringExtra(USERNAME);
                 }
-                recreate();
+                // Run recreate() at the end of execution queue
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        recreate();
+                    }
+                }, 0);
                 break;
             case LOGIN_AGAIN:
                 startLogin();
