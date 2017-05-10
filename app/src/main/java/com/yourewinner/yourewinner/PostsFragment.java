@@ -37,6 +37,9 @@ public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.On
     private PostsAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
 
+    private DataFragment mDataFragment;
+    private String mTagName;
+
     private SwipeRefreshLayout mSwipeContainer;
     private Forum mForum;
     private View mEmptyView;
@@ -63,6 +66,14 @@ public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.On
         mUsername = args.getString(ARG_USERNAME);
         mContext = getActivity();
         mForum = Forum.getInstance();
+        mTagName = "page" + mPosition;
+        mDataFragment = (DataFragment) getFragmentManager().findFragmentByTag(mTagName);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDataFragment.setData(mAdapter.getData());
     }
 
     @Override
@@ -103,23 +114,48 @@ public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.On
         mSwipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         mSwipeContainer.setOnRefreshListener(this);
         mEmptyView = view.findViewById(R.id.empty_list_item);
-        // Workaround to show indicator
-        mSwipeContainer.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeContainer.setRefreshing(true);
-            }
-        });
+
         lastCount = 0;
         currentPage = 1;
         userScrolled = false;
         isLoading = true;
 
-        getPosts();
+        loadData();
 
         return view;
     }
 
+    public void loadData() {
+        if (mDataFragment == null) {
+            // Create a data fragment to retain data during configuration changes
+            mDataFragment = new DataFragment();
+            getFragmentManager().beginTransaction().add(mDataFragment, mTagName).commit();
+            // Workaround to show indicator
+            mSwipeContainer.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeContainer.setRefreshing(true);
+                }
+            });
+            getPosts();
+        } else {
+            // Restore data from fragment
+            final Object[] topics = mDataFragment.getData();
+            if (topics != null) {
+                addItems(topics);
+                stopLoading();
+            } else {
+                // Data fragment empty? Try fetching data
+                mSwipeContainer.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSwipeContainer.setRefreshing(true);
+                    }
+                });
+                getPosts();
+            }
+        }
+    }
     public void getPosts() {
         switch (mPosition) {
             case POS_RECENT:
@@ -143,7 +179,7 @@ public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.On
 
     @Override
     protected void resumeThread() {
-        getPosts();
+        loadData();
     }
 
     private void addItems(Object[] items) {
@@ -164,7 +200,12 @@ public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.On
     private void stopLoading() {
         mAdapter.setFooterEnabled(false);
         isLoading = false;
-        mSwipeContainer.setRefreshing(false);
+        mSwipeContainer.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeContainer.setRefreshing(false);
+            }
+        });
     }
 
     @Override

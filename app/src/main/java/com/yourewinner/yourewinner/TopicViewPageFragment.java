@@ -53,7 +53,7 @@ public class TopicViewPageFragment extends BaseFragment
     private LinearLayoutManager mLayoutManager;
     private ActionMode mActionMode;
 
-    private TopicViewDataFragment mDataFragment;
+    private DataFragment mDataFragment;
     private View mLoadingBar;
     private PageLoadedListener mCallback;
     private ProgressDialog mDialog;
@@ -123,7 +123,7 @@ public class TopicViewPageFragment extends BaseFragment
 
         FragmentManager fm = getFragmentManager();
         mTagName = "page" + mPage;
-        mDataFragment = (TopicViewDataFragment) fm.findFragmentByTag(mTagName);
+        mDataFragment = (DataFragment) fm.findFragmentByTag(mTagName);
     }
 
     @Override
@@ -157,7 +157,7 @@ public class TopicViewPageFragment extends BaseFragment
 
     public void loadData() {
         if (mDataFragment == null) {
-            mDataFragment = new TopicViewDataFragment();
+            mDataFragment = new DataFragment();
             getFragmentManager().beginTransaction().add(mDataFragment, mTagName).commit();
             if (mPage == 1) {
                 getTopicByUnread();
@@ -259,7 +259,7 @@ public class TopicViewPageFragment extends BaseFragment
                             mCallback.onPageCountChanged(pageCount);
                             if (pageCount > 1) {
                                 // Save data for later
-                                TopicViewDataFragment fragment = new TopicViewDataFragment();
+                                DataFragment fragment = new DataFragment();
                                 fragment.setData(posts);
                                 fm.beginTransaction().add(fragment, tagName).commit();
                                 fm.executePendingTransactions();

@@ -98,6 +98,10 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         notifyItemRangeInserted(posStart, itemCount);
     }
 
+    public Object[] getData() {
+        return mDataSet.toArray();
+    }
+
     public void clear() {
         int itemCount = getItemCount();
         mDataSet.clear();

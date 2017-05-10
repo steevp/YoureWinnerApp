@@ -4,9 +4,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 /**
- * Created by steven on 4/14/16.
+ * Retains data during configuration changes
  */
-public class TopicViewDataFragment extends Fragment {
+public class DataFragment extends Fragment {
     private Object[] mData;
 
     @Override

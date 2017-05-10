@@ -241,7 +241,7 @@ public class MainActivity extends BaseActivity
         // Collapse by default
         mAppBarLayout.setExpanded(false, false);
         mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            private boolean mCollapsed = false;
+            private boolean mCollapsed = true;
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
                 if (mCollapsed && verticalOffset == 0) {
@@ -336,7 +336,8 @@ public class MainActivity extends BaseActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         item.setChecked(true);
-        selectItem(item.getItemId());
+        mDrawerItemId = item.getItemId();
+        selectItem(mDrawerItemId);
         return true;
     }
 
