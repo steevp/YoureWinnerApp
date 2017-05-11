@@ -38,6 +38,7 @@ public class MainActivity extends BaseActivity
     public final static String DRAWER_ITEM_ID = "DRAWER_ITEM_ID";
     public final static String AVATAR = "AVATAR";
     public final static String USERNAME = "USERNAME";
+    public final static String TITLE = "TITLE";
     public final static int RESULT_RELOAD = 666;
     public final static int LOGIN_AGAIN = 777;
 
@@ -54,6 +55,7 @@ public class MainActivity extends BaseActivity
     private CircleImageView mAvatarView;
     private String mUsername;
     private String mAvatar;
+    private String mTitle;
     private ImageView mBanner;
 
     @Override
@@ -70,15 +72,6 @@ public class MainActivity extends BaseActivity
         } else {
             // No banner
             setContentView(R.layout.activity_main_no_banner);
-        }
-
-        if (savedInstanceState != null) {
-            mDrawerItemId = savedInstanceState.getInt(DRAWER_ITEM_ID);
-            mUsername = savedInstanceState.getString(USERNAME);
-            mAvatar = savedInstanceState.getString(AVATAR);
-        } else {
-            mDrawerItemId = R.id.drawer_home;
-            //mForum.setLogin(false);
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -111,24 +104,36 @@ public class MainActivity extends BaseActivity
         });
 
         mDrawerView.addHeaderView(drawerHeader);
-        mDrawerView.getMenu().findItem(mDrawerItemId).setChecked(true);
         setupDrawer();
 
         final Intent intent = getIntent();
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_VIEW)) {
             handleUri(intent.getData());
+        }
+
+        if (savedInstanceState != null) {
+            mDrawerItemId = savedInstanceState.getInt(DRAWER_ITEM_ID);
+            mUsername = savedInstanceState.getString(USERNAME);
+            mAvatar = savedInstanceState.getString(AVATAR);
+            mTitle = savedInstanceState.getString(TITLE);
+            setupDrawerHeader();
         } else {
+            mDrawerItemId = R.id.drawer_home;
+            mTitle = getString(R.string.app_name);
             doWelcome();
         }
+
+        setTitle(mTitle);
     }
 
     @Override
     public void setTitle(CharSequence title) {
+        mTitle = title.toString();
         if (mCollapsingToolbarLayout != null) {
-            mCollapsingToolbarLayout.setTitle(title);
+            mCollapsingToolbarLayout.setTitle(mTitle);
         } else {
-            super.setTitle(title);
+            super.setTitle(mTitle);
         }
     }
 
@@ -172,7 +177,6 @@ public class MainActivity extends BaseActivity
 
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-                //getSupportActionBar().setTitle(mTitle);
                 invalidateOptionsMenu();
             }
         };
@@ -251,7 +255,7 @@ public class MainActivity extends BaseActivity
                 } else if (!mCollapsed && Math.abs(verticalOffset) >= mAppBarLayout.getTotalScrollRange()) {
                     Log.i("ywtag", "appbar collapsed");
                     mCollapsed = true;
-                    mCollapsingToolbarLayout.setTitle(getString(R.string.app_name));
+                    mCollapsingToolbarLayout.setTitle(mTitle);
                     loadBanner();
                 }
             }
@@ -347,6 +351,7 @@ public class MainActivity extends BaseActivity
         outState.putInt(DRAWER_ITEM_ID, mDrawerItemId);
         outState.putString(USERNAME, mUsername);
         outState.putString(AVATAR, mAvatar);
+        outState.putString(TITLE, mTitle);
     }
 
     @Override

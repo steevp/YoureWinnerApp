@@ -1,7 +1,7 @@
 package com.yourewinner.yourewinner;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +15,7 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class NewsFragment extends Fragment {
+public class NewsFragment extends BaseFragment implements XMLRPCCallback {
     private Forum mForum;
     private ListView mNewsList;
     private NewsAdapter mAdapter;
@@ -31,35 +31,46 @@ public class NewsFragment extends Fragment {
     }
 
     private void getNews() {
-        mForum.getNews(new XMLRPCCallback() {
-            @Override
-            public void onResponse(long id, Object result) {
-                final Map<String,Object> r = (Map<String,Object>) result;
-                if ((boolean) r.get("result")) {
-                    final Object[] newsObject = (Object[]) r.get("news");
-                    final ArrayList<String> news = new ArrayList<String>();
-                    for (int i=0; i<newsObject.length; i++) {
-                        news.add(new String((byte[]) newsObject[i], Charset.forName("UTF-8")));
+        setThreadId(mForum.getNews(this));
+    }
+
+    @Override
+    protected void resumeThread() {
+        getNews();
+    }
+
+    @Override
+    public void onResponse(long id, Object result) {
+        setThreadId(0);
+        final Map<String,Object> r = (Map<String,Object>) result;
+        if ((boolean) r.get("result")) {
+            final Object[] newsObject = (Object[]) r.get("news");
+            final ArrayList<String> news = new ArrayList<String>();
+            for (int i=0; i<newsObject.length; i++) {
+                news.add(new String((byte[]) newsObject[i], Charset.forName("UTF-8")));
+            }
+            final Activity activity = getActivity();
+            if (activity != null) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter = new NewsAdapter(activity, activity.getLayoutInflater(), news);
+                        mNewsList.setAdapter(mAdapter);
                     }
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mAdapter = new NewsAdapter(getActivity(), getActivity().getLayoutInflater(), news);
-                            mNewsList.setAdapter(mAdapter);
-                        }
-                    });
-                }
+                });
             }
+        }
+    }
 
-            @Override
-            public void onError(long id, XMLRPCException error) {
-                error.printStackTrace();
-            }
+    @Override
+    public void onError(long id, XMLRPCException error) {
+        setThreadId(0);
+        error.printStackTrace();
+    }
 
-            @Override
-            public void onServerError(long id, XMLRPCServerException error) {
-                error.printStackTrace();
-            }
-        });
+    @Override
+    public void onServerError(long id, XMLRPCServerException error) {
+        setThreadId(0);
+        error.printStackTrace();
     }
 }
