@@ -40,6 +40,10 @@ public class PrivateMessageAdapter extends BaseAdapter {
         }
     }
 
+    public Object[] getData() {
+        return mMessages.toArray();
+    }
+
     public void clearData() {
         mMessages.clear();
         notifyDataSetChanged();

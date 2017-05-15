@@ -32,12 +32,16 @@ public class PrivateMessageFragment extends Fragment
 
     public final static String ARG_BOXID = "BOXID";
 
+    private final static String ARG_CURPAGE = "ARG_CURPAGE";
+    private final static String ARG_LASTCOUNT = "ARG_LASTCOUNT";
+
     private Forum mForum;
     private String mBoxID;
     private ListView mMessageList;
     private PrivateMessageAdapter mAdapter;
     private View mFooter;
     private ProgressDialog mDialog;
+    private DataFragment mDataFragment;
 
     private int lastCount;
     private int currentPage;
@@ -76,6 +80,13 @@ public class PrivateMessageFragment extends Fragment
         super.onCreate(savedInstanceState);
         mForum = Forum.getInstance();
         mBoxID = getArguments().getString(ARG_BOXID);
+        mDataFragment = (DataFragment) getFragmentManager().findFragmentByTag(mBoxID);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDataFragment.setData(mAdapter.getData());
     }
 
     @Override
@@ -139,8 +150,14 @@ public class PrivateMessageFragment extends Fragment
 
         mFooter = inflater.inflate(R.layout.loading, null);
 
-        lastCount = 0;
-        currentPage = 1;
+        if (savedInstanceState != null) {
+            lastCount = savedInstanceState.getInt(ARG_LASTCOUNT);
+            currentPage = savedInstanceState.getInt(ARG_CURPAGE);
+        } else {
+            lastCount = 0;
+            currentPage = 1;
+        }
+
         userScrolled = false;
         isLoading = true;
         ignoreClicks = false;
@@ -149,8 +166,37 @@ public class PrivateMessageFragment extends Fragment
         mDialog.setMessage(getString(R.string.loading));
         mDialog.setCancelable(false);
 
-        getBox();
+        loadData();
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(ARG_LASTCOUNT, lastCount);
+        outState.putInt(ARG_CURPAGE, currentPage);
+    }
+
+    /**
+     * Load data from data fragment or web
+     */
+    private void loadData() {
+        if (mDataFragment == null) {
+            // Create data fragment
+            mDataFragment = new DataFragment();
+            getFragmentManager().beginTransaction().add(mDataFragment, mBoxID).commit();
+            getBox();
+        } else {
+            final Object[] messages = mDataFragment.getData();
+            if (messages != null) {
+                mAdapter.updateData(messages);
+                mMessageList.removeFooterView(mFooter);
+                isLoading = false;
+            } else {
+                // Data fragment empty? Try fetching data
+                getBox();
+            }
+        }
     }
 
     private void getBox() {

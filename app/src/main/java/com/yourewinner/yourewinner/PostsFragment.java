@@ -24,6 +24,9 @@ public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.On
     // Needed for Participated
     private final static String ARG_USERNAME = "ARG_USERNAME";
 
+    private final static String ARG_CURPAGE = "ARG_CURPAGE";
+    private final static String ARG_LASTCOUNT = "ARG_LASTCOUNT";
+
     public final static int POS_RECENT = 0;
     public final static int POS_UNREAD = 1;
     public final static int POS_PARTICIPATED = 2;
@@ -115,14 +118,27 @@ public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.On
         mSwipeContainer.setOnRefreshListener(this);
         mEmptyView = view.findViewById(R.id.empty_list_item);
 
-        lastCount = 0;
-        currentPage = 1;
+        if (savedInstanceState != null) {
+            lastCount = savedInstanceState.getInt(ARG_LASTCOUNT);
+            currentPage = savedInstanceState.getInt(ARG_CURPAGE);
+        } else {
+            lastCount = 0;
+            currentPage = 1;
+        }
+
         userScrolled = false;
         isLoading = true;
 
         loadData();
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(ARG_LASTCOUNT, lastCount);
+        outState.putInt(ARG_CURPAGE, currentPage);
     }
 
     public void loadData() {
