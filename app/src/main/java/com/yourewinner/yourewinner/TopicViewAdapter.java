@@ -124,13 +124,7 @@ public class TopicViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 public void onClick(View view) {
                     // Toggle checked state
                     boolean checked = !mCheckStates.get(getAdapterPosition(), false);
-                    mCheckStates.put(getAdapterPosition(), checked);
-                    itemView.setActivated(checked);
-                    if (checked) {
-                        mCheckedViews.put(getAdapterPosition(), itemView);
-                    } else {
-                        mCheckedViews.remove(getAdapterPosition());
-                    }
+                    setChecked(getAdapterPosition(), itemView, checked);
                     mCallback.onItemCheckedStateChanged();
                 }
             });
@@ -165,7 +159,7 @@ public class TopicViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         public void bind(Map<String,Object> post) {
             // Highlight item if checked
             boolean checked = mCheckStates.get(getAdapterPosition(), false);
-            itemView.setActivated(checked);
+            setChecked(getAdapterPosition(), itemView, checked);
 
             recycleViews();
             final DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
@@ -637,6 +631,25 @@ public class TopicViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         mYtThumbnails.clear();
     }
 
+    /**
+     * Sets an item's checked state
+     * @param position Position of item
+     * @param itemView The item's View
+     * @param checked The item's checked state
+     */
+    private void setChecked(int position, View itemView, boolean checked) {
+        mCheckStates.put(position, checked);
+        itemView.setActivated(checked);
+        if (checked) {
+            mCheckedViews.put(position, itemView);
+        } else {
+            mCheckedViews.remove(position);
+        }
+    }
+
+    /**
+     * Clear all item's checked states
+     */
     public void clearCheckedItems() {
         mCheckStates.clear();
         for (int i=0, size=mCheckedViews.size();i<size;i++) {
@@ -647,6 +660,10 @@ public class TopicViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         mCheckedViews.clear();
     }
 
+    /**
+     * Get all checked item positions
+     * @return SparseBooleanArray An array of checked states
+     */
     public SparseBooleanArray getCheckedItemPositions() {
         return mCheckStates;
     }
