@@ -2,6 +2,7 @@ package com.yourewinner.yourewinner;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
@@ -19,7 +20,8 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener, XMLRPCCallback {
+public class PostsFragment extends BaseFragment
+        implements SwipeRefreshLayout.OnRefreshListener, XMLRPCCallback, PostsAdapter.OnItemClickedListener {
     private final static String ARG_POSITION = "ARG_POSITION";
     // Needed for Participated
     private final static String ARG_USERNAME = "ARG_USERNAME";
@@ -86,7 +88,7 @@ public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.On
         mRecyclerView = (RecyclerView) view.findViewById(R.id.posts_recycler);
         mLayoutManager = new LinearLayoutManager(mRecyclerView.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new PostsAdapter(mRecyclerView.getContext());
+        mAdapter = new PostsAdapter(mRecyclerView.getContext(), this);
         mRecyclerView.setAdapter(mAdapter);
         DividerItemDecoration divider = new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation());
         mRecyclerView.addItemDecoration(divider);
@@ -271,5 +273,24 @@ public class PostsFragment extends BaseFragment implements SwipeRefreshLayout.On
                 Toast.makeText(mContext, "ERROR: yourewinner.com might be down!", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == TopicViewActivity.RESULT_DELETED) {
+            String topicId = data.getStringExtra(TopicViewActivity.ARG_TOPIC_ID);
+            mAdapter.removeItem(topicId);
+        }
+    }
+
+    @Override
+    public void onItemClicked(Map<String, Object> item) {
+        // Load topic
+        String topicId = (String) item.get("topic_id");
+        String boardId = (String) item.get("forum_id");
+        Intent intent = TopicViewActivity.createIntent(getActivity(), topicId, boardId);
+        startActivityForResult(intent, 1);
     }
 }

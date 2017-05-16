@@ -1,6 +1,7 @@
 package com.yourewinner.yourewinner;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -38,6 +39,7 @@ public class TopicViewActivity extends AppCompatActivity
     public final static String ARG_PAGE_COUNT = "ARG_PAGE_COUNT";
     public final static String ARG_SUBSCRIBED = "ARG_SUBSCRIBED";
     public final static int RESULT_RELOAD = 666;
+    public final static int RESULT_DELETED = 999;
 
     private Forum mForum;
     private ViewPager mPager;
@@ -50,6 +52,20 @@ public class TopicViewActivity extends AppCompatActivity
     private String mTopicID;
     private String mBoardID;
     private boolean mSubscribed;
+
+    /**
+     * Create intent to load the topic
+     * @param context Context for the intent
+     * @param topicId ID of the topic to load
+     * @param boardId ID of the board the topic is from
+     * @return Intent The Intent to load the topic
+     */
+    public static Intent createIntent(Context context, String topicId, String boardId) {
+        Intent intent = new Intent(context, TopicViewActivity.class);
+        intent.putExtra(ARG_TOPIC_ID, topicId);
+        intent.putExtra(ARG_BOARD_ID, boardId);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -341,12 +357,14 @@ public class TopicViewActivity extends AppCompatActivity
             public void onClick(DialogInterface dialogInterface, int i) {
                 mForum.deleteTopic(mTopicID, new XMLRPCCallback() {
                     @Override
-                    public void onResponse(long id, Object result) {
+                    public void onResponse(long id, final Object result) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 Toast.makeText(TopicViewActivity.this, "Topic deleted!", Toast.LENGTH_LONG).show();
-                                setResult(MainActivity.RESULT_RELOAD);
+                                Intent resultIntent = new Intent();
+                                resultIntent.putExtra(ARG_TOPIC_ID, mTopicID);
+                                setResult(RESULT_DELETED, resultIntent);
                                 finish();
                             }
                         });

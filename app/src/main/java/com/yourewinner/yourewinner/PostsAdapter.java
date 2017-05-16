@@ -29,7 +29,7 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private boolean mShowFooter;
 
     public interface OnItemClickedListener {
-        public void onItemClicked(Map<String, Object> item);
+        void onItemClicked(Map<String, Object> item);
     }
 
     // Holds a reference to each view
@@ -69,14 +69,10 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    public PostsAdapter(Context c) {
-        mContext = c;
+    public PostsAdapter(Context context, OnItemClickedListener listener) {
+        mContext = context;
         mDataSet = new ArrayList<>();
-        try {
-            mCallback = (OnItemClickedListener) c;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(c.toString() + " must implement PostsAdapter.OnItemClickedListener!");
-        }
+        mCallback = listener;
     }
 
     public void setFooterEnabled(boolean b) {
@@ -96,6 +92,23 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         int itemCount = data.length;
         mDataSet.addAll(Arrays.asList(data));
         notifyItemRangeInserted(posStart, itemCount);
+    }
+
+    /**
+     * Remove a topic from the dataset
+     * @param topicId ID of the topic to remove
+     */
+    public void removeItem(String topicId) {
+        for (int i=0;i<mDataSet.size();i++) {
+            //noinspection unchecked
+            Map<String,Object> map = (Map<String,Object>) mDataSet.get(i);
+            String topicId2 = (String) map.get("topic_id");
+            if (topicId.equals(topicId2)) {
+                mDataSet.remove(i);
+                notifyItemRemoved(i);
+                break;
+            }
+        }
     }
 
     public Object[] getData() {

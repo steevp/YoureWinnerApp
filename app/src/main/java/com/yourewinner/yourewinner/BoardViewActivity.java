@@ -63,7 +63,7 @@ public class BoardViewActivity extends AppCompatActivity implements PostsAdapter
         mRecyclerView = (RecyclerView) findViewById(R.id.posts_recycler);
         mLayoutManager = new LinearLayoutManager(mRecyclerView.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new PostsAdapter(mRecyclerView.getContext());
+        mAdapter = new PostsAdapter(mRecyclerView.getContext(), this);
         mRecyclerView.setAdapter(mAdapter);
         // Add divider
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation()));
