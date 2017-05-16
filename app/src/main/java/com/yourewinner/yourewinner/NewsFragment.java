@@ -7,18 +7,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Map;
 
 import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class NewsFragment extends BaseFragment implements XMLRPCCallback {
+public class NewsFragment extends BaseFragment implements XMLRPCCallback, Loadable {
     private Forum mForum;
     private ListView mNewsList;
     private NewsAdapter mAdapter;
+
+    private DataFragment mDataFragment;
+    private final static String TAG = "news";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -26,12 +27,21 @@ public class NewsFragment extends BaseFragment implements XMLRPCCallback {
         mForum = Forum.getInstance();
         View view = inflater.inflate(R.layout.fragment_news, container, false);
         mNewsList = (ListView) view.findViewById(R.id.news_list);
-        getNews();
+        mAdapter = new NewsAdapter(getActivity(), getActivity().getLayoutInflater());
+        mNewsList.setAdapter(mAdapter);
+        mDataFragment = (DataFragment) getFragmentManager().findFragmentByTag(TAG);
+        loadData();
         return view;
     }
 
     private void getNews() {
         setThreadId(mForum.getNews(this));
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDataFragment.setData(mAdapter.getData());
     }
 
     @Override
@@ -44,18 +54,13 @@ public class NewsFragment extends BaseFragment implements XMLRPCCallback {
         setThreadId(0);
         final Map<String,Object> r = (Map<String,Object>) result;
         if ((boolean) r.get("result")) {
-            final Object[] newsObject = (Object[]) r.get("news");
-            final ArrayList<String> news = new ArrayList<String>();
-            for (int i=0; i<newsObject.length; i++) {
-                news.add(new String((byte[]) newsObject[i], Charset.forName("UTF-8")));
-            }
+            final Object[] news = (Object[]) r.get("news");
             final Activity activity = getActivity();
             if (activity != null) {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mAdapter = new NewsAdapter(activity, activity.getLayoutInflater(), news);
-                        mNewsList.setAdapter(mAdapter);
+                        mAdapter.updateData(news);
                     }
                 });
             }
@@ -72,5 +77,22 @@ public class NewsFragment extends BaseFragment implements XMLRPCCallback {
     public void onServerError(long id, XMLRPCServerException error) {
         setThreadId(0);
         error.printStackTrace();
+    }
+
+    @Override
+    public void loadData() {
+        if (mDataFragment == null) {
+            mDataFragment = new DataFragment();
+            getFragmentManager().beginTransaction().add(mDataFragment, TAG).commit();
+            getNews();
+        } else {
+            Object[] news = mDataFragment.getData();
+            if (news != null && news.length > 0) {
+                mAdapter.updateData(news);
+            } else {
+                // Fetch data
+                getNews();
+            }
+        }
     }
 }

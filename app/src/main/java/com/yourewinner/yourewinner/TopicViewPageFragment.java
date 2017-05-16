@@ -35,7 +35,7 @@ import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class TopicViewPageFragment extends BaseFragment
-        implements UpdatableFragment, TopicViewAdapter.ItemCheckedStateListener {
+        implements Loadable, UpdatableFragment, TopicViewAdapter.ItemCheckedStateListener {
 
     public final static String ARG_BOARD_ID = "ARG_BOARD_ID";
     public final static String ARG_TOPIC_ID = "ARG_TOPIC_ID";
@@ -155,6 +155,7 @@ public class TopicViewPageFragment extends BaseFragment
         mDataFragment.setData(mAdapter.getData());
     }
 
+    @Override
     public void loadData() {
         if (mDataFragment == null) {
             mDataFragment = new DataFragment();

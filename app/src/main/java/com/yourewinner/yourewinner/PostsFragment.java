@@ -21,7 +21,7 @@ import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class PostsFragment extends BaseFragment
-        implements SwipeRefreshLayout.OnRefreshListener, XMLRPCCallback, PostsAdapter.OnItemClickedListener {
+        implements Loadable, SwipeRefreshLayout.OnRefreshListener, XMLRPCCallback, PostsAdapter.OnItemClickedListener {
     private final static String ARG_POSITION = "ARG_POSITION";
     // Needed for Participated
     private final static String ARG_USERNAME = "ARG_USERNAME";
@@ -143,6 +143,7 @@ public class PostsFragment extends BaseFragment
         outState.putInt(ARG_CURPAGE, currentPage);
     }
 
+    @Override
     public void loadData() {
         if (mDataFragment == null) {
             // Create a data fragment to retain data during configuration changes

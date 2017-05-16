@@ -28,7 +28,7 @@ import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class PrivateMessageFragment extends Fragment
-        implements AbsListView.OnScrollListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+        implements Loadable, AbsListView.OnScrollListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
 
     public final static String ARG_BOXID = "BOXID";
 
@@ -180,7 +180,8 @@ public class PrivateMessageFragment extends Fragment
     /**
      * Load data from data fragment or web
      */
-    private void loadData() {
+    @Override
+    public void loadData() {
         if (mDataFragment == null) {
             // Create data fragment
             mDataFragment = new DataFragment();

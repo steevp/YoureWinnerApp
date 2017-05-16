@@ -9,25 +9,19 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import org.kefirsf.bb.BBProcessorFactory;
-import org.kefirsf.bb.TextProcessor;
-
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-/**
- * Created by steven on 3/18/16.
- */
 public class NewsAdapter extends BaseAdapter {
     private Context mContext;
     private LayoutInflater mInflater;
-    private ArrayList<String> mNews;
-    private TextProcessor mProcessor;
+    private ArrayList<Object> mNews;
 
-    public NewsAdapter(Context context, LayoutInflater inflater, ArrayList<String> news) {
+    public NewsAdapter(Context context, LayoutInflater inflater) {
         mContext = context;
         mInflater = inflater;
-        mNews = news;
-        mProcessor = BBProcessorFactory.getInstance().create();
+        mNews = new ArrayList<>();
     }
 
     @Override
@@ -47,20 +41,19 @@ public class NewsAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
+        TextView newsItem;
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.news_list_item, null);
-            holder = new ViewHolder();
-            holder.newsItem = (TextView) convertView.findViewById(R.id.news_item);
-            convertView.setTag(holder);
+            convertView = mInflater.inflate(R.layout.news_list_item, parent, false);
+            newsItem = (TextView) convertView.findViewById(R.id.news_item);
+            convertView.setTag(newsItem);
         } else {
-            holder = (ViewHolder) convertView.getTag();
+            newsItem = (TextView) convertView.getTag();
         }
 
-        String news = (String) getItem(position);
+        String news = new String((byte[]) getItem(position), Charset.forName("UTF-8"));
 
-        // TODO: ugh nvm
-        news = mProcessor.process(news)
+        // TODO: make this better
+        news = BBCodeConverter.process(news)
                 .replace("[d]", "<font color='#9C9C9C'><small><strong>[")
                 .replace("[/d]", "]</strong></small></font>")
                 .replace("&amp;#039;", "'")
@@ -68,13 +61,24 @@ public class NewsAdapter extends BaseAdapter {
                 .replace("&amp;quot;", "\"")
                 .replaceAll("\\s(http[^\\s]+)", " <a href='$1'>$1</a>");
 
-        holder.newsItem.setText(Html.fromHtml(news));
-        holder.newsItem.setMovementMethod(LinkMovementMethod.getInstance());
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            newsItem.setText(Html.fromHtml(news, Html.FROM_HTML_MODE_LEGACY, new EmoteImageGetter(mContext), null));
+        } else {
+            //noinspection deprecation
+            newsItem.setText(Html.fromHtml(news, new EmoteImageGetter(mContext), null));
+        }
+
+        newsItem.setMovementMethod(LinkMovementMethod.getInstance());
 
         return convertView;
     }
 
-    private static class ViewHolder {
-        public TextView newsItem;
+    public void updateData(Object[] data) {
+        mNews.addAll(Arrays.asList(data));
+        notifyDataSetChanged();
+    }
+
+    public Object[] getData() {
+        return mNews.toArray();
     }
 }
