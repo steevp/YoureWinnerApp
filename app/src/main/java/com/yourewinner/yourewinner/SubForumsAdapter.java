@@ -1,6 +1,5 @@
 package com.yourewinner.yourewinner;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,24 +14,32 @@ import java.util.Map;
 
 public class SubForumsAdapter extends BaseExpandableListAdapter {
 
-    private Context mContext;
-    private LayoutInflater mInflater;
     private List<String> mCategories;
-    private HashMap<String,Object[]> mChildren;
+    private Map<String,Object[]> mChildren;
+    private Object[] mDataSet;
 
-    public SubForumsAdapter(Context context, LayoutInflater inflater, Object[] data) {
-        mContext = context;
-        mInflater = inflater;
+    public SubForumsAdapter() {
+        mCategories = new ArrayList<>();
+        mChildren = new HashMap<>();
+    }
 
-        mCategories = new ArrayList<String>();
-        mChildren = new HashMap<String,Object[]>();
-        for (int i=0;i<data.length;i++) {
-            Map<String,Object> cat = (Map<String,Object>) data[i];
+    public void updateData(Object[] data) {
+        mDataSet = data;
+        mCategories.clear();
+        mChildren.clear();
+        for (Object item : mDataSet) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> cat = (Map<String, Object>) item;
             String catName = new String((byte[]) cat.get("forum_name"), Charset.forName("UTF-8"));
             Object[] child = (Object[]) cat.get("child");
             mCategories.add(catName);
             mChildren.put(catName, child);
         }
+        notifyDataSetChanged();
+    }
+
+    public Object[] getData() {
+        return mDataSet;
     }
 
     @Override
@@ -74,17 +81,16 @@ public class SubForumsAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         String categoryTitle = (String) getGroup(groupPosition);
 
-        ViewHolder holder;
+        TextView textView;
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.sub_forums_category, null);
-            holder = new ViewHolder();
-            holder.textView = (TextView) convertView.findViewById(R.id.sub_forums_category);
-            convertView.setTag(holder);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.sub_forums_category, parent, false);
+            textView = (TextView) convertView.findViewById(R.id.sub_forums_category);
+            convertView.setTag(textView);
         } else {
-            holder = (ViewHolder) convertView.getTag();
+            textView = (TextView) convertView.getTag();
         }
 
-        holder.textView.setText(categoryTitle);
+        textView.setText(categoryTitle);
 
         return convertView;
     }
@@ -94,26 +100,21 @@ public class SubForumsAdapter extends BaseExpandableListAdapter {
         Map<String,Object> child = (Map<String,Object>) getChild(groupPosition, childPosition);
         final String boardText = new String((byte[]) child.get("forum_name"), Charset.forName("UTF-8"));
 
-        ViewHolder holder;
+        TextView textView;
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.sub_forums_board, null);
-            holder = new ViewHolder();
-            holder.textView = (TextView) convertView.findViewById(R.id.sub_forums_board);
-            convertView.setTag(holder);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.sub_forums_board, parent, false);
+            textView = (TextView) convertView.findViewById(R.id.sub_forums_board);
+            convertView.setTag(textView);
         } else {
-            holder = (ViewHolder) convertView.getTag();
+            textView = (TextView) convertView.getTag();
         }
 
-        holder.textView.setText(boardText);
+        textView.setText(boardText);
         return convertView;
     }
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
-    }
-
-    private static class ViewHolder {
-        public TextView textView;
     }
 }

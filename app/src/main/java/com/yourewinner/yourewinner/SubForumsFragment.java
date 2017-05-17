@@ -3,7 +3,6 @@ package com.yourewinner.yourewinner;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,27 +16,19 @@ import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class SubForumsFragment extends Fragment implements ExpandableListView.OnChildClickListener{
-    public static final String ARG_PAGE = "ARG_PAGE";
-
+public class SubForumsFragment extends BaseFragment
+        implements Loadable, ExpandableListView.OnChildClickListener, XMLRPCCallback {
     private Forum mForum;
     private ExpandableListView mSubForumsList;
     private SubForumsAdapter mSubForumsAdapter;
-    private int mPage;
-
-    public static SubForumsFragment newInstance(int page) {
-        Bundle args = new Bundle();
-        args.putInt(ARG_PAGE, page);
-        SubForumsFragment fragment = new SubForumsFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private DataFragment mDataFragment;
+    private final static String TAG = "subforums";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPage = getArguments().getInt(ARG_PAGE);
         mForum = Forum.getInstance();
+        mDataFragment = (DataFragment) getFragmentManager().findFragmentByTag(TAG);
     }
 
     @Override
@@ -45,49 +36,34 @@ public class SubForumsFragment extends Fragment implements ExpandableListView.On
         View view = inflater.inflate(R.layout.fragment_sub_forums, container, false);
         mSubForumsList = (ExpandableListView) view;
         mSubForumsList.setOnChildClickListener(this);
-        getSubForums();
+        mSubForumsAdapter = new SubForumsAdapter();
+        mSubForumsList.setAdapter(mSubForumsAdapter);
+        loadData();
         return view;
     }
 
     public void getSubForums() {
-        mForum.getForum(new XMLRPCCallback() {
-            @Override
-            public void onResponse(long id, Object result) {
-                final Object[] data = (Object[]) result;
-                final Activity activity = getActivity();
-                if (activity != null) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mSubForumsAdapter = new SubForumsAdapter(getActivity().getApplicationContext(), getActivity().getLayoutInflater(), data);
-                            mSubForumsList.setAdapter(mSubForumsAdapter);
-                        }
-                    });
-                }
-            }
+        setThreadId(mForum.getForum(this));
+    }
 
-            @Override
-            public void onError(long id, XMLRPCException error) {
-                error.printStackTrace();
-            }
-
-            @Override
-            public void onServerError(long id, XMLRPCServerException error) {
-                error.printStackTrace();
-            }
-        });
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDataFragment.setData(mSubForumsAdapter.getData());
     }
 
     @Override
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+        @SuppressWarnings("unchecked")
         Map<String,Object> child = (Map<String,Object>) mSubForumsAdapter.getChild(groupPosition, childPosition);
         final String boardID = (String) child.get("forum_id");
         final String boardName = new String((byte[]) child.get("forum_name"), Charset.forName("UTF-8"));
         final Object[] c = (Object[]) child.get("child");
         ArrayList<Map<String,Object>> children = new ArrayList<Map<String,Object>>();
         if (c != null) {
-            for (int i=0;i<c.length;i++) {
-                children.add((Map<String,Object>) c[i]);
+            for (Object aC : c) {
+                //noinspection unchecked
+                children.add((Map<String, Object>) aC);
             }
         }
         Intent intent = new Intent(getActivity(), BoardViewActivity.class);
@@ -96,5 +72,53 @@ public class SubForumsFragment extends Fragment implements ExpandableListView.On
         intent.putExtra("children", children);
         startActivity(intent);
         return false;
+    }
+
+    @Override
+    public void loadData() {
+        if (mDataFragment == null) {
+            mDataFragment = new DataFragment();
+            getFragmentManager().beginTransaction().add(mDataFragment, TAG).commit();
+            getSubForums();
+        } else {
+            final Object[] data = mDataFragment.getData();
+            if (data != null && data.length > 0) {
+                mSubForumsAdapter.updateData(data);
+            } else {
+                getSubForums();
+            }
+        }
+    }
+
+    @Override
+    public void onResponse(long id, Object result) {
+        setThreadId(0);
+        final Object[] data = (Object[]) result;
+        final Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mSubForumsAdapter.updateData(data);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onError(long id, XMLRPCException error) {
+        setThreadId(0);
+        error.printStackTrace();
+    }
+
+    @Override
+    public void onServerError(long id, XMLRPCServerException error) {
+        setThreadId(0);
+        error.printStackTrace();
+    }
+
+    @Override
+    protected void resumeThread() {
+        getSubForums();
     }
 }

@@ -311,9 +311,6 @@ public class MainActivity extends BaseActivity
             case R.id.drawer_browse:
                 setTitle(getString(R.string.action_browse));
                 fragment = new SubForumsFragment();
-                Bundle args = new Bundle();
-                args.putInt(SubForumsFragment.ARG_PAGE, 1);
-                fragment.setArguments(args);
                 break;
             case R.id.drawer_settings:
                 intent = new Intent(this, SettingsActivity.class);
