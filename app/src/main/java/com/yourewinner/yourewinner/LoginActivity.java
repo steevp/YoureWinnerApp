@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
                             Intent resultIntent = new Intent();
                             resultIntent.putExtra(MainActivity.AVATAR, avatar);
                             resultIntent.putExtra(MainActivity.USERNAME, username);
-                            setResult(MainActivity.RESULT_RELOAD, resultIntent);
+                            setResult(MainActivity.LOGIN_SUCCESS, resultIntent);
                             finish();
                         }
                     });

@@ -39,6 +39,7 @@ public class MainActivity extends BaseActivity
     public final static String TITLE = "TITLE";
     public final static int RESULT_RELOAD = 666;
     public final static int LOGIN_AGAIN = 777;
+    public final static int LOGIN_SUCCESS = 888;
 
     private Forum mForum;
     private PrefsManager mPrefs;
@@ -362,10 +363,6 @@ public class MainActivity extends BaseActivity
 
         switch (resultCode) {
             case RESULT_RELOAD:
-                if (data != null) {
-                    mAvatar = data.getStringExtra(AVATAR);
-                    mUsername = data.getStringExtra(USERNAME);
-                }
                 // Run recreate() at the end of execution queue
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -376,6 +373,12 @@ public class MainActivity extends BaseActivity
                 break;
             case LOGIN_AGAIN:
                 startLogin();
+                break;
+            case LOGIN_SUCCESS:
+                mAvatar = data.getStringExtra(AVATAR);
+                mUsername = data.getStringExtra(USERNAME);
+                setupDrawerHeader();
+                selectItem(R.id.drawer_home);
                 break;
         }
     }
