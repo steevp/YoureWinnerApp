@@ -212,9 +212,9 @@ public class BoardViewActivity extends AppCompatActivity implements PostsAdapter
     }
 
     @Override
-    public void onItemClicked(Map<String, Object> item) {
+    public void onItemClicked(PostsWrapper post) {
         // Load topic
-        String topicID = item.get("topic_id").toString();
+        String topicID = post.getTopicId();
         Intent intent = new Intent(this, TopicViewActivity.class);
         intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
         intent.putExtra(TopicViewActivity.ARG_BOARD_ID, mBoardID);

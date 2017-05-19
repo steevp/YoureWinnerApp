@@ -11,17 +11,19 @@ import android.widget.TextView;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class NewsAdapter extends BaseAdapter {
     private Context mContext;
-    private LayoutInflater mInflater;
-    private ArrayList<Object> mNews;
+    private ArrayList<String> mNews;
 
-    public NewsAdapter(Context context, LayoutInflater inflater) {
+    public NewsAdapter(Context context) {
         mContext = context;
-        mInflater = inflater;
         mNews = new ArrayList<>();
+    }
+
+    public NewsAdapter(Context context, ArrayList<String> newsList) {
+        mContext = context;
+        mNews = newsList;
     }
 
     @Override
@@ -30,7 +32,7 @@ public class NewsAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public String getItem(int position) {
         return mNews.get(position);
     }
 
@@ -43,14 +45,14 @@ public class NewsAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         TextView newsItem;
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.news_list_item, parent, false);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_list_item, parent, false);
             newsItem = (TextView) convertView.findViewById(R.id.news_item);
             convertView.setTag(newsItem);
         } else {
             newsItem = (TextView) convertView.getTag();
         }
 
-        String news = new String((byte[]) getItem(position), Charset.forName("UTF-8"));
+        String news = getItem(position);
 
         // TODO: make this better
         news = BBCodeConverter.process(news)
@@ -74,11 +76,14 @@ public class NewsAdapter extends BaseAdapter {
     }
 
     public void updateData(Object[] data) {
-        mNews.addAll(Arrays.asList(data));
+        for (Object n : data) {
+            final String news = new String((byte[]) n, Charset.forName("UTF-8"));
+            mNews.add(news);
+        }
         notifyDataSetChanged();
     }
 
-    public Object[] getData() {
-        return mNews.toArray();
+    public ArrayList<String> getData() {
+        return mNews;
     }
 }

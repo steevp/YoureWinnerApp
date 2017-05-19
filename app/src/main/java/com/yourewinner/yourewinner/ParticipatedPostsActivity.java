@@ -6,8 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-import java.util.Map;
-
 public class ParticipatedPostsActivity extends AppCompatActivity implements PostsAdapter.OnItemClickedListener {
 
     public final static String ARG_USERNAME = "ARG_USERNAME";
@@ -38,10 +36,10 @@ public class ParticipatedPostsActivity extends AppCompatActivity implements Post
     }
 
     @Override
-    public void onItemClicked(Map<String, Object> item) {
+    public void onItemClicked(PostsWrapper post) {
         // Load topic
-        String topicID = (String) item.get("topic_id");
-        String boardID = (String) item.get("forum_id");
+        String topicID = post.getTopicId();
+        String boardID = post.getBoardId();
         Intent intent = new Intent(this, TopicViewActivity.class);
         intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
         intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);

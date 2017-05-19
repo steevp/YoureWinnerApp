@@ -256,10 +256,10 @@ public class SearchActivity extends AppCompatActivity
     }
 
     @Override
-    public void onItemClicked(Map<String, Object> item) {
+    public void onItemClicked(PostsWrapper post) {
         // Load topic
-        String topicID = (String) item.get("topic_id");
-        String boardID = (String) item.get("forum_id");
+        String topicID = post.getTopicId();
+        String boardID = post.getBoardId();
         Intent intent = new Intent(this, TopicViewActivity.class);
         intent.putExtra(TopicViewActivity.ARG_TOPIC_ID, topicID);
         intent.putExtra(TopicViewActivity.ARG_BOARD_ID, boardID);

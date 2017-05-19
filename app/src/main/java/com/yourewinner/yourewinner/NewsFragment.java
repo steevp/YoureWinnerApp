@@ -7,19 +7,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import de.timroes.axmlrpc.XMLRPCCallback;
 import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
-public class NewsFragment extends BaseFragment implements XMLRPCCallback, Loadable {
+public class NewsFragment extends BaseFragment implements XMLRPCCallback {
+    private final static String NEWS_LIST = "NEWS_LIST";
+
     private Forum mForum;
     private ListView mNewsList;
     private NewsAdapter mAdapter;
-
-    private DataFragment mDataFragment;
-    private final static String TAG = "news";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -27,21 +27,29 @@ public class NewsFragment extends BaseFragment implements XMLRPCCallback, Loadab
         mForum = Forum.getInstance();
         View view = inflater.inflate(R.layout.fragment_news, container, false);
         mNewsList = (ListView) view.findViewById(R.id.news_list);
-        mAdapter = new NewsAdapter(getActivity(), getActivity().getLayoutInflater());
-        mNewsList.setAdapter(mAdapter);
-        mDataFragment = (DataFragment) getFragmentManager().findFragmentByTag(TAG);
-        loadData();
+
+
+        if (savedInstanceState != null) {
+            final ArrayList<String> newsList = savedInstanceState.getStringArrayList(NEWS_LIST);
+            mAdapter = new NewsAdapter(getActivity(), newsList);
+            mNewsList.setAdapter(mAdapter);
+        } else {
+            mAdapter = new NewsAdapter(getActivity());
+            mNewsList.setAdapter(mAdapter);
+            getNews();
+        }
+
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList(NEWS_LIST, mAdapter.getData());
     }
 
     private void getNews() {
         setThreadId(mForum.getNews(this));
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mDataFragment.setData(mAdapter.getData());
     }
 
     @Override
@@ -77,22 +85,5 @@ public class NewsFragment extends BaseFragment implements XMLRPCCallback, Loadab
     public void onServerError(long id, XMLRPCServerException error) {
         setThreadId(0);
         error.printStackTrace();
-    }
-
-    @Override
-    public void loadData() {
-        if (mDataFragment == null) {
-            mDataFragment = new DataFragment();
-            getFragmentManager().beginTransaction().add(mDataFragment, TAG).commit();
-            getNews();
-        } else {
-            Object[] news = mDataFragment.getData();
-            if (news != null && news.length > 0) {
-                mAdapter.updateData(news);
-            } else {
-                // Fetch data
-                getNews();
-            }
-        }
     }
 }

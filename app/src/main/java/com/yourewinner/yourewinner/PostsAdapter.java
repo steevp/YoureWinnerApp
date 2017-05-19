@@ -10,12 +10,8 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -24,12 +20,12 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final static int TYPE_FOOTER = 1;
 
     private Context mContext;
-    private List<Object> mDataSet;
+    private ArrayList<PostsWrapper> mDataSet;
     private OnItemClickedListener mCallback;
     private boolean mShowFooter;
 
     public interface OnItemClickedListener {
-        void onItemClicked(Map<String, Object> item);
+        void onItemClicked(PostsWrapper post);
     }
 
     // Holds a reference to each view
@@ -51,7 +47,7 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             mDate = (TextView) itemView.findViewById(R.id.post_time);
         }
 
-        public void bind(final Map<String, Object> item, final OnItemClickedListener listener) {
+        public void bind(final PostsWrapper item, final OnItemClickedListener listener) {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -71,8 +67,14 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public PostsAdapter(Context context, OnItemClickedListener listener) {
         mContext = context;
-        mDataSet = new ArrayList<>();
         mCallback = listener;
+        mDataSet = new ArrayList<>();
+    }
+
+    public PostsAdapter(Context context, OnItemClickedListener listener, ArrayList<PostsWrapper> posts) {
+        mContext = context;
+        mCallback = listener;
+        mDataSet = posts;
     }
 
     public void setFooterEnabled(boolean b) {
@@ -90,7 +92,9 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void updateData(Object[] data) {
         int posStart = getItemCount();
         int itemCount = data.length;
-        mDataSet.addAll(Arrays.asList(data));
+        for (Object p: data) {
+            mDataSet.add(new PostsWrapper(p));
+        }
         notifyItemRangeInserted(posStart, itemCount);
     }
 
@@ -100,10 +104,8 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
      */
     public void removeItem(String topicId) {
         for (int i=0;i<mDataSet.size();i++) {
-            //noinspection unchecked
-            Map<String,Object> map = (Map<String,Object>) mDataSet.get(i);
-            String topicId2 = (String) map.get("topic_id");
-            if (topicId.equals(topicId2)) {
+            PostsWrapper post = mDataSet.get(i);
+            if (topicId.equals(post.getTopicId())) {
                 mDataSet.remove(i);
                 notifyItemRemoved(i);
                 break;
@@ -111,8 +113,8 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    public Object[] getData() {
-        return mDataSet.toArray();
+    public ArrayList<PostsWrapper> getData() {
+        return mDataSet;
     }
 
     public void clear() {
@@ -141,37 +143,30 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         if (holder instanceof VHItem) {
             VHItem vhItem = (VHItem) holder;
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> post = (Map<String, Object>) mDataSet.get(position);
+            PostsWrapper post = mDataSet.get(position);
 
             vhItem.bind(post, mCallback);
 
             // Set username
-            byte[] userBytes;
-            if (post.get("post_author_name") != null) {
-                userBytes = (byte[]) post.get("post_author_name");
-            } else {
-                userBytes = (byte[]) post.get("topic_author_name");
-            }
-            String username = new String(userBytes, Charset.forName("UTF-8"));
+            String username = post.getAuthorName();
             vhItem.mUsername.setText(username);
 
             // Set board name
-            String boardName = new String((byte[]) post.get("forum_name"), Charset.forName("UTF-8"));
+            String boardName = post.getBoardName();
             vhItem.mBoardName.setText(boardName);
 
             // Set topic title
-            String topicTitle = new String((byte[]) post.get("topic_title"), Charset.forName("UTF-8"));
+            String topicTitle = post.getTopicTitle();
             vhItem.mTopicTitle.setText(topicTitle);
 
             // Set post content
-            String postContent = new String((byte[]) post.get("short_content"), Charset.forName("UTF-8"));
+            String postContent = post.getPostContent();
             // Strip out spoilers
             postContent = postContent.replaceAll("\\[spoiler\\].*?\\[/spoiler\\]", "hidden");
             vhItem.mPostContent.setText(postContent);
 
             // Set avatar
-            String avatar = (String) post.get("icon_url");
+            String avatar = post.getAvatar();
             if (avatar.length() > 0) {
                 Picasso.with(mContext).load(avatar).placeholder(R.drawable.no_avatar).fit().into(vhItem.mAvatar);
             } else {
@@ -179,12 +174,7 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             }
 
             // Set post time
-            Date then;
-            if (post.get("post_time") != null) {
-                then = (Date) post.get("post_time");
-            } else {
-                then = (Date) post.get("last_reply_time");
-            }
+            Date then = post.getPostTime();
             long now = System.currentTimeMillis();
             String postTime = DateUtils.getRelativeTimeSpanString(then.getTime(), now, DateUtils.MINUTE_IN_MILLIS).toString();
             vhItem.mDate.setText(postTime);

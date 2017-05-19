@@ -1,17 +1,27 @@
 package com.yourewinner.yourewinner;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class BBCodeTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
-    public void testEmotes() throws Exception {
+public class BBCodeTests {
+
+    /**
+     * Test Emotes
+     */
+    @Test
+    public void emotesWork() {
         final String in = "YOU'RE :stamp: '< :stamp:";
         final String out = BBCodeConverter.process(in);
         final String expected = "YOU&apos;RE <img src=\"stamp\"> <img src=\"pacman\"> <img src=\"stamp\">";
         assertEquals(expected, out);
     }
 
-    public void testBBCodes() throws Exception {
+    /**
+     * Test BBCode
+     */
+    @Test
+    public void bbCodeWorks() {
         final String in = "[quote][url=http://yourewinner.com]YOU'RE WINNER ![/url][/quote]";
         final String out = BBCodeConverter.process(in);
         final String expected = "<blockquote><a href=\"http://yourewinner.com\">YOU&apos;RE WINNER !</a></blockquote>";
