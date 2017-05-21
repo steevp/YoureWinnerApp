@@ -20,6 +20,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.yourewinner.yourewinner.wrapper.PrivateMessageWrapper;
+
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -28,12 +30,13 @@ import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class PrivateMessageFragment extends Fragment
-        implements Loadable, AbsListView.OnScrollListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+        implements AbsListView.OnScrollListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
 
-    public final static String ARG_BOXID = "BOXID";
+    public final static String ARG_BOXID = "ARG_BOXID";
 
-    private final static String ARG_CURPAGE = "ARG_CURPAGE";
-    private final static String ARG_LASTCOUNT = "ARG_LASTCOUNT";
+    private final static String CUR_PAGE = "CUR_PAGE";
+    private final static String LAST_COUNT = "LAST_COUNT";
+    private final static String MSG_LIST = "MSG_LIST";
 
     private Forum mForum;
     private String mBoxID;
@@ -41,7 +44,6 @@ public class PrivateMessageFragment extends Fragment
     private PrivateMessageAdapter mAdapter;
     private View mFooter;
     private ProgressDialog mDialog;
-    private DataFragment mDataFragment;
 
     private int lastCount;
     private int currentPage;
@@ -80,13 +82,6 @@ public class PrivateMessageFragment extends Fragment
         super.onCreate(savedInstanceState);
         mForum = Forum.getInstance();
         mBoxID = getArguments().getString(ARG_BOXID);
-        mDataFragment = (DataFragment) getFragmentManager().findFragmentByTag(mBoxID);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mDataFragment.setData(mAdapter.getData());
     }
 
     @Override
@@ -95,8 +90,6 @@ public class PrivateMessageFragment extends Fragment
         View view = inflater.inflate(R.layout.fragment_private_message, container, false);
         mMessageList = (ListView) view.findViewById(R.id.message_list);
         mMessageList.setOnScrollListener(this);
-        mAdapter = new PrivateMessageAdapter(getActivity(), getActivity().getLayoutInflater(), mBoxID);
-        mMessageList.setAdapter(mAdapter);
         mMessageList.setOnItemClickListener(this);
         mMessageList.setOnItemLongClickListener(this);
 
@@ -150,54 +143,38 @@ public class PrivateMessageFragment extends Fragment
 
         mFooter = inflater.inflate(R.layout.loading, null);
 
-        if (savedInstanceState != null) {
-            lastCount = savedInstanceState.getInt(ARG_LASTCOUNT);
-            currentPage = savedInstanceState.getInt(ARG_CURPAGE);
-        } else {
-            lastCount = 0;
-            currentPage = 1;
-        }
-
         userScrolled = false;
-        isLoading = true;
         ignoreClicks = false;
 
         mDialog = new ProgressDialog(getActivity());
         mDialog.setMessage(getString(R.string.loading));
         mDialog.setCancelable(false);
 
-        loadData();
+        if (savedInstanceState != null) {
+            isLoading = false;
+            lastCount = savedInstanceState.getInt(LAST_COUNT);
+            currentPage = savedInstanceState.getInt(CUR_PAGE);
+            ArrayList<PrivateMessageWrapper> messages = savedInstanceState.getParcelableArrayList(MSG_LIST);
+            mAdapter = new PrivateMessageAdapter(getActivity(), mBoxID, messages);
+            mMessageList.setAdapter(mAdapter);
+        } else {
+            isLoading = true;
+            lastCount = 0;
+            currentPage = 1;
+            mAdapter = new PrivateMessageAdapter(getActivity(), mBoxID);
+            mMessageList.setAdapter(mAdapter);
+            getBox();
+        }
+
         return view;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(ARG_LASTCOUNT, lastCount);
-        outState.putInt(ARG_CURPAGE, currentPage);
-    }
-
-    /**
-     * Load data from data fragment or web
-     */
-    @Override
-    public void loadData() {
-        if (mDataFragment == null) {
-            // Create data fragment
-            mDataFragment = new DataFragment();
-            getFragmentManager().beginTransaction().add(mDataFragment, mBoxID).commit();
-            getBox();
-        } else {
-            final Object[] messages = mDataFragment.getData();
-            if (messages != null) {
-                mAdapter.updateData(messages);
-                mMessageList.removeFooterView(mFooter);
-                isLoading = false;
-            } else {
-                // Data fragment empty? Try fetching data
-                getBox();
-            }
-        }
+        outState.putInt(LAST_COUNT, lastCount);
+        outState.putInt(CUR_PAGE, currentPage);
+        outState.putParcelableArrayList(MSG_LIST, mAdapter.getData());
     }
 
     private void getBox() {
@@ -249,7 +226,7 @@ public class PrivateMessageFragment extends Fragment
 
     private void deleteCheckedMessages() {
         SparseBooleanArray checked = mMessageList.getCheckedItemPositions();
-        ArrayList<Object> messages = new ArrayList<Object>();
+        ArrayList<PrivateMessageWrapper> messages = new ArrayList<>();
 
         for (int i=0, size=checked.size(); i<size; i++) {
             final int key = checked.keyAt(i);
@@ -264,17 +241,17 @@ public class PrivateMessageFragment extends Fragment
         }
     }
 
-    private class DeleteMessagesTask extends AsyncTask<ArrayList<Object>, Void, Boolean> {
+    private class DeleteMessagesTask extends AsyncTask<ArrayList<PrivateMessageWrapper>, Void, Boolean> {
 
-        private ArrayList<Object> mMessages;
+        private ArrayList<PrivateMessageWrapper> mMessages;
 
         @Override
-        protected Boolean doInBackground(ArrayList<Object>... params) {
+        protected Boolean doInBackground(ArrayList<PrivateMessageWrapper>... params) {
             mMessages = params[0];
 
             if (mMessages.size() > 0) {
-                Map<String, Object> msg = (Map<String, Object>) mMessages.get(0);
-                String msgID = (String) msg.get("msg_id");
+                PrivateMessageWrapper msg = mMessages.get(0);
+                String msgID = msg.getMessageId();
                 try {
                     boolean result = mForum.deleteMessage(msgID, mBoxID);
                     return result;
@@ -343,14 +320,13 @@ public class PrivateMessageFragment extends Fragment
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (!ignoreClicks) {
-            Map<String, Object> pm = (Map<String, Object>) mAdapter.getItem(position);
+            PrivateMessageWrapper pm = mAdapter.getItem(position);
 
             if (pm != null) {
-                String msgID = (String) pm.get("msg_id");
-                //getMessage(msgID);
+                String msgID = pm.getMessageId();
                 Intent intent = new Intent(getActivity(), PrivateMessageActivity.class);
                 intent.putExtra(PrivateMessageActivity.ARG_MSGID, msgID);
-                intent.putExtra(PrivateMessageActivity.ARG_BOXID, mBoxID);
+                intent.putExtra(ARG_BOXID, mBoxID);
                 startActivityForResult(intent, 0);
             }
         }

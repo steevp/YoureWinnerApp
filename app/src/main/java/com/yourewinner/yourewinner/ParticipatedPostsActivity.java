@@ -6,6 +6,8 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
+import com.yourewinner.yourewinner.wrapper.PostsWrapper;
+
 public class ParticipatedPostsActivity extends AppCompatActivity implements PostsAdapter.OnItemClickedListener {
 
     public final static String ARG_USERNAME = "ARG_USERNAME";

@@ -1,7 +1,6 @@
 package com.yourewinner.yourewinner;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,38 +9,40 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.yourewinner.yourewinner.wrapper.PrivateMessageWrapper;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PrivateMessageAdapter extends BaseAdapter {
 
     private Context mContext;
-    private LayoutInflater mInflater;
     private String mBoxID;
-    private ArrayList<Object> mMessages;
+    private ArrayList<PrivateMessageWrapper> mMessages;
 
-    public PrivateMessageAdapter(Context context, LayoutInflater inflater, String boxID) {
+    public PrivateMessageAdapter(Context context, String boxID) {
         mContext = context;
-        mInflater = inflater;
         mBoxID = boxID;
-        mMessages = new ArrayList<Object>();
+        mMessages = new ArrayList<>();
+    }
+
+    public PrivateMessageAdapter(Context context, String boxID, ArrayList<PrivateMessageWrapper> messages) {
+        mContext = context;
+        mBoxID = boxID;
+        mMessages = messages;
     }
 
     public void updateData(Object[] data) {
-        if (data != null) {
-            mMessages.addAll(Arrays.asList(data));
-            notifyDataSetChanged();
+        for (Object m : data) {
+            mMessages.add(new PrivateMessageWrapper(m));
         }
+        notifyDataSetChanged();
     }
 
-    public Object[] getData() {
-        return mMessages.toArray();
+    public ArrayList<PrivateMessageWrapper> getData() {
+        return mMessages;
     }
 
     public void clearData() {
@@ -49,8 +50,8 @@ public class PrivateMessageAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    public void removeItem(Object object) {
-        mMessages.remove(object);
+    public void removeItem(PrivateMessageWrapper message) {
+        mMessages.remove(message);
         notifyDataSetChanged();
     }
 
@@ -60,7 +61,7 @@ public class PrivateMessageAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public PrivateMessageWrapper getItem(int position) {
         int totalCount = getCount();
         if (totalCount == 0 || position >= totalCount || position < 0) {
             return null;
@@ -77,21 +78,21 @@ public class PrivateMessageAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         final ViewHolder holder;
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.row_private_message, null);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_private_message, parent, false);
             holder = new ViewHolder();
             holder.avatarImageView = (CircleImageView) convertView.findViewById(R.id.avatar);
             holder.usernameTextView = (TextView) convertView.findViewById(R.id.username);
             holder.subjectTextView = (TextView) convertView.findViewById(R.id.message_subject);
-            holder.bodyTextview = (TextView) convertView.findViewById(R.id.message_body);
+            holder.bodyTextView = (TextView) convertView.findViewById(R.id.message_body);
             holder.timestampTextView = (TextView) convertView.findViewById(R.id.message_timestamp);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        Map<String,Object> message = (Map<String,Object>) getItem(position);
+        PrivateMessageWrapper message = getItem(position);
 
-        String iconUrl = (String) message.get("icon_url");
+        String iconUrl = message.getAvatar();
         if (iconUrl.length() > 0) {
             Picasso.with(mContext).load(iconUrl).placeholder(R.drawable.no_avatar).fit().into(holder.avatarImageView);
         } else {
@@ -100,26 +101,20 @@ public class PrivateMessageAdapter extends BaseAdapter {
 
         String sender;
         if (mBoxID.equals("sent")) {
-            Object[] msgTo = (Object[]) message.get("msg_to");
-            ArrayList<String> senders = new ArrayList<String>();
-            for (int i=0;i<msgTo.length;i++) {
-                Map<String,Object> map = (Map<String,Object>) msgTo[i];
-                senders.add(new String((byte[]) map.get("username"), Charset.forName("UTF-8")));
-            }
-            sender = TextUtils.join(", ", senders);
+            sender = message.getRecipients();
         } else {
-            sender = new String((byte[]) message.get("msg_from"), Charset.forName("UTF-8"));
+            sender = message.getSender();
         }
 
         holder.usernameTextView.setText(sender);
 
-        String subject = new String((byte[]) message.get("msg_subject"), Charset.forName("UTF-8"));
+        String subject = message.getSubject();
         holder.subjectTextView.setText(subject);
 
-        String body = new String((byte[]) message.get("short_content"), Charset.forName("UTF-8"));
-        holder.bodyTextview.setText(body);
+        String body = message.getContent();
+        holder.bodyTextView.setText(body);
 
-        Date timestamp = (Date) message.get("sent_date");
+        Date timestamp = message.getSentDate();
         long now = System.currentTimeMillis();
         String sentTime = DateUtils.getRelativeTimeSpanString(timestamp.getTime(), now, DateUtils.MINUTE_IN_MILLIS).toString();
         holder.timestampTextView.setText(sentTime);
@@ -131,7 +126,7 @@ public class PrivateMessageAdapter extends BaseAdapter {
         public CircleImageView avatarImageView;
         public TextView usernameTextView;
         public TextView subjectTextView;
-        public TextView bodyTextview;
+        public TextView bodyTextView;
         public TextView timestampTextView;
     }
 }

@@ -1,4 +1,4 @@
-package com.yourewinner.yourewinner;
+package com.yourewinner.yourewinner.wrapper;
 
 import android.os.Parcel;
 import android.os.Parcelable;

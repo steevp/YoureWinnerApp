@@ -22,6 +22,9 @@ import android.widget.AbsListView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
+import com.yourewinner.yourewinner.wrapper.PostsWrapper;
+
+import java.util.ArrayList;
 import java.util.Map;
 
 import de.timroes.axmlrpc.XMLRPCCallback;
@@ -30,6 +33,13 @@ import de.timroes.axmlrpc.XMLRPCServerException;
 
 public class SearchActivity extends AppCompatActivity
         implements PostsAdapter.OnItemClickedListener, SwipeRefreshLayout.OnRefreshListener {
+    private final static String LAST_COUNT = "LAST_COUNT";
+    private final static String CUR_PAGE = "CUR_PAGE";
+    private final static String POSTS_LIST = "POSTS_LIST";
+    private final static String QUERY = "QUERY";
+    private final static String SEARCH_USER = "SEARCH_USER";
+    private final static String SEARCH_TITLE = "SEARCH_TITLE";
+
     private Forum mForum;
     private SearchView mSearchView;
     private RecyclerView mRecyclerView;
@@ -63,8 +73,6 @@ public class SearchActivity extends AppCompatActivity
         mRecyclerView = (RecyclerView) findViewById(R.id.posts_recycler);
         mLayoutManager = new LinearLayoutManager(mRecyclerView.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new PostsAdapter(mRecyclerView.getContext(), this);
-        mRecyclerView.setAdapter(mAdapter);
         // Add divider
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation()));
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -93,15 +101,43 @@ public class SearchActivity extends AppCompatActivity
         mSwipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         mSwipeContainer.setOnRefreshListener(this);
 
-        lastCount = 0;
-        currentPage = 1;
         userScrolled = false;
         isLoading = false;
 
         mSearchUser = "";
         mSearchTitle = false;
 
-        handleIntent(getIntent());
+        if (savedInstanceState != null) {
+            lastCount = savedInstanceState.getInt(LAST_COUNT);
+            currentPage = savedInstanceState.getInt(CUR_PAGE);
+            mQuery = savedInstanceState.getString(QUERY);
+            mSearchUser = savedInstanceState.getString(SEARCH_USER);
+            mSearchTitle = savedInstanceState.getBoolean(SEARCH_TITLE);
+            ArrayList<PostsWrapper> posts = savedInstanceState.getParcelableArrayList(POSTS_LIST);
+            if (posts != null && !posts.isEmpty()) {
+                mAdapter = new PostsAdapter(mRecyclerView.getContext(), this, posts);
+            } else {
+                mAdapter = new PostsAdapter(mRecyclerView.getContext(), this);
+            }
+            mRecyclerView.setAdapter(mAdapter);
+        } else {
+            lastCount = 0;
+            currentPage = 1;
+            mAdapter = new PostsAdapter(mRecyclerView.getContext(), this);
+            mRecyclerView.setAdapter(mAdapter);
+            handleIntent(getIntent());
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(LAST_COUNT, lastCount);
+        outState.putInt(CUR_PAGE, currentPage);
+        outState.putParcelableArrayList(POSTS_LIST, mAdapter.getData());
+        outState.putString(QUERY, mQuery);
+        outState.putString(SEARCH_USER, mSearchUser);
+        outState.putBoolean(SEARCH_TITLE, mSearchTitle);
     }
 
     public void searchTopic() {

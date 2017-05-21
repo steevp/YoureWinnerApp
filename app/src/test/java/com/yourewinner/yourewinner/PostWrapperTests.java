@@ -1,5 +1,7 @@
 package com.yourewinner.yourewinner;
 
+import com.yourewinner.yourewinner.wrapper.PostsWrapper;
+
 import org.junit.Test;
 
 import java.util.Date;

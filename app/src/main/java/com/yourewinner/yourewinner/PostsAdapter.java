@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.yourewinner.yourewinner.wrapper.PostsWrapper;
 
 import java.util.ArrayList;
 import java.util.Date;

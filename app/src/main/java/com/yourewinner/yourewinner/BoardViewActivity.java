@@ -16,6 +16,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.yourewinner.yourewinner.wrapper.PostsWrapper;
+
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Map;

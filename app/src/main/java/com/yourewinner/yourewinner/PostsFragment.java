@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.Toast;
 
+import com.yourewinner.yourewinner.wrapper.PostsWrapper;
+
 import java.util.ArrayList;
 import java.util.Map;
 
