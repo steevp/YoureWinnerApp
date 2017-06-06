@@ -151,7 +151,6 @@ public class MainActivity extends BaseActivity
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         mDrawerItemId = intent.getIntExtra(DRAWER_ITEM_ID, R.id.drawer_home);
-        mDrawerView.getMenu().findItem(mDrawerItemId).setChecked(true);
         selectItem(mDrawerItemId);
     }
 
@@ -289,6 +288,7 @@ public class MainActivity extends BaseActivity
     }
 
     private void selectItem(int id) {
+        mDrawerView.getMenu().findItem(mDrawerItemId).setChecked(true);
 
         Fragment fragment = null;
         Intent intent = null;
@@ -335,7 +335,6 @@ public class MainActivity extends BaseActivity
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        item.setChecked(true);
         mDrawerItemId = item.getItemId();
         selectItem(mDrawerItemId);
         return true;

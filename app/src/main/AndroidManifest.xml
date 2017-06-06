@@ -153,7 +153,7 @@
             android:name=".YouTubePlayerActivity"
             android:configChanges="screenSize|orientation"
             android:theme="@style/Theme.AppCompat.NoActionBar.Translucent" />
-        <activity android:name=".LoginActivity"></activity>
+        <activity android:name=".LoginActivity" />
     </application>
 
 </manifest>

@@ -1,8 +1,10 @@
 package com.yourewinner.yourewinner;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -24,6 +26,13 @@ public class ComposePrivateMessageActivity extends AppCompatActivity {
     private EditText mMessageSubject;
     private EditText mMessageBody;
     private ProgressDialog mDialog;
+
+    public static Intent createIntent(Context context, String recipients, @Nullable  String subject) {
+        Intent intent = new Intent(context, ComposePrivateMessageActivity.class);
+        intent.putExtra(ARG_MSGTO, recipients);
+        intent.putExtra(ARG_SUBJECT, subject);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

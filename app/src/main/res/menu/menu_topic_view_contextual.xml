@@ -40,4 +40,11 @@
         app:showAsAction="never"
         android:visible="false" />
 
+    <item
+        android:id="@+id/action_send_pm"
+        android:title="@string/action_send_pm"
+        android:icon="@drawable/ic_message"
+        app:showAsAction="ifRoom"
+        android:visible="true" />
+
 </menu>

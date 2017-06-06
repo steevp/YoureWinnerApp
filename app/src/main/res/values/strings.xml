@@ -43,6 +43,7 @@
     <string name="action_deselect">Deselect All</string>
     <string name="action_search">Search</string>
     <string name="action_view_rating">View Ratings</string>
+    <string name="action_send_pm">Send PM</string>
 
     <string name="title_activity_reply_topic">ReplyTopicActivity</string>
 

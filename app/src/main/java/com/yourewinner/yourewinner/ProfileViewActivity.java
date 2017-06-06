@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -82,6 +84,23 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
         mProfileHostnameContainer = (LinearLayout) findViewById(R.id.profile_hostname_container);
 
         getProfileInfo();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_profile_view, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_send_pm:
+                Intent intent = ComposePrivateMessageActivity.createIntent(this, mUsername, null);
+                startActivity(intent);
+                return true;
+        }
+        return false;
     }
 
     public void getProfileInfo() {

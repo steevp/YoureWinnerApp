@@ -428,6 +428,30 @@ public class TopicViewPageFragment extends BaseFragment
         builder.show();
     }
 
+    private void sendPm() {
+        final SparseBooleanArray checked = mAdapter.getCheckedItemPositions();
+        final List<String> recipients = new ArrayList<>();
+        for (int i=0, size=checked.size(); i<size; i++) {
+            final int key = checked.keyAt(i);
+            if (checked.get(key)) {
+                final Map<String,Object> post = mAdapter.getItem(key - 1);
+                final String username = new String((byte[]) post.get("post_author_name"), Charset.forName("UTF-8"));
+                if (!recipients.contains(username)) {
+                    recipients.add(username);
+                }
+            }
+        }
+        final StringBuilder builder = new StringBuilder();
+        for (int i=0,size=recipients.size();i<size;i++) {
+            builder.append(recipients.get(i));
+            if (i + 1 < size) {
+                builder.append(", ");
+            }
+        }
+        Intent intent = ComposePrivateMessageActivity.createIntent(getActivity(), builder.toString(), null);
+        startActivity(intent);
+    }
+
     private void viewRatings() {
         final SparseBooleanArray checked = mAdapter.getCheckedItemPositions();
         for (int i=0, size=checked.size(); i<size; i++) {
@@ -576,6 +600,9 @@ public class TopicViewPageFragment extends BaseFragment
                     return true;
                 case R.id.action_delete_post:
                     deletePost();
+                    return true;
+                case R.id.action_send_pm:
+                    sendPm();
                     return true;
             }
             return false;
